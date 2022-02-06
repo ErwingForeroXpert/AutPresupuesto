@@ -1,0 +1,6 @@
+Proceso.txt
+*.xlsb
+.vscode
+___pycache__*
+_dev*
+*.csv
