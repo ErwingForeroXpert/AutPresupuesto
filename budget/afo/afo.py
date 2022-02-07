@@ -16,17 +16,9 @@ class AFO(dfo):
     def __init__(self, afo_type: str, *args, **kargs) -> None:
         super().__init__(*args, **kargs)
         self._type = afo_type
-        self.properties = None
+        self.properties = self.get_properties(self._type)
         self.actual_process = None
         self.properties_process = None
-        self.__process_type()
-
-    def __process_type(self) -> None:
-
-        if not AFO_TYPES.exist(self._type):
-            raise ValueError(f"Type {self._type} not found in AFO_TYPES")
-
-        self.properties = AFO_TYPES[self._type].get_properties()
 
     def get_properties_for_process(self, process: str) -> object:
         """Get properties for AFO process
@@ -46,8 +38,12 @@ class AFO(dfo):
         
         return self.properties_process
 
-    def execute_formulas(self, driver: 'Driver'):
+    def execute_formulas(self, driver: 'Driver') -> None:
+        """Execute process of the formulas in the driver.
 
+        Args:
+            driver (Driver): driver of values
+        """
         _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.value)) #destructuring tuples [(driver, cols), ...]
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
@@ -74,7 +70,9 @@ class AFO(dfo):
             )
 
         if mask_amarr.sum() > 0:
-            self.insert_alert(_res_table[mask_amarr])
+            self.insert_alert(
+                alert=_res_table[mask_amarr], 
+                description= "Para la sub_categoria Amarre* no se encontraron reemplazos en el driver")
 
         # change values
         # the same size or smaller than the columns would be expected
@@ -114,7 +112,9 @@ class AFO(dfo):
         # insert in alerts if found nan in any column after sector
         mask = pd.isna(dfo.get_from(_res_table, "sector")).any(axis=1)
         if mask.sum() > 0:
-            self.insert_alert(_res_table[mask])
+            self.insert_alert(
+                alert=_res_table[mask],
+                description= f"No se encontraron valores en el driver, columnas \n {mask.columns.tolist()}")
 
         self.table = _res_table
 
@@ -130,11 +130,41 @@ class AFO(dfo):
                 sum_venta_anterior=pd.NamedAgg(
                     column="venta_nta_acum_anio_anterior", aggfunc=np.sum),
             )
+
+    @staticmethod
+    def get_properties( _type: str) -> None:
+
+        if not AFO_TYPES.exist(_type):
+            raise ValueError(f"Type {_type} not found in AFO_TYPES")
+
+        return AFO_TYPES[_type].get_properties()
+
+    @staticmethod
+    def from_excel(type: str, path: str, **kargs) -> 'AFO':
+        """Create a afo from an Excel file .
+
+        Args:
+            path (str): file route
+
+        Returns:
+            AFO: instance of AFO
+        """ 
+        _properties = AFO.get_properties(type)
+        dto_instance = dfo.get_table_excel(path=path, index_idx=_properties[""], sheet=_properties["sheet"], names=_properties["columns"], **kargs)
+        return AFO(afo_type=type, table=dto_instance.table)
     
     @staticmethod
-    def fast_filter(dataframe: 'pd.DataFrame', columns: 'list|str', type: str, value: 'Any') -> 'np.bool':
-        if type == "contains":
-            return dataframe[columns].str.contains(pat=value)
+    def from_csv(path: str, **kargs):
+        """Create a new driver from an Csv file .
+
+        Args:
+            path (str): file route
+
+        Returns:
+            Driver: instance of driver
+        """
+        driver_properties = Driver.get_properties()
+        return Driver(table=path, names=driver_properties["columns"], **kargs)
 
     @staticmethod
     def process_excel_to_afo():

@@ -16,6 +16,7 @@ AFO_TYPES = {
     "directa": {
         "sheets": "AFO -  Directa",
         "use_cols": "A:S",
+        "index_idx": [2, None],
         "columns": [
             "cod_oficina",
             "oficina_venta",
@@ -46,6 +47,7 @@ AFO_TYPES = {
     "calle": {
         "sheets": "AFO -  Directa",
         "use_cols": "A:P",
+        "index_idx": [2, None],
         "columns": [
             "cod_canal",
             "canal",
@@ -73,6 +75,7 @@ AFO_TYPES = {
     "compra": {
         "sheets": "AFO -  Directa",
         "use_cols": "A:W",
+        "index_idx": [2, None],
         "columns": [
             "cod_oficina",
             "oficina_ventas",

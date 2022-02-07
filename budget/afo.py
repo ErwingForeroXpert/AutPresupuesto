@@ -10,7 +10,7 @@ import numpy as np
 import gc
 from dataframes import DataFrameOptimized as dfo
 from utils import constants as const
-
+from afo import afo
 
 def execute_afo_agrupation(directa: 'dfo', calle: 'dfo', compra: 'dfo') -> 'dfo':
     result = []
@@ -250,6 +250,7 @@ def process_afo_files(get_file: 'Function'):
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
+            _dt_afo_directa = afo.
             _dt_afo_directa = dfo.get_table_excel(_file, const.SHEETS_AFO["directa"], index_idx=[
                 2, None], columns=const.COLUMNS_AFO["directa"], converters=const.CONVERTERS_AFO["directa"])
             _dt_afo_calle = dfo.get_table_excel(_file, const.SHEETS_AFO["calle"], index_idx=[

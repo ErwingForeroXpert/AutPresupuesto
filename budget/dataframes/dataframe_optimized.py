@@ -83,7 +83,7 @@ class DataFrameOptimized():
         else:
             raise Exception("Required table of DataFrameOptimized")
 
-    def insert_alert(self, alert: 'Any') -> None:
+    def insert_alert(self, alert: 'Any', description:str) -> None:
         """Inserts an alert into the alert list .
 
         Args:
@@ -95,10 +95,12 @@ class DataFrameOptimized():
 
         try:
 
+            alert["description"] = description
             _alerts_columns = self.table.columns.tolist()
-            ac_alert_columns = alert.columns.tolist()
-            
-            self.__alerts = pd.concat([self.__alerts, alert], ignore_index=True)
+            _required_of_alert = alert[_alerts_columns] #get only the columns that exist in the alerts
+
+            self.__alerts = pd.concat([self.__alerts, _required_of_alert], ignore_index=True)
+
         except Exception as e:
             raise Exception(f"insert_alert {e}")
 
