@@ -8,7 +8,7 @@ def after_process_formulas_directa(
     cols_drivers: 'list', 
     properties: 'object',
     table2: 'pd.DataFrame' = None,
-    ):
+    ) -> pd.DataFrame:
 
         if type == "directa":
             # driver 3 merge with table by formato
@@ -24,7 +24,7 @@ def after_process_formulas_directa(
 
             for idx, _column in enumerate(properties["add_columns"]):
 
-                # if 'formato' column is equals to 'formato'
+                # if column not exist in table
                 if _column not in table.columns.tolist():
                     table[_column] = np.nan
 
@@ -57,34 +57,48 @@ def after_process_formulas_directa(
                 "Tienda Mixta"])
 
             # driver 4 merge with table by cod_agente_comercial
-            _res_table3 = table.merge(drivers[3].table[cols_driver4], left_on='cod_agente_comercial',
-                                           right_on='actual_codigo_ac', how='left')  # formato is included in columns
-            mask = pd.isna(_res_table3['cod_ac_reemplazar'])
+            table3 = table.merge(
+                right=drivers[3].table[cols_drivers[3]], 
+                left_on='cod_agente_comercial',
+                right_on='actual_codigo_ac', 
+                how='left')  # formato is included in columns
+
+            mask = pd.isna(table3['cod_ac_reemplazar'])
 
             # replace not nan by new values
-            table.loc[~mask, 'cod_agente_comercial'] = _res_table3.loc[~mask,
-                                                                            'cod_ac_reemplazar']
+            table.loc[~mask, 'cod_agente_comercial'] = table3.loc[~mask, 'cod_ac_reemplazar']
 
             # driver 5 merge with table by cod cliente
-            _res_table4 = table.merge(drivers[4].table[cols_driver5], left_on='cod_agente_comercial',
-                                           right_on='codigo_cliente', how='left')  # formato is included in columns
+            table4 = table.merge(
+                right=drivers[4][cols_drivers[4]], 
+                left_on='cod_agente_comercial',
+                right_on='codigo_cliente', how='left')  # formato is included in columns
+
             # add new two columns "Nombre cliente" and "oficina de ventas"
-            _res_table['nombre_ac'] = _res_table4[cols_driver5[1]]
-            _res_table['oficina_venta'] = _res_table4[cols_driver5[2]]
+            table['nombre_ac'] = table4[cols_drivers[4][1]]
+            table['oficina_venta'] = table4[cols_drivers[4][2]]
 
         elif type == "compra":
 
             # driver 4 merge with table by cod_agente_comercial
-            _res_table3 = table.merge(drivers[3].table[cols_driver4], left_on='cod_agente',
-                                           right_on='actual_codigo_ac', how='left')  # formato is included in columns
-            mask = pd.isna(_res_table3['cod_agente'])
+            table3 = table.merge(
+                right=drivers[3][cols_drivers[3]], 
+                left_on='cod_agente',
+                right_on='actual_codigo_ac', how='left')  # formato is included in columns
+
+            mask = pd.isna(table3['cod_agente'])
 
             # replace not nan by new values
-            table.loc[~mask, 'cod_agente'] = _res_table3.loc[~mask,
-                                                                  'cod_ac_reemplazar']
+            table.loc[~mask, 'cod_agente'] = table3.loc[~mask,'cod_ac_reemplazar']
 
             # driver 5 merge with table by cod cliente
-            _res_table4 = table.merge(
-                drivers[4].table[cols_driver5], left_on='cod_agente', right_on='codigo_cliente', how='left')
+            table4 = table.merge(
+                right=drivers[4].table[cols_drivers[4]], 
+                left_on='cod_agente', 
+                right_on='codigo_cliente', 
+                how='left')
+
             # new column with "agentes" found
-            _res_table['agente'] = _res_table4[cols_driver5[1]]
+            table['agente'] = table4[cols_drivers[4][1]]
+        
+        return table

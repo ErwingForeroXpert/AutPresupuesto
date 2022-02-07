@@ -5,6 +5,7 @@
 
 import os
 from sre_compile import isstring
+from time import time
 from utils import index as utils
 from typing import Any
 import vaex as vx
@@ -127,6 +128,14 @@ class DataFrameOptimized():
 
         except Exception as e:
             raise Exception(f"delete_rows {e}")
+
+    def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> None:
+        
+        if name is None:
+            name = f"{time.time()}.csv"
+
+        route = os.path.normpath(os.path.join(folder_path, name))
+        self.table.to_csv(path_or_buf=route, sep=sep, **kargs)
 
     @staticmethod
     def get_table_excel(path: str, sheet: str, header_idx: 'list'= None, index_idx: 'list'= None, row_converter: 'list' = None, *args, **kargs) -> 'DataFrameOptimized':

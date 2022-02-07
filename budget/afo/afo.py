@@ -48,7 +48,7 @@ class AFO(dfo):
 
     def execute_formulas(self, driver: 'Driver'):
 
-        _drivers, cols_driver = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.value)) #destructuring tuples [(driver, cols), ...]
+        _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.value)) #destructuring tuples [(driver, cols), ...]
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
         # Dataframe
@@ -61,7 +61,7 @@ class AFO(dfo):
             )
         #search by 'key'
         _res_table = _table.merge(
-            _drivers[0][[_properties["key_column_name"], *cols_driver[0]]], 
+            _drivers[0][[_properties["key_column_name"], *cols_drivers[0]]], 
             on=_properties["key_column_name"], 
             how='left'
             )
@@ -69,7 +69,7 @@ class AFO(dfo):
         # only for the sub_categoria to begin with "amarr"
         # amarres filter
         mask_amarr = (
-            pd.isna(_res_table[cols_driver[0]]).all(axis=1) & 
+            pd.isna(_res_table[cols_drivers[0]]).all(axis=1) & 
             _res_table['sub_categoria'].str.contains(pat='(?i)amarr')
             )
 
@@ -80,19 +80,20 @@ class AFO(dfo):
         # the same size or smaller than the columns would be expected
         columns_to_change = _properties["columns_change"]
         for idx, _column in enumerate(columns_to_change):
-            mask = pd.isna(_res_table[cols_driver[0][idx]])
+            mask = pd.isna(_res_table[cols_drivers[0][idx]])
             # if the found value is nan, the one be had will be left
             _res_table.loc[~mask,
-                           _column] = _res_table.loc[~mask, cols_driver[0][idx]]
+                           _column] = _res_table.loc[~mask, cols_drivers[0][idx]]
 
         # delete columns unnecessary
-        _res_table.drop(cols_driver[0], axis=1, inplace=True)
+        _res_table.drop(cols_drivers[0], axis=1, inplace=True)
         _res_table.reset_index(drop=True, inplace=True)
 
         # add optionals extra columns
+        _res_table2 = None
         if "extra_columns" in _properties.keys():
             _res_table2 = _res_table.merge(
-                _drivers[1][[_properties["key_merge_extra_columns"], *cols_driver[1]]], 
+                _drivers[1][[_properties["key_merge_extra_columns"], *cols_drivers[1]]], 
                 on=_properties["key_merge_extra_columns"], 
                 how='left'
                 )
@@ -101,14 +102,22 @@ class AFO(dfo):
                 , '-') #value to insert
 
             # add agrupacion and formato columns
-            cols_driver[1] = [*cols_driver[1], *_properties["extra_columns"]]
-            
+            cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
+        
+        _res_table = AFO_TYPES[self._type].extra_formula_process(
+            table=_res_table, 
+            drivers= _drivers, 
+            cols_drivers= cols_drivers, 
+            properties= _properties,
+            table2=_res_table2)
+        
+        self.table = _res_table
+
     def execute_agrupation(self):
 
-        columns_agg = self.properties.formula_process.agg_columns # see contants
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
-        return self.table.groupby(columns_agg, as_index=False).agg(
+        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(
                 sum_venta_actual=pd.NamedAgg(
                     column="venta_nta_acum_anio_actual", aggfunc=np.sum),
                 sum_venta_ppto=pd.NamedAgg(
