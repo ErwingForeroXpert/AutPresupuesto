@@ -292,20 +292,8 @@ def process_afo_files(get_file: 'Function'):
                 const.PROCESS_NAME, "No se encontraron el archivo driver en la carpeta")
 
         with ThreadPoolExecutor() as executor:
-            arguments = [{"path": _file_directa,
-                         "delimiter": ';', 
-                         "skiprows": 2, 
-                         "header": None,
-                         "names": const.COLUMNS_AFO["directa"], 
-                         "converters":const.CONVERTERS_AFO["directa"]
-                         },
-                         {"path": _file_calle,
-                         "delimiter": ';', 
-                         "skiprows": 2, 
-                         "header": None,
-                         "names": const.COLUMNS_AFO["calle"], 
-                         "converters":const.CONVERTERS_AFO["calle"]
-                         },
+            arguments = [{"path": _file_directa},
+                         {"path": _file_calle},
                          {"path": _file_compra,
                          "delimiter": ';', 
                          "skiprows": 2, 

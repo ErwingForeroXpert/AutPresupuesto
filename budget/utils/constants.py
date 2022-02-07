@@ -14,9 +14,9 @@ ICON_IMAGE = "icon.ico"
 
 AFO_TYPES = {
     "directa": {
-        "sheets": "AFO -  Directa",
-        "use_cols": "A:S",
-        "index_idx": [2, None],
+        "sheet": "AFO -  Directa",
+        "skiprows": [2, None],
+        "delimiter": ";",
         "columns": [
             "cod_oficina",
             "oficina_venta",
@@ -45,9 +45,9 @@ AFO_TYPES = {
         }
     },
     "calle": {
-        "sheets": "AFO -  Directa",
-        "use_cols": "A:P",
-        "index_idx": [2, None],
+        "sheet": "AFO -  Directa",
+        "skiprows": [2, None],
+        "delimiter": ";",
         "columns": [
             "cod_canal",
             "canal",
@@ -73,9 +73,9 @@ AFO_TYPES = {
         }
     },
     "compra": {
-        "sheets": "AFO -  Directa",
-        "use_cols": "A:W",
-        "index_idx": [2, None],
+        "sheet": "AFO -  Directa",
+        "skiprows": [2, None],
+        "delimiter": ";",
         "columns": [
             "cod_oficina",
             "oficina_ventas",
@@ -109,6 +109,8 @@ AFO_TYPES = {
 
 DRIVER = {
     "sheet": "Drivers",
+    "skiprows": [2, None],
+    "delimiter": ";",
     "columns": [
         "clave",
         "id_consecutivo",
@@ -171,7 +173,8 @@ DRIVER = {
         "codigo_cliente",
         "nombre_cliente",
         "oficina_ventas_ecom"
-    ]
+    ],
+    "converters": None
 }
 
 PROCESSES = {

@@ -144,7 +144,7 @@ def convert_row(row: 'np.array', converter: 'list') -> 'np.array':
             row[i] = converter[i](row[i]) #1D Array
     return row
 
-def get_data_of_excel_sheet(file_path: str, sheet: str, header_idx: 'list'= None, index_idx: 'list'= None, row_converter: 'list' = None) -> 'np.array':
+def get_data_of_excel_sheet(file_path: str, sheet: str, header_idx: 'list'= None, skiprows: 'list'= None, row_converter: 'list' = None) -> 'np.array':
     """Get data of sheet in Excel File
 
     Returns:
@@ -162,8 +162,8 @@ def get_data_of_excel_sheet(file_path: str, sheet: str, header_idx: 'list'= None
         if row_converter is not None:
             data = np.apply_along_axis(convert_row, 1, data, row_converter)
 
-        if index_idx is not None:
-            data = data[index_idx[0]:index_idx[1],:]
+        if skiprows is not None:
+            data = data[skiprows[0]:skiprows[1],:]
 
         return data
 

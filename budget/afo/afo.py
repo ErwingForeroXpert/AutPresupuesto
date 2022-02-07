@@ -150,22 +150,36 @@ class AFO(dfo):
             AFO: instance of AFO
         """ 
         _properties = AFO.get_properties(type)
-        dto_instance = dfo.get_table_excel(path=path, index_idx=_properties[""], sheet=_properties["sheet"], names=_properties["columns"], **kargs)
+        dto_instance = dfo.get_table_excel(
+            path=path, 
+            sheet=_properties["sheet"], 
+            skiprows=_properties["skiprows"], 
+            columns=_properties["columns"], 
+            converters=_properties["converters"], 
+            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
+                        #arguments or overwrite previous parameters see utils/constants 
+
         return AFO(afo_type=type, table=dto_instance.table)
     
     @staticmethod
     def from_csv(path: str, **kargs):
-        """Create a new driver from an Csv file .
+        """Create a afo from an Csv file .
 
         Args:
             path (str): file route
 
         Returns:
-            Driver: instance of driver
-        """
-        driver_properties = Driver.get_properties()
-        return Driver(table=path, names=driver_properties["columns"], **kargs)
+            AFO: instance of AFO
+        """ 
+        _properties = AFO.get_properties(type)
+        dto_instance = dto_instance = dfo.get_table_csv(
+            path=path, 
+            delimiter= _properties["delimiter"], 
+            skiprows= _properties["skiprows"][0], 
+            header= None,
+            names= _properties["columns"], 
+            converters=_properties["converters"],
+            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
+                        #arguments or overwrite previous arguments see utils/constants  
 
-    @staticmethod
-    def process_excel_to_afo():
-        return AFO(table=_file, names=const.COLUMNS_AFO["driver"], **kargs)
+        return AFO(afo_type=type, table=dto_instance.table)

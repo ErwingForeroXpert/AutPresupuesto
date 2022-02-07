@@ -144,21 +144,21 @@ class DataFrameOptimized():
         self.table.to_csv(path_or_buf=route, sep=sep, **kargs)
 
     @staticmethod
-    def get_table_excel(path: str, sheet: str, header_idx: 'list'= None, index_idx: 'list'= None, row_converter: 'list' = None, *args, **kargs) -> 'DataFrameOptimized':
+    def get_table_excel(path: str, sheet: str, header_idx: 'list'= None, skiprows: 'list'= None, converters: 'list' = None, *args, **kargs) -> 'DataFrameOptimized':
         """Returns a DataFrame instance that will be used to parse the table at the given path .
 
         Args:
             path [str]: path of file
             sheet [str]: sheet of data
             header_idx [list]: list of each starting and ending column, max_len = 2, example: [0,5]
-            index_idx [list]: list of each starting and ending row, max_len = 2, example: [0,1000]
-            row_converter [list]: list of columns converters, same size that columns.
+            skiprows [list]: list of each starting and ending row, max_len = 2, example: [0,1000]
+            converters [list]: list of columns converters, same size that columns.
 
         Returns:
             [DataFrameOptimized]: instance of DataFrameOptimized
         """
         try:
-            _data = utils.get_data_of_excel_sheet(file_path=path, sheet=sheet, header_idx=header_idx, index_idx=index_idx, row_converter=row_converter)
+            _data = utils.get_data_of_excel_sheet(file_path=path, sheet=sheet, header_idx=header_idx, skiprows=skiprows, converters=converters)
             _dt = DataFrameOptimized(_data, *args, **kargs)
             return _dt
             

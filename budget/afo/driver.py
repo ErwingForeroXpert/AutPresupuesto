@@ -126,9 +126,16 @@ class Driver(dfo):
         Returns:
             Driver: instance of driver
         """
-        driver_properties = Driver.get_properties()
+        _properties = Driver.get_properties()
 
-        dto_instance = dfo.get_table_excel(path=path, sheet=driver_properties["sheet"], names=driver_properties["columns"], **kargs)
+        dto_instance = dfo.get_table_excel(
+            path=path, 
+            sheet=_properties["sheet"], 
+            skiprows=_properties["skiprows"], 
+            columns=_properties["columns"], 
+            converters=_properties["converters"], 
+            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
+                        #arguments or overwrite previous parameters see utils/constants 
         return Driver(table=dto_instance.table)
     
     @staticmethod
@@ -141,5 +148,15 @@ class Driver(dfo):
         Returns:
             Driver: instance of driver
         """
-        driver_properties = Driver.get_properties()
-        return Driver(table=path, names=driver_properties["columns"], **kargs)
+        _properties = Driver.get_properties()
+
+        dto_instance = dfo.get_table_excel(
+            path=path, 
+            delimiter= _properties["delimiter"], 
+            skiprows= _properties["skiprows"][0], 
+            names= _properties["columns"], 
+            converters=_properties["converters"],
+            header= None,
+            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
+                        #arguments or overwrite previous parameters see utils/constants 
+        return Driver(table=dto_instance.table)
