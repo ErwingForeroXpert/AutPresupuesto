@@ -130,7 +130,13 @@ class DataFrameOptimized():
             raise Exception(f"delete_rows {e}")
 
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> None:
-        
+        """Save the table to a CSV file .
+
+        Args:
+            folder_path (str): folder
+            name (str, optional): name of csv file. Defaults to None.
+            sep (str, optional): separator. Defaults to ";".
+        """
         if name is None:
             name = f"{time.time()}.csv"
 
