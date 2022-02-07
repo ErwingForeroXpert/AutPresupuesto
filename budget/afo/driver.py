@@ -150,13 +150,13 @@ class Driver(dfo):
         """
         _properties = Driver.get_properties()
 
-        dto_instance = dfo.get_table_excel(
+        dto_instance = dfo.get_table_csv(
             path=path, 
             delimiter= _properties["delimiter"], 
             skiprows= _properties["skiprows"][0], 
             names= _properties["columns"], 
             converters=_properties["converters"],
             header= None,
-            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
-                        #arguments or overwrite previous parameters see utils/constants 
+            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
+                        #arguments or overwrite previous arguments see utils/constants  
         return Driver(table=dto_instance.table)

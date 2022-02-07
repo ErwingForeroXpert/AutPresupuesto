@@ -294,19 +294,8 @@ def process_afo_files(get_file: 'Function'):
         with ThreadPoolExecutor() as executor:
             arguments = [{"path": _file_directa},
                          {"path": _file_calle},
-                         {"path": _file_compra,
-                         "delimiter": ';', 
-                         "skiprows": 2, 
-                         "header": None,
-                         "names": const.COLUMNS_AFO["compra"], 
-                         "converters":const.CONVERTERS_AFO["compra"]
-                         },
-                         {"path": _file_compra,
-                         "delimiter": ';', 
-                         "skiprows": 1, 
-                         "header": None,
-                         "names": const.COLUMNS_AFO["driver"], 
-                         }
+                         {"path": _file_compra},
+                         {"path": _file_driver}
             ]
             results = executor.map(lambda x: dfo.get_table_csv(**x), arguments)
         

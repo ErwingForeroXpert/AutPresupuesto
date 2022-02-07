@@ -109,7 +109,7 @@ AFO_TYPES = {
 
 DRIVER = {
     "sheet": "Drivers",
-    "skiprows": [2, None],
+    "skiprows": [1, None],
     "delimiter": ";",
     "columns": [
         "clave",
