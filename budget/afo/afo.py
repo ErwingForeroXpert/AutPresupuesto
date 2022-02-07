@@ -40,30 +40,29 @@ class AFO(dfo):
         if not AFO_PROCESSES.exist(process):
             raise ValueError(f"Process {process} not found in AFO_PROCESSES")
             
-        if self.actual_process == process:
-            return self.properties_process
-        
-        self.actual_process = process
-        self.properties_process = AFO_PROCESSES[self.actual_process].get_properties()[self._type] # afo properties for this process
+        if self.actual_process != process:
+            self.actual_process = process
+            self.properties_process = AFO_PROCESSES[self.actual_process].get_properties()[self._type] # afo properties for this process
         
         return self.properties_process
 
     def execute_formulas(self, driver: 'Driver'):
 
         _drivers, cols_driver = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.value)) #destructuring tuples [(driver, cols), ...]
+        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
         # Dataframe
         _table = self.table
 
         _table = dfo.combine_str_columns(
             dataframe=_table, 
-            idx_cols=self.properties["key_columns"], 
-            drop_duplicates=self.properties["key_column_name"]
+            idx_cols=_properties["key_columns"], 
+            drop_duplicates=_properties["key_column_name"]
             )
         #search by 'key'
         _res_table = _table.merge(
-            _drivers[0][[self.properties["key_column_name"], *cols_driver[0]]], 
-            on=self.properties["key_column_name"], 
+            _drivers[0][[_properties["key_column_name"], *cols_driver[0]]], 
+            on=_properties["key_column_name"], 
             how='left'
             )
 
@@ -79,10 +78,10 @@ class AFO(dfo):
 
         # change values
         # the same size or smaller than the columns would be expected
-        columns_to_change = self.properties["columns_change"]
+        columns_to_change = _properties["columns_change"]
         for idx, _column in enumerate(columns_to_change):
             mask = pd.isna(_res_table[cols_driver[0][idx]])
-            # if the value found is nan, the one be had will be left
+            # if the found value is nan, the one be had will be left
             _res_table.loc[~mask,
                            _column] = _res_table.loc[~mask, cols_driver[0][idx]]
 
@@ -90,22 +89,24 @@ class AFO(dfo):
         _res_table.drop(cols_driver[0], axis=1, inplace=True)
         _res_table.reset_index(drop=True, inplace=True)
 
-        if "extra_columns" in self.properties.keys():
+        # add optionals extra columns
+        if "extra_columns" in _properties.keys():
             _res_table2 = _res_table.merge(
-                _drivers[1][[self.properties["key_merge_extra_columns"], *cols_driver[1]]], 
-                on=self.properties["key_merge_extra_columns"], 
+                _drivers[1][[_properties["key_merge_extra_columns"], *cols_driver[1]]], 
+                on=_properties["key_merge_extra_columns"], 
                 how='left'
                 )
-            _res_table2[self.properties["extra_columns"]] = np.full(
-                (len(_res_table2), len(self.properties["extra_columns"])) #rows, cols
+            _res_table2[_properties["extra_columns"]] = np.full(
+                (len(_res_table2), len(_properties["extra_columns"])) #rows, cols
                 , '-') #value to insert
 
             # add agrupacion and formato columns
-            cols_driver[1] = [*cols_driver[1], *self.properties["extra_columns"]]
-        
+            cols_driver[1] = [*cols_driver[1], *_properties["extra_columns"]]
+            
     def execute_agrupation(self):
 
         columns_agg = self.properties.formula_process.agg_columns # see contants
+        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
         return self.table.groupby(columns_agg, as_index=False).agg(
                 sum_venta_actual=pd.NamedAgg(
