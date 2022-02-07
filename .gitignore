@@ -1,6 +1,9 @@
 Proceso.txt
 *.xlsb
 .vscode
-___pycache__*
+
+*.pyc
+__pycache__
+
 _dev*
 *.csv
