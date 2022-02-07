@@ -2,6 +2,7 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
+from typing import Any
 import numpy as np
 import pandas as pd
 from budget.afo.afo_processes import AFO_PROCESSES
@@ -54,30 +55,53 @@ class AFO(dfo):
         # Dataframe
         _table = self.table
 
+        _table = dfo.combine_str_columns(
+            dataframe=_table, 
+            idx_cols=self.properties["key_columns"], 
+            drop_duplicates=self.properties["key_column_name"]
+            )
         #search by 'key'
-        _table = dfo.combine_str_columns(_table, self.properties["key_columns"], self.properties["key_column_name"])
-        _res_table = _table.merge(_drivers[0][[self.properties["key_column_name"], 
-                *cols_driver[0]]], on=self.properties["key_column_name"], how='left')
+        _res_table = _table.merge(
+            _drivers[0][[self.properties["key_column_name"], *cols_driver[0]]], 
+            on=self.properties["key_column_name"], 
+            how='left'
+            )
 
         # only for the sub_categoria to begin with "amarr"
         # amarres filter
-        mask_amarr = (pd.isna(_res_table[cols_driver[0]]).all(
-            axis=1) & _res_table['sub_categoria'].str.contains(pat='(?i)amarr'))
+        mask_amarr = (
+            pd.isna(_res_table[cols_driver[0]]).all(axis=1) & 
+            _res_table['sub_categoria'].str.contains(pat='(?i)amarr')
+            )
+
         if mask_amarr.sum() > 0:
             self.insert_alert(_res_table[mask_amarr])
 
         # change values
         # the same size or smaller than the columns would be expected
-        columns_to_change = data["columns_change"]
+        columns_to_change = self.properties["columns_change"]
         for idx, _column in enumerate(columns_to_change):
-            mask = pd.isna(_res_table[cols_driver1[idx]])
+            mask = pd.isna(_res_table[cols_driver[0][idx]])
             # if the value found is nan, the one be had will be left
             _res_table.loc[~mask,
-                           _column] = _res_table.loc[~mask, cols_driver1[idx]]
+                           _column] = _res_table.loc[~mask, cols_driver[0][idx]]
 
         # delete columns unnecessary
-        _res_table.drop(cols_driver1, axis=1, inplace=True)
+        _res_table.drop(cols_driver[0], axis=1, inplace=True)
         _res_table.reset_index(drop=True, inplace=True)
+
+        if "extra_columns" in self.properties.keys():
+            _res_table2 = _res_table.merge(
+                _drivers[1][[self.properties["key_merge_extra_columns"], *cols_driver[1]]], 
+                on=self.properties["key_merge_extra_columns"], 
+                how='left'
+                )
+            _res_table2[self.properties["extra_columns"]] = np.full(
+                (len(_res_table2), len(self.properties["extra_columns"])) #rows, cols
+                , '-') #value to insert
+
+            # add agrupacion and formato columns
+            cols_driver[1] = [*cols_driver[1], *self.properties["extra_columns"]]
         
     def execute_agrupation(self):
 
@@ -92,6 +116,10 @@ class AFO(dfo):
                     column="venta_nta_acum_anio_anterior", aggfunc=np.sum),
             )
     
+    @staticmethod
+    def fast_filter(dataframe: 'pd.DataFrame', columns: 'list|str', type: str, value: 'Any') -> 'np.bool':
+        if type == "contains":
+            return dataframe[columns].str.contains(pat=value)
 
     @staticmethod
     def process_excel_to_afo():
