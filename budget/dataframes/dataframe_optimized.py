@@ -78,7 +78,8 @@ class DataFrameOptimized():
     def create_alerts(self) -> None:
 
         if self.table is not None:
-            self.__alerts = pd.DataFrame(columns=self.table.columns.to_list())
+            _columns = [*self.table.columns.to_list(), "description"]
+            self.__alerts = pd.DataFrame(columns=_columns)
         else:
             raise Exception("Required table of DataFrameOptimized")
 
@@ -87,23 +88,20 @@ class DataFrameOptimized():
 
         Args:
             alert ([Any]): Register with alert
-
+            description (str): description of alert
         Raises:
             Exception: Generic Exception 
         """
 
         try:
-            self.__alerts = pd.concat([self.__alerts, alert])
+
+            _alerts_columns = self.table.columns.tolist()
+            ac_alert_columns = alert.columns.tolist()
+            
+            self.__alerts = pd.concat([self.__alerts, alert], ignore_index=True)
         except Exception as e:
             raise Exception(f"insert_alert {e}")
-        
-    def get_alerts(self) -> 'np.array':
-        """Returns the alerts .
 
-        Returns:
-            [Any]: actual alerts
-        """
-        return self.__alerts
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
@@ -220,6 +218,7 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"from_tuple - {e}")
     
+
     @staticmethod
     def combine_str_columns(dataframe: 'pd.DataFrame', columns: list[str], name_res: str) -> 'pd.DataFrame':
         first_column = columns[0]

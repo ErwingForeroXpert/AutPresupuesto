@@ -111,6 +111,11 @@ class AFO(dfo):
             properties= _properties,
             table2=_res_table2)
         
+        # insert in alerts if found nan in any column after sector
+        mask = pd.isna(dfo.get_from(_res_table, "sector")).any(axis=1)
+        if mask.sum() > 0:
+            self.insert_alert(_res_table[mask])
+
         self.table = _res_table
 
     def execute_agrupation(self):
