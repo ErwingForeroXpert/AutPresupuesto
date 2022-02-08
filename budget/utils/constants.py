@@ -222,12 +222,19 @@ PROCESSES = {
             "drop_duplicates":[False, True, True, True, True]
         }
     },
-    "distribution": {
-
+    "assignment": {
+        "directa": {
+            "filter_assignment": {"column": "", "value":"sin asignar"},
+            "invalid_sectors": ["helados", "otros no operacional", "otros oper no ccial", "servicios"],
+            "levels":[{
+                "columns": ["oficina_venta", "segmento", "agrupacion", "formato", "sector", "mes"]
+            }]
+        },
     }
 }
 
 # routes
 PRINCIPAL_FILE_SOURCE = ""
-ROOT_DIR = path.abspath(path.join(__file__, "../../..")
+ROOT_DIR = path.abspath(
+    path.join(__file__, "../../..")
                         ) if ENVIROMENT == "DEV" else getcwd()

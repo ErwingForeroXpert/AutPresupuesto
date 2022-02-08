@@ -140,7 +140,9 @@ class AFO(dfo):
             )   
 
     def assignment(self):
-        
+        agg_base = self.execute_agrupation()
+        mask_asign = agg_base[]
+
     @staticmethod
     def get_properties( _type: str) -> None:
 
