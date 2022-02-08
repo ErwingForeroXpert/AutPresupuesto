@@ -244,9 +244,10 @@ PROCESSES = {
             "levels":[{
                 "columns": ["oficina_venta", "segmento", "agrupacion", "formato", "sector", "mes"],
                 "agg_values":[
-                    {"col_res":"sum_venta_actual", "column": "sum_venta_actual"}, 
-                    {"col_res":"sum_venta_ppto", "column": "sum_venta_actual"}
-                ]
+                    {"col_res":"total_venta_act_asignada", "column": "sum_venta_actual"}, 
+                    {"col_res":"total_venta_act_sin_asignar", "column": "sum_venta_actual"}
+                ],
+                "add_columns": ["porc_participacion", "sin_asignar_valor"]
             }],
             
         },

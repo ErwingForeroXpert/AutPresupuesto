@@ -142,7 +142,7 @@ class AFO(dfo):
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
         agg_base = self.execute_agrupation()
-        actual_level = _properties['levels'][0]
+        actual_level = _properties['levels'][0] #see utils/constants - AFO_PROCESSES
         agg_values = actual_level['agg_values']
 
         #mask for not assignment
@@ -154,15 +154,15 @@ class AFO(dfo):
         #agrupation about "Ventas asignadas positivas"
         total_sales = assign.groupby(actual_level["columns"], as_index=False).agg(
             {
-                f"{agg_names[0]}":pd.NamedAgg(
-                    column="sum_venta_actual", aggfunc=np.sum)
+                f"{agg_values[0]['col_res']}":pd.NamedAgg(
+                    column=agg_values[0]['column'], aggfunc=np.sum)
             }
         )
         #agrupation about "Ventas sin asignar negativas"
         total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(
             {
-                f"{agg_names[1]}":pd.NamedAgg(
-                    column="sum_venta_actual", aggfunc=np.sum)
+                f"{agg_values[1]['col_res']}":pd.NamedAgg(
+                    column=agg_values[1]['column'], aggfunc=np.sum)
             }
         )
 
@@ -176,14 +176,15 @@ class AFO(dfo):
             how="left")
 
         #0 for empty values
-        general_base.loc[pd.isna(general_base[[agg_names[0], agg_names[1]]]).all(axis=1),
-                                 [agg_names[0], agg_names[1]]] = 0 
+        general_base.loc[pd.isna(general_base[[agg_values[0]['col_res'], agg_values[1]['col_res']]]).all(axis=1),
+                                 [agg_values[0]['col_res'], agg_values[1]['col_res']]] = 0 
 
         #sum level act
-        mask_cero_total = general_base[agg_names[0]] == 0
+        mask_cero_total = general_base[agg_values[0]['col_res']] == 0
         general_base["porc_participacion"] = 0
-        general_base.loc[~mask_cero_total, "porc_participacion"] = general_base.loc[~mask_cero_total, "sum_venta_actual"]/general_base.loc[~mask_cero_total, agg_names[0]]
-
+        general_base.loc[~mask_cero_total, "porc_participacion"] = general_base.loc[~mask_cero_total, agg_values[0]['col_res']]/ \
+                                                                    general_base.loc[~mask_cero_total, agg_values[0]['col_res']]
+        general_base
 
 
 
