@@ -153,14 +153,21 @@ class AFO(dfo):
             total_venta_act = pd.NamedAgg(
                     column="sum_venta_actual", aggfunc=np.sum)
         )
-        not_assign_unique = 
-        res = agg_base.merge(
+        not_assign_unique = not_assign.drop_duplicates(subset=_properties["levels"][0]["columns"], keep="first")
+
+        general_base = agg_base.merge(
             right=total_sales, 
             on=_properties["levels"][0]["columns"], 
             how="left")
-        res.loc[pd.isna(res[_properties["levels"][0]["columns"]]), "total_venta_act"] = 0 
+        
+        general_base = general_base.merge(
+            right=not_assign_unique, 
+            on=_properties["levels"][0]["columns"], 
+            how="left")
 
-        res["% participacion"] = res["sum_venta_actual"]/res["total_venta_act"]
+        general_base.loc[pd.isna(general_base[_properties["levels"][0]["columns"]]), "total_venta_act"] = 0 
+
+        general_base["% participacion"] = general_base["sum_venta_actual"]/general_base["total_venta_act"]
 
 
 
