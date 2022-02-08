@@ -149,25 +149,35 @@ class AFO(dfo):
         not_assign = agg_base[mask_not_assign] #sin asignar menores a 0
         assign = agg_base[~mask_not_assign] 
 
+        #agrupation about "Ventas asignadas positivas"
         total_sales = assign.groupby(_properties["levels"][0]["columns"], as_index=False).agg(
-            total_venta_act = pd.NamedAgg(
+            total_venta_act_asignada = pd.NamedAgg(
                     column="sum_venta_actual", aggfunc=np.sum)
         )
-        not_assign_unique = not_assign.drop_duplicates(subset=_properties["levels"][0]["columns"], keep="first")
+        #agrupation about "Ventas sin asignar negativas"
+        total_sales_not_assign = not_assign.groupby(_properties["levels"][0]["columns"], as_index=False).agg(
+            total_venta_act_sin_asignar = pd.NamedAgg(
+                    column="sum_venta_actual", aggfunc=np.sum)
+        )
 
+        #insert two columns 
         general_base = agg_base.merge(
             right=total_sales, 
             on=_properties["levels"][0]["columns"], 
-            how="left")
-        
-        general_base = general_base.merge(
-            right=not_assign_unique, 
+            how="left").merge(
+            right=total_sales_not_assign, 
             on=_properties["levels"][0]["columns"], 
             how="left")
 
-        general_base.loc[pd.isna(general_base[_properties["levels"][0]["columns"]]), "total_venta_act"] = 0 
+        #0 for empty values
+        general_base.loc[pd.isna(general_base[["total_venta_act_asignada", "total_venta_act_sin_asignar"]]).all(axis=1), ["total_venta_act_asignada", "total_venta_act_sin_asignar"]] = 0 
 
-        general_base["% participacion"] = general_base["sum_venta_actual"]/general_base["total_venta_act"]
+        #sum level act
+        mask_cero_total = general_base["total_venta_act_asignada"] == 0
+        general_base["porc_participacion"] = np.nan
+        general_base.loc[~mask_cero_total, "porc_participacion"] = general_base.loc[~mask_cero_total, "sum_venta_actual"]/general_base.loc[~mask_cero_total, "total_venta_act_asignada"]
+        general_base.loc[mask_cero_total, "porc_participacion"] = 0
+
 
 
 
