@@ -129,8 +129,16 @@ class AFO(dfo):
             pd.DataFrame: result of agrupation
         """
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
-
-        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(
+        agg_values = _properties["agg_values"]
+        obj_agg_values = {}
+        for agg_val in agg_values:
+            obj_agg_values[f"{agg_val['col_res']}"] = pd.NamedAgg(
+                    column=agg_val['col_res'], aggfunc=np.sum)
+                
+        return self.table.groupby(_properties["agg_columns"], as_index=False).agg({
+            f"{agg_values[0]['col_res']}": pd.NamedAgg(
+                    column="venta_nta_acum_anio_actual", aggfunc=np.sum)
+        }
                 sum_venta_actual=pd.NamedAgg(
                     column="venta_nta_acum_anio_actual", aggfunc=np.sum),
                 sum_venta_ppto=pd.NamedAgg(
@@ -142,41 +150,49 @@ class AFO(dfo):
     def execute_assignment(self):
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
-
         agg_base = self.execute_agrupation()
+        actual_level = _properties['levels'][0]
+        agg_names = actual_level['agg_values_names']
+        agg_columns = actual_level['columns_to_agg']
+
+        #mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base["sum_venta_actual"] <= 0
 
         not_assign = agg_base[mask_not_assign] #sin asignar menores a 0
         assign = agg_base[~mask_not_assign] 
 
         #agrupation about "Ventas asignadas positivas"
-        total_sales = assign.groupby(_properties["levels"][0]["columns"], as_index=False).agg(
-            total_venta_act_asignada = pd.NamedAgg(
+        total_sales = assign.groupby(actual_level["columns"], as_index=False).agg(
+            {
+                f"{agg_names[0]}":pd.NamedAgg(
                     column="sum_venta_actual", aggfunc=np.sum)
+            }
         )
         #agrupation about "Ventas sin asignar negativas"
-        total_sales_not_assign = not_assign.groupby(_properties["levels"][0]["columns"], as_index=False).agg(
-            total_venta_act_sin_asignar = pd.NamedAgg(
+        total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(
+            {
+                f"{agg_names[1]}":pd.NamedAgg(
                     column="sum_venta_actual", aggfunc=np.sum)
+            }
         )
 
         #insert two columns 
         general_base = agg_base.merge(
             right=total_sales, 
-            on=_properties["levels"][0]["columns"], 
+            on=actual_level["columns"], 
             how="left").merge(
             right=total_sales_not_assign, 
-            on=_properties["levels"][0]["columns"], 
+            on=actual_level["columns"], 
             how="left")
 
         #0 for empty values
-        general_base.loc[pd.isna(general_base[["total_venta_act_asignada", "total_venta_act_sin_asignar"]]).all(axis=1), ["total_venta_act_asignada", "total_venta_act_sin_asignar"]] = 0 
+        general_base.loc[pd.isna(general_base[[agg_names[0], agg_names[1]]]).all(axis=1),
+                                 [agg_names[0], agg_names[1]]] = 0 
 
         #sum level act
-        mask_cero_total = general_base["total_venta_act_asignada"] == 0
-        general_base["porc_participacion"] = np.nan
-        general_base.loc[~mask_cero_total, "porc_participacion"] = general_base.loc[~mask_cero_total, "sum_venta_actual"]/general_base.loc[~mask_cero_total, "total_venta_act_asignada"]
-        general_base.loc[mask_cero_total, "porc_participacion"] = 0
+        mask_cero_total = general_base[agg_names[0]] == 0
+        general_base["porc_participacion"] = 0
+        general_base.loc[~mask_cero_total, "porc_participacion"] = general_base.loc[~mask_cero_total, "sum_venta_actual"]/general_base.loc[~mask_cero_total, agg_names[0]]
 
 
 
