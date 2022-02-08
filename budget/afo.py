@@ -10,7 +10,7 @@ import numpy as np
 import gc
 from dataframes import DataFrameOptimized as dfo
 from utils import constants as const
-from afo import afo
+from afo.afo import AFO
 
 def execute_afo_agrupation(directa: 'dfo', calle: 'dfo', compra: 'dfo') -> 'dfo':
     result = []
@@ -250,14 +250,13 @@ def process_afo_files(get_file: 'Function'):
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
-            _dt_afo_directa = afo.
-            _dt_afo_directa = dfo.get_table_excel(_file, const.SHEETS_AFO["directa"], index_idx=[
-                2, None], columns=const.COLUMNS_AFO["directa"], converters=const.CONVERTERS_AFO["directa"])
-            _dt_afo_calle = dfo.get_table_excel(_file, const.SHEETS_AFO["calle"], index_idx=[
-                                                2, None], columns=const.COLUMNS_AFO["calle"], converters=const.CONVERTERS_AFO["calle"])
-            _dt_afo_compra = dfo.get_table_excel(_file, const.SHEETS_AFO["compra"], index_idx=[
-                                                 2, None], columns=const.COLUMNS_AFO["compra"], converters=const.CONVERTERS_AFO["compra"])
-            _dt_driver = dfo.get_table_excel(_file, const.SHEETS_AFO["driver"])
+            with ThreadPoolExecutor() as executor:
+
+                arguments = [{"path": _file}]*4
+                results = executor.map(lambda x: AFO.from_csv(**x), arguments)
+
+            _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = results
+
         else:
             tk.messagebox.showerror(
                 const.PROCESS_NAME, "No se encontro ningun archivo con extension .xls")
@@ -297,19 +296,16 @@ def process_afo_files(get_file: 'Function'):
                          {"path": _file_compra},
                          {"path": _file_driver}
             ]
-            results = executor.map(lambda x: dfo.get_table_csv(**x), arguments)
+            results = executor.map(lambda x: AFO.from_csv(**x), arguments)
         
     _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = results 
 
 
-
-    # process drivers
-    drivers = process_afo_driver(_dt_driver)
-
-    # DIRECTA
+    # DIRECTA - 
     mask = ~(_dt_afo_directa.table[["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"]] == 0).all(axis=1)
     _dt_afo_directa.delete_rows(mask)
+
     # CALLE
     mask = ~(_dt_afo_calle.table[["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"]] == 0).all(axis=1)
@@ -319,8 +315,18 @@ def process_afo_files(get_file: 'Function'):
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"]] == 0).all(axis=1)
     _dt_afo_compra.delete_rows(mask)
 
-    directa, calle, compra = execute_afo_formulas(
-        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, drivers)
+    with ThreadPoolExecutor() as executor:
+            arguments = [
+                [_dt_afo_directa, {"driver": _dt_driver}],
+                [_dt_afo_calle, {"driver": _dt_driver}],
+                [_dt_afo_compra, {"driver": _dt_driver}]
+                ]
 
+            results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
+
+    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+    _dt_afo_directa.exe
+    _dt_afo_calle
+    _dt_afo_compra
     # clean
     gc.collect()

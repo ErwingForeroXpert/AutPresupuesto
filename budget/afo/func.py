@@ -114,6 +114,3 @@ def after_process_formulas_directa(
         table['agente'] = table4[cols_drivers[4][1]]
         
         return table
-
-
-def 

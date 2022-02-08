@@ -38,7 +38,7 @@ class AFO(dfo):
         
         return self.properties_process
 
-    def execute_formulas(self, driver: 'Driver') -> None:
+    def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
 
         Args:
@@ -117,8 +117,9 @@ class AFO(dfo):
                 description= f"No se encontraron valores en el driver, columnas \n {mask.columns.tolist()}")
 
         self.table = _res_table
+        return self
 
-    def execute_agrupation(self):
+    def execute_agrupation(self) -> pd.DataFrame:
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
@@ -129,7 +130,7 @@ class AFO(dfo):
                     column="ppto_nta_acum_anio_actual", aggfunc=np.sum),
                 sum_venta_anterior=pd.NamedAgg(
                     column="venta_nta_acum_anio_anterior", aggfunc=np.sum),
-            )
+            )   
 
     @staticmethod
     def get_properties( _type: str) -> None:

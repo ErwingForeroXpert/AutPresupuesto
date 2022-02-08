@@ -46,9 +46,12 @@ class Driver(dfo):
 
             if insert:
                 _drivers.append(super().from_tuple(
-                    values=table[actual_columns].to_numpy(), columns=actual_columns))
-                _drivers[-1].table = _drivers[-1].table[~isna(
-                    _drivers[-1].table).all(axis=1)]
+                    values=table[actual_columns].to_numpy(), 
+                    columns=actual_columns))
+                _drivers[-1].table = _drivers[-1].table[
+                    ~isna(_drivers[-1].table)
+                    .all(axis=1)
+                    ]
                 actual_columns = []
 
         return _drivers
