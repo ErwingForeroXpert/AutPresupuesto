@@ -192,7 +192,7 @@ PROCESSES = {
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "agg_columns": ["cod_oficina", "oficina_venta",
                             "canal", "sub_canal", "tipologia", "mes",
-                            "segmento", "agrupacion"]
+                            "segmento", "agrupacion", "formato", "sector", "categoria", "sub_categoria", "linea", "marca" "mes"]
         },
         "calle": {
             "key_columns": ["sector", "categoria", "sub_categoria", "linea", "marca"],

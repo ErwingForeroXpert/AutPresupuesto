@@ -144,10 +144,25 @@ class AFO(dfo):
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
 
         agg_base = self.execute_agrupation()
-        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"])
+        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base["sum_venta_actual"] <= 0
 
-        not_assign = agg_base[mask_not_assign]
-        assign = agg_base[~mask_not_assign]
+        not_assign = agg_base[mask_not_assign] #sin asignar menores a 0
+        assign = agg_base[~mask_not_assign] 
+
+        total_sales = assign.groupby(_properties["levels"][0]["columns"], as_index=False).agg(
+            total_venta_act = pd.NamedAgg(
+                    column="sum_venta_actual", aggfunc=np.sum)
+        )
+        not_assign_unique = 
+        res = agg_base.merge(
+            right=total_sales, 
+            on=_properties["levels"][0]["columns"], 
+            how="left")
+        res.loc[pd.isna(res[_properties["levels"][0]["columns"]]), "total_venta_act"] = 0 
+
+        res["% participacion"] = res["sum_venta_actual"]/res["total_venta_act"]
+
+
 
     @staticmethod
     def get_properties( _type: str) -> None:
