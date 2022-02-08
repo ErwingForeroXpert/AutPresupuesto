@@ -15,6 +15,7 @@ ICON_IMAGE = "icon.ico"
 AFO_TYPES = {
     "directa": {
         "sheet": "AFO -  Directa",
+        "regex_name": r".*directa.*",
         "skiprows": [2, None],
         "delimiter": ";",
         "columns": [
@@ -46,6 +47,7 @@ AFO_TYPES = {
     },
     "calle": {
         "sheet": "AFO -  Directa",
+        "regex_name": r".*calle.*",
         "skiprows": [2, None],
         "delimiter": ";",
         "columns": [
@@ -74,6 +76,7 @@ AFO_TYPES = {
     },
     "compra": {
         "sheet": "AFO -  Directa",
+        "regex_name": r".*compra.*",
         "skiprows": [2, None],
         "delimiter": ";",
         "columns": [
@@ -109,6 +112,7 @@ AFO_TYPES = {
 
 DRIVER = {
     "sheet": "Drivers",
+    "regex_name": r".*drive.*",
     "skiprows": [1, None],
     "delimiter": ";",
     "columns": [

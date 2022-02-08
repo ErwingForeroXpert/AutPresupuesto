@@ -8,9 +8,10 @@ import tkinter as tk
 import pandas as pd
 import numpy as np
 import gc
+import re
 from dataframes import DataFrameOptimized as dfo
 from utils import constants as const
-from afo.afo import AFO
+from afo.afo import AFO, Driver
 
 def execute_afo_agrupation(directa: 'dfo', calle: 'dfo', compra: 'dfo') -> 'dfo':
     result = []
@@ -252,10 +253,13 @@ def process_afo_files(get_file: 'Function'):
         if "xls" in _file:
             with ThreadPoolExecutor() as executor:
 
-                arguments = [{"path": _file}]*4
-                results = executor.map(lambda x: AFO.from_csv(**x), arguments)
+                arguments = [{"path": _file}]*3
+                results = executor.map(lambda x: AFO.from_excel(**x), arguments)
 
-            _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = results
+                temp_driver = executor.submit(Driver.from_excel, {"path": _file})
+                _dt_driver = temp_driver.result()
+
+            _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results
 
         else:
             tk.messagebox.showerror(
@@ -269,13 +273,13 @@ def process_afo_files(get_file: 'Function'):
                 const.PROCESS_NAME, "No se encontraron los archivos necesarios en la carpeta")
 
         _file_directa = [
-            _path for _path in _only_csv if "directa" in _path.strip().lower()][0]
+            _path for _path in _only_csv if re.match(const.AFO_TYPES["directa"]["regex_name"], _path.strip())][0]
         _file_calle = [
-            _path for _path in _only_csv if "calle" in _path.strip().lower()][0]
+            _path for _path in _only_csv if re.match(const.AFO_TYPES["calle"]["regex_name"], _path.strip())][0]
         _file_compra = [
-            _path for _path in _only_csv if "compra" in _path.strip().lower()][0]
+            _path for _path in _only_csv if re.match(const.AFO_TYPES["compra"]["regex_name"], _path.strip())][0]
         _file_driver = [
-            _path for _path in _only_csv if "drive" in _path.strip().lower()][0]
+            _path for _path in _only_csv if re.match(const.DRIVER["regex_name"], _path.strip())][0]
 
         if _file_directa is None:
             tk.messagebox.showerror(
@@ -293,12 +297,14 @@ def process_afo_files(get_file: 'Function'):
         with ThreadPoolExecutor() as executor:
             arguments = [{"path": _file_directa},
                          {"path": _file_calle},
-                         {"path": _file_compra},
-                         {"path": _file_driver}
+                         {"path": _file_compra}
             ]
             results = executor.map(lambda x: AFO.from_csv(**x), arguments)
-        
-    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = results 
+
+            temp_driver = executor.submit(Driver.from_csv, {"path": _file_driver})
+            _dt_driver = temp_driver.result()
+
+        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
 
 
     # DIRECTA - 
@@ -323,10 +329,12 @@ def process_afo_files(get_file: 'Function'):
                 ]
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
+            
 
     _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
-    _dt_afo_directa.exe
-    _dt_afo_calle
-    _dt_afo_compra
+    agg_directa = _dt_afo_directa.execute_agrupation()
+    agg_calle = _dt_afo_calle.execute_agrupation()
+    agg_compra = _dt_afo_compra.execute_agrupation()
+
     # clean
     gc.collect()

@@ -120,7 +120,14 @@ class AFO(dfo):
         return self
 
     def execute_agrupation(self) -> pd.DataFrame:
+        """Get Agrupation by next values:
+            "venta actual"
+            "venta ppto"
+            "venta anterior"
 
+        Returns:
+            pd.DataFrame: result of agrupation
+        """
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
 
         return self.table.groupby(_properties["agg_columns"], as_index=False).agg(
@@ -132,6 +139,8 @@ class AFO(dfo):
                     column="venta_nta_acum_anio_anterior", aggfunc=np.sum),
             )   
 
+    def assignment(self):
+        
     @staticmethod
     def get_properties( _type: str) -> None:
 
