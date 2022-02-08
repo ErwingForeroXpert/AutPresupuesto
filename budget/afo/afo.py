@@ -139,9 +139,15 @@ class AFO(dfo):
                     column="venta_nta_acum_anio_anterior", aggfunc=np.sum),
             )   
 
-    def assignment(self):
+    def execute_assignment(self):
+
+        _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
+
         agg_base = self.execute_agrupation()
-        mask_asign = agg_base[]
+        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"])
+
+        not_assign = agg_base[mask_not_assign]
+        assign = agg_base[~mask_not_assign]
 
     @staticmethod
     def get_properties( _type: str) -> None:

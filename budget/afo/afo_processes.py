@@ -10,7 +10,8 @@ from utils.constants import PROCESSES
 @unique
 class AFO_PROCESSES(Enum):
     FORMULA = "formula"
-
+    ASSIGNMENT = "assignment"
+    
     @classmethod
     def exist(cls, value):
         return value in cls._value2member_map_ 

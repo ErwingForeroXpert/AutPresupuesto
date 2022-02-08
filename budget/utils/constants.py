@@ -224,7 +224,7 @@ PROCESSES = {
     },
     "assignment": {
         "directa": {
-            "filter_assignment": {"column": "", "value":"sin asignar"},
+            "filter_assignment": {"column": "categoria", "pattern":"(?i)sin asignar"},
             "invalid_sectors": ["helados", "otros no operacional", "otros oper no ccial", "servicios"],
             "levels":[{
                 "columns": ["oficina_venta", "segmento", "agrupacion", "formato", "sector", "mes"]
