@@ -243,8 +243,10 @@ PROCESSES = {
             "invalid_sectors": ["helados", "otros no operacional", "otros oper no ccial", "servicios"],
             "levels":[{
                 "columns": ["oficina_venta", "segmento", "agrupacion", "formato", "sector", "mes"],
-                "columns_to_agg": [["sum_venta_actual", "sum_venta_actual"], ["sum_venta_actual", "sum_venta_actual"]],
-                "agg_values_names": ["total_venta_act_asignada", "total_venta_act_sin_asignar"],
+                "agg_values":[
+                    {"col_res":"sum_venta_actual", "column": "sum_venta_actual"}, 
+                    {"col_res":"sum_venta_ppto", "column": "sum_venta_actual"}
+                ]
             }],
             
         },

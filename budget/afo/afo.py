@@ -130,30 +130,20 @@ class AFO(dfo):
         """
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
         agg_values = _properties["agg_values"]
+
         obj_agg_values = {}
         for agg_val in agg_values:
             obj_agg_values[f"{agg_val['col_res']}"] = pd.NamedAgg(
-                    column=agg_val['col_res'], aggfunc=np.sum)
+                    column=agg_val['column'], aggfunc=np.sum)
                 
-        return self.table.groupby(_properties["agg_columns"], as_index=False).agg({
-            f"{agg_values[0]['col_res']}": pd.NamedAgg(
-                    column="venta_nta_acum_anio_actual", aggfunc=np.sum)
-        }
-                sum_venta_actual=pd.NamedAgg(
-                    column="venta_nta_acum_anio_actual", aggfunc=np.sum),
-                sum_venta_ppto=pd.NamedAgg(
-                    column="ppto_nta_acum_anio_actual", aggfunc=np.sum),
-                sum_venta_anterior=pd.NamedAgg(
-                    column="venta_nta_acum_anio_anterior", aggfunc=np.sum),
-            )   
+        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(obj_agg_values)   
 
     def execute_assignment(self):
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
         agg_base = self.execute_agrupation()
         actual_level = _properties['levels'][0]
-        agg_names = actual_level['agg_values_names']
-        agg_columns = actual_level['columns_to_agg']
+        agg_values = actual_level['agg_values']
 
         #mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base["sum_venta_actual"] <= 0
