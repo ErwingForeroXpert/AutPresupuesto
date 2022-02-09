@@ -38,6 +38,15 @@ class AFO(dfo):
         
         return self.properties_process
 
+    def dropcero(self, columns: 'list|str'):
+        """Delete rows with cero in all columns
+
+        Args:
+            columns (list): columns to validate
+        """
+        mask = ~(self.table[columns] == 0).all(axis=1)
+        self.delete_rows(mask)
+
     def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
 

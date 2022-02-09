@@ -308,14 +308,14 @@ def process_afo_files(get_file: 'Function'):
 
 
     # DIRECTA - 
-    mask = ~(_dt_afo_directa.table[["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"]] == 0).all(axis=1)
-    _dt_afo_directa.delete_rows(mask)
+    _dt_afo_directa.dropcero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     # CALLE
     mask = ~(_dt_afo_calle.table[["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"]] == 0).all(axis=1)
-    _dt_afo_calle.delete_rows(mask)
+    _dt_afo_calle.dropcero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
     # COMPRA
     mask = ~(_dt_afo_compra.table[["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"]] == 0).all(axis=1)
