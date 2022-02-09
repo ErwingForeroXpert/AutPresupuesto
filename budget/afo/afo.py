@@ -138,11 +138,16 @@ class AFO(dfo):
                 
         return self.table.groupby(_properties["agg_columns"], as_index=False).agg(obj_agg_values)   
 
-    def execute_assignment(self):
+    def execute_assignment(self, data: 'pd.DataFrame'= None, level: 'int'= 0):
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
-        agg_base = self.execute_agrupation()
-        actual_level = _properties['levels'][0] #see utils/constants - AFO_PROCESSES
+
+        if data is not None:
+            agg_base = data
+        else:
+            agg_base = self.execute_agrupation()
+
+        actual_level = _properties['levels'][level] #see utils/constants - AFO_PROCESSES
         agg_values = actual_level['agg_values']
 
         #mask for not assignment
@@ -158,6 +163,7 @@ class AFO(dfo):
                     column=agg_values[0]['column'], aggfunc=np.sum)
             }
         )
+
         #agrupation about "Ventas sin asignar negativas"
         total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(
             {
@@ -186,10 +192,26 @@ class AFO(dfo):
                                                                     general_base.loc[~mask_cero_total, agg_values[0]['col_res']] #suma_venta_act / total_venta_act_asignada
 
         #update sum sales
-        general_base[actual_level["add_columns"][1]] = agg_values[0]['column']+(general_base[actual_level["add_columns"][0]]*\
+        general_base[agg_values[0]['column']] = agg_values[0]['column']+(general_base[actual_level["add_columns"][0]]*\
                                             general_base[agg_values[1]['col_res']]) #suma_venta + (total_venta_act_sin_asignar * porc_participacion)
 
-        mask_diff_results = 
+        #agrupation about "Ventas asignadas positivas"
+        total_sales_now = assign.groupby(actual_level["columns"], as_index=False).agg(
+            {
+                f"{agg_values[0]['col_res']}":pd.NamedAgg(
+                    column=agg_values[0]['column'], aggfunc=np.sum)
+            }
+        )
+
+        #difference between total sales of "suma venta"
+        mask_diff_results = ~(total_sales[agg_values[0]['column']] == total_sales_now[agg_values[0]['column']])
+
+        if mask_diff_results.sum() > 0:
+            print(f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}")
+            return self.execute_agrupation(data=data, level=level+1)
+        else:
+            return general_base
+        
 
     @staticmethod
     def get_properties( _type: str) -> None:

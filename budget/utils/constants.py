@@ -241,15 +241,13 @@ PROCESSES = {
         "directa": {
             "filter_assignment": {"column": "categoria", "pattern":"(?i)sin asignar"},
             "invalid_sectors": ["helados", "otros no operacional", "otros oper no ccial", "servicios"],
-            "levels":[{
-                "columns": ["oficina_venta", "segmento", "agrupacion", "formato", "sector", "mes"],
-                "agg_values":[
-                    {"col_res":"total_venta_act_asignada", "column": "sum_venta_actual"}, 
-                    {"col_res":"total_venta_act_sin_asignar", "column": "sum_venta_actual"}
-                ],
-                "add_columns": ["porc_participacion", "temp_venta"]
-            }],
-            
+            "agg_values":[
+                        {"cols_res":["total_venta_act_asignada", "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
+                        {"cols_res":["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"}],
+            "add_columns": ["porc_participacion"],
+            "levels":[  ["oficina_venta", "segmento", "agrupacion", "formato", "sector", "mes"],
+                        ["oficina_venta", "segmento", "agrupacion", "formato", "sector"],
+                        ["oficina_venta", "segmento", "sector"]],
         },
     }
 }
