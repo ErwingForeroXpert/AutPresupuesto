@@ -176,18 +176,20 @@ class AFO(dfo):
             how="left")
 
         #0 for empty values
-        general_base.loc[pd.isna(general_base[[agg_values[0]['col_res'], agg_values[1]['col_res']]]).all(axis=1),
-                                 [agg_values[0]['col_res'], agg_values[1]['col_res']]] = 0 
+        general_base.loc[pd.isna(general_base[agg_values[0]['col_res']]), agg_values[0]['col_res']] = 0 
+        general_base.loc[pd.isna(general_base[agg_values[1]['col_res']]), agg_values[1]['col_res']] = 0 
 
         #sum level act
         mask_cero_total = general_base[agg_values[0]['col_res']] == 0
         general_base[actual_level["add_columns"][0]] = 0
-        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, actual_level["columns"]]/ \
-                                                                    general_base.loc[~mask_cero_total, agg_values[0]['col_res']] #
-        #"sin asignar act distancia"                                                         
-        general_base[actual_level["add_columns"][1]] = general_base[actual_level["add_columns"][0]]*general_base[agg_values[1]['col_res']] #total_venta_act_sin_asignar * porc_participacion
+        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, agg_values[0]['column']]/ \
+                                                                    general_base.loc[~mask_cero_total, agg_values[0]['col_res']] #suma_venta_act / total_venta_act_asignada
 
+        #update sum sales
+        general_base[actual_level["add_columns"][1]] = agg_values[0]['column']+(general_base[actual_level["add_columns"][0]]*\
+                                            general_base[agg_values[1]['col_res']]) #suma_venta + (total_venta_act_sin_asignar * porc_participacion)
 
+        mask_diff_results = 
 
     @staticmethod
     def get_properties( _type: str) -> None:
