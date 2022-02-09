@@ -138,7 +138,7 @@ class AFO(dfo):
                 
         return self.table.groupby(_properties["agg_columns"], as_index=False).agg(obj_agg_values)   
 
-    def execute_assignment(self, data: 'pd.DataFrame'= None, level: 'int'= 0):
+    def execute_assignment(self, data: 'pd.DataFrame'= None, level: 'int'= 0, type_sale: 'int'=0):
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
 
@@ -159,8 +159,8 @@ class AFO(dfo):
         #agrupation about "Ventas asignadas positivas"
         total_sales = assign.groupby(actual_level["columns"], as_index=False).agg(
             {
-                f"{agg_values[0]['col_res']}":pd.NamedAgg(
-                    column=agg_values[0]['column'], aggfunc=np.sum)
+                f"{agg_values[type_sale][0]['col_res']}":pd.NamedAgg(
+                    column=agg_values[type_sale]['column'], aggfunc=np.sum)
             }
         )
 
@@ -182,24 +182,24 @@ class AFO(dfo):
             how="left")
 
         #0 for empty values
-        general_base.loc[pd.isna(general_base[agg_values[0]['col_res']]), agg_values[0]['col_res']] = 0 
+        general_base.loc[pd.isna(general_base[agg_values[type_sale][0]['col_res']]), agg_values[type_sale][0]['col_res']] = 0 
         general_base.loc[pd.isna(general_base[agg_values[1]['col_res']]), agg_values[1]['col_res']] = 0 
 
         #sum level act
-        mask_cero_total = general_base[agg_values[0]['col_res']] == 0
+        mask_cero_total = general_base[agg_values[type_sale][0]['col_res']] == 0
         general_base[actual_level["add_columns"][0]] = 0
-        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, agg_values[0]['column']]/ \
-                                                                    general_base.loc[~mask_cero_total, agg_values[0]['col_res']] #suma_venta_act / total_venta_act_asignada
+        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, agg_values[type_sale]['column']]/ \
+                                                                    general_base.loc[~mask_cero_total, agg_values[type_sale][0]['col_res']] #suma_venta_act / total_venta_act_asignada
 
         #update sum sales
-        general_base[agg_values[0]['column']] = agg_values[0]['column']+(general_base[actual_level["add_columns"][0]]*\
+        general_base[agg_values[type_sale]['column']] = agg_values[type_sale]['column']+(general_base[actual_level["add_columns"][0]]*\
                                             general_base[agg_values[1]['col_res']]) #suma_venta + (total_venta_act_sin_asignar * porc_participacion)
 
-        #agrupation about "Ventas asignadas positivas"
+        #agrupation about "Ventas actuales positivas"
         total_sales_now = assign.groupby(actual_level["columns"], as_index=False).agg(
             {
-                f"{agg_values[0]['col_res']}":pd.NamedAgg(
-                    column=agg_values[0]['column'], aggfunc=np.sum)
+                f"{agg_values[type_sale][0]['col_res']}":pd.NamedAgg(
+                    column=agg_values[type_sale]['column'], aggfunc=np.sum)
             }
         )
 
@@ -208,7 +208,8 @@ class AFO(dfo):
 
         if mask_diff_results.sum() > 0:
             print(f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}")
-            return self.execute_agrupation(data=data, level=level+1)
+            diff_results = general_base[actual_level["columns"]]
+            return 
         else:
             return general_base
         
