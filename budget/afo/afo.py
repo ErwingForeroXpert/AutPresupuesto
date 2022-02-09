@@ -148,7 +148,7 @@ class AFO(dfo):
             agg_base = self.execute_agrupation()
 
         actual_level = _properties['levels'][level] #see utils/constants - AFO_PROCESSES
-        agg_values = actual_level['agg_values']
+        agg_values = _properties['agg_values']
 
         #mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base["sum_venta_actual"] <= 0
