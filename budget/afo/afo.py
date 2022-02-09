@@ -129,7 +129,7 @@ class AFO(dfo):
             pd.DataFrame: result of agrupation
         """
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
-        agg_values = _properties["agg_values"]
+        agg_values = _properties["agg_values"] #[{"col_res":[], "column":""},...] 
 
         obj_agg_values = {}
         for agg_val in agg_values:
@@ -148,10 +148,10 @@ class AFO(dfo):
             agg_base = self.execute_agrupation()
 
         actual_level = _properties['levels'][level] #see utils/constants - AFO_PROCESSES
-        agg_values = _properties['agg_values']
+        agg_values = _properties['agg_values'] #[{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
 
         #mask for not assignment
-        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base["sum_venta_actual"] <= 0
+        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base[agg_values[type_sale]['column']] <= 0
 
         not_assign = agg_base[mask_not_assign] #sin asignar menores a 0
         assign = agg_base[~mask_not_assign] 
@@ -167,8 +167,8 @@ class AFO(dfo):
         #agrupation about "Ventas sin asignar negativas"
         total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(
             {
-                f"{agg_values[1]['col_res']}":pd.NamedAgg(
-                    column=agg_values[1]['column'], aggfunc=np.sum)
+                f"{agg_values[type_sale][1]['col_res']}":pd.NamedAgg(
+                    column=agg_values[type_sale]['column'], aggfunc=np.sum)
             }
         )
 
@@ -183,7 +183,7 @@ class AFO(dfo):
 
         #0 for empty values
         general_base.loc[pd.isna(general_base[agg_values[type_sale][0]['col_res']]), agg_values[type_sale][0]['col_res']] = 0 
-        general_base.loc[pd.isna(general_base[agg_values[1]['col_res']]), agg_values[1]['col_res']] = 0 
+        general_base.loc[pd.isna(general_base[agg_values[type_sale][1]['col_res']]), agg_values[type_sale][1]['col_res']] = 0 
 
         #sum level act
         mask_cero_total = general_base[agg_values[type_sale][0]['col_res']] == 0
@@ -193,9 +193,9 @@ class AFO(dfo):
 
         #update sum sales
         general_base[agg_values[type_sale]['column']] = agg_values[type_sale]['column']+(general_base[actual_level["add_columns"][0]]*\
-                                            general_base[agg_values[1]['col_res']]) #suma_venta + (total_venta_act_sin_asignar * porc_participacion)
+                                            general_base[agg_values[type_sale][1]['col_res']]) #suma_venta + (total_venta_act_sin_asignar * porc_participacion)
 
-        #agrupation about "Ventas actuales positivas"
+        #agrupation by "Ventas actuales positivas"
         total_sales_now = assign.groupby(actual_level["columns"], as_index=False).agg(
             {
                 f"{agg_values[type_sale][0]['col_res']}":pd.NamedAgg(
@@ -204,11 +204,12 @@ class AFO(dfo):
         )
 
         #difference between total sales of "suma venta"
-        mask_diff_results = ~(total_sales[agg_values[0]['column']] == total_sales_now[agg_values[0]['column']])
+        mask_diff_results = ~(total_sales[agg_values[type_sale]['column']] == total_sales_now[agg_values[type_sale]['column']])
 
         if mask_diff_results.sum() > 0:
-            print(f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}")
-            diff_results = general_base[actual_level["columns"]]
+            print(f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
+            diff_totals = total_sales[mask_diff_results]
+            diff_results = general_base.merge(right=diff_totals[actual_level["columns"]], on=actual_level["columns"], how="left")
             return 
         else:
             return general_base
