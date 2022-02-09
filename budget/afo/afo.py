@@ -181,10 +181,11 @@ class AFO(dfo):
 
         #sum level act
         mask_cero_total = general_base[agg_values[0]['col_res']] == 0
-        general_base["porc_participacion"] = 0
-        general_base.loc[~mask_cero_total, "porc_participacion"] = general_base.loc[~mask_cero_total, agg_values[0]['col_res']]/ \
-                                                                    general_base.loc[~mask_cero_total, agg_values[0]['col_res']]
-        general_base
+        general_base[actual_level["add_columns"][0]] = 0
+        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, actual_level["columns"]]/ \
+                                                                    general_base.loc[~mask_cero_total, agg_values[0]['col_res']] #
+        #"sin asignar act distancia"                                                         
+        general_base[actual_level["add_columns"][1]] = general_base[actual_level["add_columns"][0]]*general_base[agg_values[1]['col_res']] #total_venta_act_sin_asignar * porc_participacion
 
 
 
