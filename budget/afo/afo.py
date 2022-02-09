@@ -187,7 +187,7 @@ class AFO(dfo):
 
         #sum level act
         mask_cero_total = general_base[agg_values[type_sale][0]['col_res']] == 0
-        general_base[actual_level["add_columns"][0]] = 0
+        general_base[actual_level["add_columns"][0]] = 0 #porc_participacion
         general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, agg_values[type_sale]['column']]/ \
                                                                     general_base.loc[~mask_cero_total, agg_values[type_sale][0]['col_res']] #suma_venta_act / total_venta_act_asignada
 
