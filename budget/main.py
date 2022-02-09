@@ -3,9 +3,107 @@
 #    @author: ErwingForero 
 # 
 
-from afo import process_afo_files
+import tkinter as tk
+import gc
+import re
+from concurrent.futures import ThreadPoolExecutor
+from utils import constants as const
+from afo.afo import AFO, Driver
 from gui.application import Application
 from utils import constants as const
+
+def process_afo_files(get_file: 'Function'):
+    """Main process for AFO files
+
+    Args:
+        get_file (Function): function that brings the file or folder with the files
+    """
+    _files = get_file()
+
+    if len(_files) == 1:
+        _file = _files[0]
+        if "xls" in _file:
+            with ThreadPoolExecutor() as executor:
+
+                arguments = [{"path": _file}]*3
+                results = executor.map(lambda x: AFO.from_excel(**x), arguments)
+
+                temp_driver = executor.submit(Driver.from_excel, {"path": _file})
+                _dt_driver = temp_driver.result()
+
+            _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results
+
+        else:
+            tk.messagebox.showerror(
+                const.PROCESS_NAME, "No se encontro ningun archivo con extension .xls")
+    else:
+
+        _only_csv = [
+            _path for _path in _files if "csv" in _path or "txt" in _path]
+        if len(_only_csv) < 4:
+            tk.messagebox.showerror(
+                const.PROCESS_NAME, "No se encontraron los archivos necesarios en la carpeta")
+
+        _file_directa = [
+            _path for _path in _only_csv if re.match(const.AFO_TYPES["directa"]["regex_name"], _path.strip())][0]
+        _file_calle = [
+            _path for _path in _only_csv if re.match(const.AFO_TYPES["calle"]["regex_name"], _path.strip())][0]
+        _file_compra = [
+            _path for _path in _only_csv if re.match(const.AFO_TYPES["compra"]["regex_name"], _path.strip())][0]
+        _file_driver = [
+            _path for _path in _only_csv if re.match(const.DRIVER["regex_name"], _path.strip())][0]
+
+        if _file_directa is None:
+            tk.messagebox.showerror(
+                const.PROCESS_NAME, "No se encontraron el archivo directa en la carpeta")
+        if _file_calle is None:
+            tk.messagebox.showerror(
+                const.PROCESS_NAME, "No se encontraron el archivo calle en la carpeta")
+        if _file_compra is None:
+            tk.messagebox.showerror(
+                const.PROCESS_NAME, "No se encontraron el archivo compra en la carpeta")
+        if _file_driver is None:
+            tk.messagebox.showerror(
+                const.PROCESS_NAME, "No se encontraron el archivo driver en la carpeta")
+
+        with ThreadPoolExecutor() as executor:
+            arguments = [{"path": _file_directa},
+                         {"path": _file_calle},
+                         {"path": _file_compra}
+            ]
+            results = executor.map(lambda x: AFO.from_csv(**x), arguments)
+
+            temp_driver = executor.submit(Driver.from_csv, {"path": _file_driver})
+            _dt_driver = temp_driver.result()
+
+        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+
+
+    # DIRECTA - 
+    _dt_afo_directa.dropcero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+
+    # CALLE
+    _dt_afo_calle.dropcero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # COMPRA
+    _dt_afo_compra.dropcero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+
+    with ThreadPoolExecutor() as executor:
+            arguments = [
+                [_dt_afo_directa, {"driver": _dt_driver}],
+                [_dt_afo_calle, {"driver": _dt_driver}],
+                [_dt_afo_compra, {"driver": _dt_driver}]
+                ]
+
+            results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
+            
+
+    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+    agg_directa = _dt_afo_directa.execute_agrupation()
+    agg_calle = _dt_afo_calle.execute_agrupation()
+    agg_compra = _dt_afo_compra.execute_agrupation()
 
 
 if __name__ == "__main__":
