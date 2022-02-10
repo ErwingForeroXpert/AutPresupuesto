@@ -97,7 +97,7 @@ AFO_TYPES = {
             "sub_categoria",
             "linea",
             "marca",
-            "mes"
+            "mes",
             "venta_nta_acum_anio_actual",
             "ppto_nta_acum_anio_actual",
             "venta_nta_acum_anio_anterior"

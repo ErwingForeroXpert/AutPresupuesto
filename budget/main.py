@@ -81,14 +81,14 @@ def process_afo_files(get_file: 'Function'):
 
 
     # DIRECTA - 
-    _dt_afo_directa.dropcero(["venta_nta_acum_anio_actual",
+    _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     # CALLE
-    _dt_afo_calle.dropcero(["venta_nta_acum_anio_actual",
+    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
     # COMPRA
-    _dt_afo_compra.dropcero(["venta_nta_acum_anio_actual",
+    _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     with ThreadPoolExecutor() as executor:

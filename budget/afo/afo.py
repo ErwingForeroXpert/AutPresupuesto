@@ -38,7 +38,7 @@ class AFO(dfo):
         
         return self.properties_process
 
-    def dropcero(self, columns: 'list|str'):
+    def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
 
         Args:
@@ -53,8 +53,8 @@ class AFO(dfo):
         Args:
             driver (Driver): driver of values
         """
-        _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.value)) #destructuring tuples [(driver, cols), ...]
-        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
+        _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.name)) #destructuring tuples [(driver, cols), ...]
+        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
 
         # Dataframe
         _table = self.table
@@ -137,7 +137,7 @@ class AFO(dfo):
         Returns:
             pd.DataFrame: result of agrupation
         """
-        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.value)
+        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
         agg_values = _properties["agg_values"] #[{"col_res":[], "column":""},...] 
 
         obj_agg_values = {}
@@ -149,7 +149,7 @@ class AFO(dfo):
 
     def execute_assignment(self, data: 'pd.DataFrame'= None, level: 'int'= 0, type_sale: 'int'=0):
 
-        _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.value)
+        _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)
 
         if data is not None:
             agg_base = data
