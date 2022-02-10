@@ -84,6 +84,8 @@ AFO_TYPES = {
             "oficina_ventas",
             "cod_agente",
             "agente",
+            "nombre_comercial",
+            "barrio",
             "cod_canal",
             "canal",
             "cod_sub_canal",
@@ -190,9 +192,8 @@ PROCESSES = {
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
-            "agg_columns": ["cod_oficina", "oficina_venta",
-                            "canal", "sub_canal", "tipologia", "mes",
-                            "segmento", "agrupacion", "formato", "sector", "categoria", "sub_categoria", "linea", "marca" "mes"],
+            "agg_columns": ["cod_oficina", "oficina_venta","canal", "sub_canal", "tipologia",
+                            "segmento", "agrupacion", "formato", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
@@ -208,7 +209,7 @@ PROCESSES = {
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "agg_columns": ["cod_oficina", "oficina_venta",
                             "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
-                            "sector", "categoria", "sub_categoria", "linea", "marca" "mes"],
+                            "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
@@ -222,7 +223,7 @@ PROCESSES = {
             "type": "compra",
             "agg_columns": ["oficina_venta",
                             "cod_agente", "sector", "categoria", "sub_categoria",
-                            "linea", "marca" "mes"],
+                            "linea", "marca", "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
