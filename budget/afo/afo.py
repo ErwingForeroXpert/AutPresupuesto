@@ -61,8 +61,8 @@ class AFO(dfo):
 
         _table = dfo.combine_str_columns(
             dataframe=_table, 
-            idx_cols=_properties["key_columns"], 
-            drop_duplicates=_properties["key_column_name"]
+            columns=_properties["key_columns"], 
+            name_res=_properties["key_column_name"]
             )
         #search by 'key'
         _res_table = _table.merge(
