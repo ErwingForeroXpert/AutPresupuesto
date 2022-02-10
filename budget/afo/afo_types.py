@@ -26,3 +26,4 @@ class AFO_TYPES(Enum):
 
     def extra_formula_process(self, **kargs):
         return after_process_formulas_directa(type=self.value, **kargs)
+        

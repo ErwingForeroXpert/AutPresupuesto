@@ -233,7 +233,7 @@ class AFO(dfo):
         return AFO_TYPES[_type].get_properties()
 
     @staticmethod
-    def from_excel(type: str, path: str, **kargs) -> 'AFO':
+    def from_excel(path: str, afo_type: str, **kargs) -> 'AFO':
         """Create a afo from an Excel file .
 
         Args:
@@ -255,7 +255,7 @@ class AFO(dfo):
         return AFO(afo_type=type, table=dto_instance.table)
     
     @staticmethod
-    def from_csv(path: str, **kargs):
+    def from_csv(path: str, afo_type: str, **kargs):
         """Create a afo from an Csv file .
 
         Args:
@@ -264,7 +264,7 @@ class AFO(dfo):
         Returns:
             AFO: instance of AFO
         """ 
-        _properties = AFO.get_properties(type)
+        _properties = AFO.get_properties(afo_type)
         dto_instance = dto_instance = dfo.get_table_csv(
             path=path, 
             delimiter= _properties["delimiter"], 

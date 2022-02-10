@@ -7,6 +7,7 @@ import tkinter as tk
 import gc
 import re
 from concurrent.futures import ThreadPoolExecutor
+from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
 from gui.application import Application
@@ -28,7 +29,7 @@ def process_afo_files(get_file: 'Function'):
                 arguments = [{"path": _file}]*3
                 results = executor.map(lambda x: AFO.from_excel(**x), arguments)
 
-                temp_driver = executor.submit(Driver.from_excel, {"path": _file})
+                temp_driver = executor.submit(lambda x: Driver.from_excel(**x), {"path": _file})
                 _dt_driver = temp_driver.result()
 
             _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results
@@ -45,13 +46,13 @@ def process_afo_files(get_file: 'Function'):
                 const.PROCESS_NAME, "No se encontraron los archivos necesarios en la carpeta")
 
         _file_directa = [
-            _path for _path in _only_csv if re.match(const.AFO_TYPES["directa"]["regex_name"], _path.strip())][0]
+            _path for _path in _only_csv if re.match(AFO_TYPES.DIRECTA.get_properties()["regex_name"], _path.strip())][0]
         _file_calle = [
-            _path for _path in _only_csv if re.match(const.AFO_TYPES["calle"]["regex_name"], _path.strip())][0]
+            _path for _path in _only_csv if re.match(AFO_TYPES.CALLE.get_properties()["regex_name"], _path.strip())][0]
         _file_compra = [
-            _path for _path in _only_csv if re.match(const.AFO_TYPES["compra"]["regex_name"], _path.strip())][0]
+            _path for _path in _only_csv if re.match(AFO_TYPES.COMPRA.get_properties()["regex_name"], _path.strip())][0]
         _file_driver = [
-            _path for _path in _only_csv if re.match(const.DRIVER["regex_name"], _path.strip())][0]
+            _path for _path in _only_csv if re.match(Driver.get_properties()["regex_name"], _path.strip())][0]
 
         if _file_directa is None:
             tk.messagebox.showerror(
@@ -67,13 +68,13 @@ def process_afo_files(get_file: 'Function'):
                 const.PROCESS_NAME, "No se encontraron el archivo driver en la carpeta")
 
         with ThreadPoolExecutor() as executor:
-            arguments = [{"path": _file_directa},
-                         {"path": _file_calle},
-                         {"path": _file_compra}
+            arguments = [{"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.value},
+                         {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.value},
+                         {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.value}
             ]
             results = executor.map(lambda x: AFO.from_csv(**x), arguments)
 
-            temp_driver = executor.submit(Driver.from_csv, {"path": _file_driver})
+            temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
             _dt_driver = temp_driver.result()
 
         _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
