@@ -13,8 +13,8 @@ class AFO_TYPES(Enum):
     COMPRA = "compra"
 
     @classmethod
-    def exist(cls, value):
-        return value in cls._value2member_map_ 
+    def exist(cls, key):
+        return key in cls.__members__ 
     
     def get_properties(self) -> object:
         """Get properties of AFO
@@ -26,4 +26,3 @@ class AFO_TYPES(Enum):
 
     def extra_formula_process(self, **kargs):
         return after_process_formulas_directa(type=self.value, **kargs)
-        

@@ -13,8 +13,8 @@ class AFO_PROCESSES(Enum):
     ASSIGNMENT = "assignment"
     
     @classmethod
-    def exist(cls, value):
-        return value in cls._value2member_map_ 
+    def exist(cls, key):
+        return key in cls.__members__ 
     
     def get_properties(self) -> object:
         """Get properties of PROCESS

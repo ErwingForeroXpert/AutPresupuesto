@@ -242,7 +242,7 @@ class AFO(dfo):
         Returns:
             AFO: instance of AFO
         """ 
-        _properties = AFO.get_properties(type)
+        _properties = AFO.get_properties(afo_type)
         dto_instance = dfo.get_table_excel(
             path=path, 
             sheet=_properties["sheet"], 
@@ -252,7 +252,7 @@ class AFO(dfo):
             **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
                         #arguments or overwrite previous parameters see utils/constants 
 
-        return AFO(afo_type=type, table=dto_instance.table)
+        return AFO(afo_type=afo_type, table=dto_instance.table)
     
     @staticmethod
     def from_csv(path: str, afo_type: str, **kargs):
@@ -275,4 +275,4 @@ class AFO(dfo):
             **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
                         #arguments or overwrite previous arguments see utils/constants  
 
-        return AFO(afo_type=type, table=dto_instance.table)
+        return AFO(afo_type=afo_type, table=dto_instance.table)
