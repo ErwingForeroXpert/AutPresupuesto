@@ -60,7 +60,7 @@ def after_process_formulas_directa(
         "sub_canal", 
         "cod_tipologia", 
         "tipologia"]] = np.full(
-            (len(mask), 6),
+            (mask.sum(), 6),
             ["T", 
             "Tradicional", 
             "TD", 
@@ -70,7 +70,7 @@ def after_process_formulas_directa(
 
         # driver 4 merge with table by cod_agente_comercial
         table3 = table.merge(
-            right=drivers[3].table[cols_drivers[3]], 
+            right=drivers[3][cols_drivers[3]], 
             left_on='cod_agente_comercial',
             right_on='actual_codigo_ac', 
             how='left')  # formato is included in columns
@@ -105,7 +105,7 @@ def after_process_formulas_directa(
 
         # driver 5 merge with table by cod cliente
         table4 = table.merge(
-            right=drivers[4].table[cols_drivers[4]], 
+            right=drivers[4][cols_drivers[4]], 
             left_on='cod_agente', 
             right_on='codigo_cliente', 
             how='left')
@@ -113,4 +113,4 @@ def after_process_formulas_directa(
         # new column with "agentes" found
         table['agente'] = table4[cols_drivers[4][1]]
         
-        return table
+    return table

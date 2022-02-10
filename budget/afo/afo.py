@@ -54,8 +54,9 @@ class AFO(dfo):
             driver (Driver): driver of values
         """
         _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.name)) #destructuring tuples [(driver, cols), ...]
+        cols_drivers = list(cols_drivers) #so that it can be modified
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
-            
+
         # Dataframe
         _table = self.table
 
@@ -116,14 +117,16 @@ class AFO(dfo):
             drivers= _drivers, 
             cols_drivers= cols_drivers, 
             properties= _properties,
-            table2=_res_table2)
+            table2=_res_table2
+            )
         
         # insert in alerts if found nan in any column after sector
-        mask = pd.isna(dfo.get_from(_res_table, "sector")).any(axis=1)
+        _dt_expected_values = dfo.get_from(_res_table, "sector")
+        mask = pd.isna(_dt_expected_values).any(axis=1)
         if mask.sum() > 0:
             self.insert_alert(
                 alert=_res_table[mask],
-                description= f"No se encontraron valores en el driver, columnas \n {mask.columns.tolist()}")
+                description= f"No se encontraron valores en el driver, columnas \n {_dt_expected_values.columns.tolist()}")
 
         self.table = _res_table
         return self
