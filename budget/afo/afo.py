@@ -55,7 +55,7 @@ class AFO(dfo):
         """
         _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.name)) #destructuring tuples [(driver, cols), ...]
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
-
+            
         # Dataframe
         _table = self.table
 
