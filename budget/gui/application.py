@@ -65,7 +65,7 @@ class Application():
         self.buttons["rd_folder"].select()
 
         self.buttons["rd_file"] = tk.Radiobutton(self.root, text="Archivo", value="file", \
-            variable=self.type_route, command=self.make_message("Debera seleccionar el archivo"))
+            variable=self.type_route, command=self.make_message("Debera seleccionar el archivo"), state=tk.DISABLED)
         self.buttons["rd_file"].grid(row=1, column=1)
         self.buttons["rd_file"].deselect()
 

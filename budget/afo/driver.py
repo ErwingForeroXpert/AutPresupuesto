@@ -2,9 +2,9 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
-from afo_processes import AFO_PROCESSES
+from afo.afo_processes import AFO_PROCESSES
 from pandas import isna
-from dataframes import dataframe_optimized as dfo
+from dataframes.dataframe_optimized import DataFrameOptimized as dfo
 from utils import constants as const
 
 

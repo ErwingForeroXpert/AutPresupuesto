@@ -5,9 +5,9 @@
 from typing import Any
 import numpy as np
 import pandas as pd
-from budget.afo.afo_processes import AFO_PROCESSES
-from budget.afo.driver import Driver
-from dataframes import dataframe_optimized as dfo
+from afo.afo_processes import AFO_PROCESSES
+from afo.driver import Driver
+from dataframes.dataframe_optimized import DataFrameOptimized as dfo
 from utils import constants as const
 from afo.afo_types import AFO_TYPES
 
