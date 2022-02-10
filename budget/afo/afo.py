@@ -34,7 +34,7 @@ class AFO(dfo):
             
         if self.actual_process != process:
             self.actual_process = process
-            self.properties_process = AFO_PROCESSES[self.actual_process].get_properties()[self._type] # afo properties for this process
+            self.properties_process = AFO_PROCESSES[self.actual_process].get_properties()[AFO_TYPES[self._type].value] # afo properties for this process
         
         return self.properties_process
 

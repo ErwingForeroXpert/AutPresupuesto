@@ -233,7 +233,7 @@ class DataFrameOptimized():
         return dataframe
 
     @staticmethod
-    def get_header_names_of(dataframe: 'pd.DataFrame', idx_cols: list[int], drop_duplicates: bool, subset: 'str|list[str]', **kargs) -> tuple[pd.DataFrame, list[str]]:
+    def get_header_names_of(dataframe: 'pd.DataFrame', idx_cols: list[int], drop_duplicates: bool = False, subset: 'str|list[str]'= None, **kargs) -> tuple[pd.DataFrame, list[str]]:
         _headers = dataframe.columns.tolist()
         _columns_name = [_headers[i] for i in idx_cols] #get the column names
 

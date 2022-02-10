@@ -14,6 +14,7 @@ class Driver(dfo):
         super().__init__(*args, **kargs)
         self.properties = self.get_properties()
         self._drivers = None
+        self._type = "driver"
         self.sep_drivers = "sep"
         self.actual_process = None
         self.sub_drivers_process = None
@@ -54,7 +55,25 @@ class Driver(dfo):
                     ]
                 actual_columns = []
 
-        return _drivers
+        self._drivers = _drivers
+
+    def get_properties_for_process(self, process: str) -> object:
+        """Get properties for Driver process
+
+        Args:
+            process[str]: Actual process
+
+        Returns:
+            object: properties of driver actual process
+        """
+        if not AFO_PROCESSES.exist(process):
+            raise ValueError(f"Process {process} not found in AFO_PROCESSES")
+            
+        if self.actual_process != process:
+            self.actual_process = process
+            self.properties_process = AFO_PROCESSES[self.actual_process].get_properties()[self._type] # afo properties for this process
+        
+        return self.properties_process
 
     @property
     def sub_drivers(self) -> 'list[super()]':
@@ -63,10 +82,10 @@ class Driver(dfo):
         Returns:
             list[dfo]: list of subdrivers
         """
-        if self.sub_drivers is None:
-            self.sub_drivers = self.process_subdrivers()
+        if self._drivers is None:
+            self.process_subdrivers()
         
-        return self.sub_drivers
+        return self._drivers
 
     def get_sub_drivers_for_process(self, process: str) -> list[tuple['super()', list[str]]]:
         """Returns a list of all sub - drivers for the process that are required for the process .
@@ -81,29 +100,22 @@ class Driver(dfo):
             list[tuple[dfo, list[str]]]: get tuple of subdrivers and head columns
         """
 
-        if not AFO_PROCESSES.exist(process):
-            raise ValueError(f"Process {process} not found in AFO_PROCESSES")
-
         _sub_drivers = self.sub_drivers 
 
-        if self.actual_process == process:
-            return self.sub_drivers_process
-        
-        self.actual_process = process
-        properties_process_driver = AFO_PROCESSES[self.actual_process].get_properties()["driver"] # driver properties for this process
+        _properties = self.get_properties_for_process(process) # driver properties for this process
 
-        index_sub_drivers = properties_process_driver["index_sub_drivers"] #index of each subdriver
-        cols_required_sub_drivers = properties_process_driver["cols_required_sub_drivers"] #cols of each subdriver
-        subset_index_columns = properties_process_driver["subset_index_columns"] #key for delete duplicates in each subdriver
-        drop_duplicates = properties_process_driver["drop_duplicates"] #delete duplicates?
+        index_sub_drivers = _properties["index_sub_drivers"] #index of each subdriver
+        cols_required_sub_drivers = _properties["cols_required_sub_drivers"] #cols of each subdriver
+        subset_index_columns = _properties["subset_index_columns"] #key for delete duplicates in each subdriver
+        drop_duplicates = _properties["drop_duplicates"] #delete duplicates?
         
         result = []
         for idx_pos, index in enumerate(index_sub_drivers): #iterate index and position to other properties see constanst PROCESSES
             if drop_duplicates[idx_pos]:
-                _, res_columns = super().get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos])
-            else:
                 _sub_drivers[index].table, res_columns = super().get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos],
                                                                 drop_duplicates=True, subset=subset_index_columns[idx_pos], keep="first", inplace=True)
+            else:
+                 _, res_columns = super().get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos])
             result.append((_sub_drivers[index].table, res_columns))
         
         self.sub_drivers_process = result #save actual sub_drivers
