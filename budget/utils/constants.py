@@ -81,7 +81,7 @@ AFO_TYPES = {
         "delimiter": ";",
         "columns": [
             "cod_oficina",
-            "oficina_ventas",
+            "oficina_venta",
             "cod_agente",
             "agente",
             "nombre_comercial",

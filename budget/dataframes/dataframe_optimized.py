@@ -104,6 +104,8 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"insert_alert {e}")
 
+    def get_alerts(self):
+        return self.__alerts
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
