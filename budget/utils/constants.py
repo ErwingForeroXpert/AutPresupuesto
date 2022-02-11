@@ -207,9 +207,8 @@ PROCESSES = {
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
-            "agg_columns": ["cod_oficina", "oficina_venta",
-                            "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
-                            "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
+            "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
+                            "segmento", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
