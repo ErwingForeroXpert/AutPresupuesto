@@ -98,10 +98,10 @@ def process_afo_files(get_file: 'Function'):
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
-
-    _dt_afo_compra = results 
-    agg_directa = _dt_afo_directa.execute_agrupation()
-    agg_calle = _dt_afo_calle.execute_agrupation()
+    for result in results:
+        _dt_afo_compra = result
+    # agg_directa = _dt_afo_directa.execute_agrupation()
+    # agg_calle = _dt_afo_calle.execute_agrupation()
     agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")
