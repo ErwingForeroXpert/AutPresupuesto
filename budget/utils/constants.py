@@ -192,6 +192,7 @@ PROCESSES = {
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
+            "add_columns_dif": "trans",
             "agg_columns": ["cod_oficina", "oficina_venta","canal", "sub_canal", "tipologia",
                             "segmento", "agrupacion", "formato", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
@@ -206,6 +207,8 @@ PROCESSES = {
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
+            "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
+            "add_columns_dif": "trans_",
             "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
                             "segmento", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
