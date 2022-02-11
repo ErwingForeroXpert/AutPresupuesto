@@ -192,9 +192,10 @@ PROCESSES = {
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
-            "add_columns_dif": "trans",
+            "add_columns_dif": "trans_",
             "agg_columns": ["cod_oficina", "oficina_venta","canal", "sub_canal", "tipologia",
-                            "segmento", "agrupacion", "formato", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
+                            "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato", #are the same in add_columns with dif
+                            "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},

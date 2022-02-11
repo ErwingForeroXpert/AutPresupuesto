@@ -35,18 +35,18 @@ def after_process_formulas_directa(
 
         for idx, _column in enumerate(properties["add_columns"]):
             
-            add_columns_dif = f"{properties['add_columns_dif']}{_column}"
-            table[add_columns_dif] = np.nan #empty column
+            new_column_name = f"{properties['add_columns_dif']}{_column}"
+            table[new_column_name] = np.nan #empty column
 
             #asigned or not asigned
-            table.loc[mask,_column] = table2.loc[mask, 
+            table.loc[mask,new_column_name] = table2.loc[mask, 
                                         cols_drivers[1][idx]]
-            table.loc[~mask, _column] = table3.loc[~mask,
+            table.loc[~mask, new_column_name] = table3.loc[~mask,
                                         cols_drivers[2][idx]]
 
             # replace for "-" NaN values 
-            _mask_empty = pd.isna(table[_column])
-            table.loc[_mask_empty, _column] = '-'
+            _mask_empty = pd.isna(table[new_column_name])
+            table.loc[_mask_empty, new_column_name] = '-'
 
     elif type == "calle":
         # replace if found "Sin asignar"
@@ -87,6 +87,11 @@ def after_process_formulas_directa(
         # add new two columns "Nombre cliente" and "oficina de ventas"
         table['nombre_ac'] = table4[cols_drivers[4][1]]
         table['oficina_venta'] = table4[cols_drivers[4][2]]
+
+        for idx, _column in enumerate(properties["add_columns"]):
+            
+            new_column_name = f"{properties['add_columns_dif']}{_column}"
+            table[new_column_name] = table2[cols_drivers[1][idx]]
 
     elif type == "compra":
 
