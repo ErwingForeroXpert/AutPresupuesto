@@ -143,12 +143,12 @@ class AFO(dfo):
         _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
         agg_values = _properties["agg_values"] #[{"col_res":[], "column":""},...] 
 
-        obj_agg_values = {}
+        aggregations = {}
         for agg_val in agg_values:
-            obj_agg_values[f"{agg_val['col_res']}"] = pd.NamedAgg(
+            aggregations[f"{agg_val['col_res']}"] = pd.NamedAgg(
                     column=agg_val['column'], aggfunc=np.sum)
                 
-        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(obj_agg_values)   
+        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)   
 
     def execute_assignment(self, data: 'pd.DataFrame'= None, level: 'int'= 0, type_sale: 'int'=0):
 
@@ -169,20 +169,18 @@ class AFO(dfo):
         assign = agg_base[~mask_not_assign] 
 
         #agrupation about "Ventas asignadas positivas"
-        total_sales = assign.groupby(actual_level["columns"], as_index=False).agg(
-            {
+        aggregation = {
                 f"{agg_values[type_sale][0]['col_res']}":pd.NamedAgg(
                     column=agg_values[type_sale]['column'], aggfunc=np.sum)
             }
-        )
+        total_sales = assign.groupby(actual_level["columns"], as_index=False).agg(**aggregation)
 
         #agrupation about "Ventas sin asignar negativas"
-        total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(
-            {
+        aggregation = {
                 f"{agg_values[type_sale][1]['col_res']}":pd.NamedAgg(
                     column=agg_values[type_sale]['column'], aggfunc=np.sum)
             }
-        )
+        total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(**aggregation)
 
         #insert two columns 
         general_base = agg_base.merge(

@@ -106,6 +106,7 @@ def process_afo_files(get_file: 'Function'):
     agg_calle = _dt_afo_calle.execute_agrupation()
     agg_compra = _dt_afo_compra.execute_agrupation()
 
+    print("hi")
 
 if __name__ == "__main__":
     # process_afo_files([""])
