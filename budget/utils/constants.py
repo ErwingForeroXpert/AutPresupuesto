@@ -223,7 +223,6 @@ PROCESSES = {
             "key_columns": ["sector", "categoria", "sub_categoria", "linea", "marca"],
             "key_column_name": "clave",
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-            "type": "compra",
             "agg_columns": ["oficina_venta",
                             "cod_agente", "sector", "categoria", "sub_categoria",
                             "linea", "marca", "mes"],

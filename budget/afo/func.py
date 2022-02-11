@@ -99,7 +99,8 @@ def after_process_formulas_directa(
         table3 = table.merge(
             right=drivers[3][cols_drivers[3]], 
             left_on='cod_agente',
-            right_on='actual_codigo_ac', how='left')  # formato is included in columns
+            right_on='actual_codigo_ac', 
+            how='left')  # formato is included in columns
 
         mask = pd.isna(table3['cod_agente'])
 
