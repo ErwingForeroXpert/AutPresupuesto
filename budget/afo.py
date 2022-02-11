@@ -164,17 +164,23 @@ def execute_afo_formulas(directa: 'dfo', calle: 'dfo', compra: 'dfo', drivers: l
                                                                                                                                ["T", "Tradicional", "TD", "Tiendas", "TG", "Tienda Mixta"])
 
             # driver 4 merge with table by cod_agente_comercial
-            _res_table3 = _res_table.merge(drivers[3].table[cols_driver4], left_on='cod_agente_comercial',
-                                           right_on='actual_codigo_ac', how='left')  # formato is included in columns
+            _res_table3 = _res_table.merge(
+                drivers[3].table[cols_driver4], 
+            left_on='cod_agente_comercial',
+            right_on='actual_codigo_ac', how='left')  # formato is included in columns
+
             mask = pd.isna(_res_table3['cod_ac_reemplazar'])
 
             # replace not nan by new values
             _res_table.loc[~mask, 'cod_agente_comercial'] = _res_table3.loc[~mask,
-                                                                            'cod_ac_reemplazar']
+                                                            'cod_ac_reemplazar']
 
             # driver 5 merge with table by cod cliente
-            _res_table4 = _res_table.merge(drivers[4].table[cols_driver5], left_on='cod_agente_comercial',
-                                           right_on='codigo_cliente', how='left')  # formato is included in columns
+            _res_table4 = _res_table.merge(
+                drivers[4].table[cols_driver5], 
+            left_on='cod_agente_comercial',
+            right_on='codigo_cliente', how='left')  # formato is included in columns
+
             # add new two columns "Nombre cliente" and "oficina de ventas"
             _res_table['nombre_ac'] = _res_table4[cols_driver5[1]]
             _res_table['oficina_venta'] = _res_table4[cols_driver5[2]]
@@ -182,8 +188,12 @@ def execute_afo_formulas(directa: 'dfo', calle: 'dfo', compra: 'dfo', drivers: l
         elif data["type"] == "compra":
 
             # driver 4 merge with table by cod_agente_comercial
-            _res_table3 = _res_table.merge(drivers[3].table[cols_driver4], left_on='cod_agente',
-                                           right_on='actual_codigo_ac', how='left')  # formato is included in columns
+            _res_table3 = _res_table.merge(
+                drivers[3].table[cols_driver4], 
+                left_on='cod_agente',
+                right_on='actual_codigo_ac', how='left')  # formato is included in columns
+            
+            #if cod_agente contains NaN
             mask = pd.isna(_res_table3['cod_agente'])
 
             # replace not nan by new values
@@ -192,7 +202,11 @@ def execute_afo_formulas(directa: 'dfo', calle: 'dfo', compra: 'dfo', drivers: l
 
             # driver 5 merge with table by cod cliente
             _res_table4 = _res_table.merge(
-                drivers[4].table[cols_driver5], left_on='cod_agente', right_on='codigo_cliente', how='left')
+                drivers[4].table[cols_driver5], 
+                left_on='cod_agente', 
+                right_on='codigo_cliente', 
+                how='left')
+                
             # new column with "agentes" found
             _res_table['agente'] = _res_table4[cols_driver5[1]]
 

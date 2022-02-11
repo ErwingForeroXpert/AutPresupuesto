@@ -17,7 +17,7 @@ def after_process_formulas_directa(
         drivers (list): drivers see afo/driver
         cols_drivers (list): columns of drivers
         properties (object): properties of afo type
-        table2 (pd.DataFrame, optional): util table used for "directa" and "calle" type. Defaults to None.
+        table2 (pd.DataFrame, optional): util table used for "directa" and "calle" afo type. Defaults to None.
 
     Returns:
         pd.DataFrame: table before process afo
@@ -41,10 +41,10 @@ def after_process_formulas_directa(
                 table[_column] = np.nan
 
             #asigned or not asigned
-            table.loc[mask,
-                            _column] = table2.loc[mask, cols_drivers[1][idx]]
-            table.loc[~mask,
-                            _column] = table3.loc[~mask, cols_drivers[2][idx]]
+            table.loc[mask,_column] = table2.loc[mask, 
+                                        cols_drivers[1][idx]]
+            table.loc[~mask, _column] = table3.loc[~mask,
+                                        cols_drivers[2][idx]]
 
             # replace for "-" NaN values 
             _mask_empty = pd.isna(table[_column])
