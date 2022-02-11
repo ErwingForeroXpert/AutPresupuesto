@@ -210,7 +210,8 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
+            "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", 
+                            "trans_canal", "trans_sub_canal", "trans_segmento", "cod_agente_comercial", "nombre_ac",
                             "segmento", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
