@@ -120,8 +120,8 @@ class AFO(dfo):
             table2=_res_table2
             )
         
-        # insert in alerts if found nan in any column after sector
-        _dt_expected_values = dfo.get_from(_res_table, "sector")
+        # insert in alerts if found nan in any column after ...
+        _dt_expected_values = dfo.get_from(_res_table, _properties["validate_nan_before"])
         mask = pd.isna(_dt_expected_values).any(axis=1)
         if mask.sum() > 0:
             self.insert_alert(

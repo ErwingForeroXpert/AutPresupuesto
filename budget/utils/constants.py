@@ -193,9 +193,11 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
+            "validate_nan_before": "sector",
             "agg_columns": ["cod_oficina", "oficina_venta","canal", "sub_canal", "tipologia",
                             "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato", #are the same in add_columns with dif
-                            "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
+                            "sector", "categoria", "sub_categoria", "linea", "marca", #same key columns
+                            "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
@@ -210,9 +212,11 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", 
-                            "trans_canal", "trans_sub_canal", "trans_segmento", "cod_agente_comercial", "nombre_ac",
-                            "segmento", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
+            "validate_nan_before": "sector",
+            "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
+                            "trans_canal", "trans_sub_canal", "trans_segmento", #are the same in add_columns with dif
+                            "sector", "categoria", "sub_categoria", "linea", "marca", #same key columns
+                            "mes"], 
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
@@ -223,9 +227,10 @@ PROCESSES = {
             "key_columns": ["sector", "categoria", "sub_categoria", "linea", "marca"],
             "key_column_name": "clave",
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-            "agg_columns": ["oficina_venta",
-                            "cod_agente", "sector", "categoria", "sub_categoria",
-                            "linea", "marca", "mes"],
+            "validate_nan_before": "sector",
+            "agg_columns": ["oficina_venta","cod_agente", 
+                            "sector", "categoria", "sub_categoria","linea", "marca", #same key columns
+                            "mes"],
             "agg_values":[
                 {"col_res":"sum_venta_actual", "column": "venta_nta_acum_anio_actual"}, 
                 {"col_res":"sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
