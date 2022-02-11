@@ -103,7 +103,6 @@ class AFO(dfo):
             _res_table2 = _res_table.merge(
                 _drivers[1][[_properties["key_merge_extra_columns"], *cols_drivers[1]]], 
                 on=_properties["key_merge_extra_columns"], 
-                
                 how='left'
                 )
             _res_table2[_properties["extra_columns"]] = np.full(

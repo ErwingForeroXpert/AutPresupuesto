@@ -87,9 +87,9 @@ def after_process_formulas_directa(
         # add new two columns "Nombre cliente" and "oficina de ventas"
         table['nombre_ac'] = table4[cols_drivers[4][1]]
         table['oficina_venta'] = table4[cols_drivers[4][2]]
-
+        
+        #add other columns
         for idx, _column in enumerate(properties["add_columns"]):
-            
             new_column_name = f"{properties['add_columns_dif']}{_column}"
             table[new_column_name] = table2[cols_drivers[1][idx]]
 
