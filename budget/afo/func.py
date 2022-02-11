@@ -31,14 +31,12 @@ def after_process_formulas_directa(
             how='left')
 
         # change values
-        mask = table['formato'].str.contains(
-            pat='(?i)sin asignar')  # for format whitout be assigned
+        mask = table['formato'].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
 
         for idx, _column in enumerate(properties["add_columns"]):
-
-            # if column not exist in table
-            if _column not in table.columns.tolist():
-                table[_column] = np.nan
+            
+            add_columns_dif = f"{properties['add_columns_dif']}{_column}"
+            table[add_columns_dif] = np.nan #empty column
 
             #asigned or not asigned
             table.loc[mask,_column] = table2.loc[mask, 
