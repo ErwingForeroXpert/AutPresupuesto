@@ -84,25 +84,27 @@ def process_afo_files(get_file: 'Function'):
     _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
-    # CALLE
-    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
-    # COMPRA
-    _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # # CALLE
+    # _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # # COMPRA
+    # _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     with ThreadPoolExecutor() as executor:
             arguments = [
-                [_dt_afo_compra, {"driver": _dt_driver}]
+                [_dt_afo_directa, {"driver": _dt_driver}]
+                # [_dt_afo_calle, {"driver": _dt_driver}]
+                # [_dt_afo_compra, {"driver": _dt_driver}]
                 ]
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
     for result in results:
-        _dt_afo_compra = result
-    # agg_directa = _dt_afo_directa.execute_agrupation()
+        _dt_afo_directa = result
+    agg_directa = _dt_afo_directa.execute_agrupation()
     # agg_calle = _dt_afo_calle.execute_agrupation()
-    agg_compra = _dt_afo_compra.execute_agrupation()
+    # agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")
 

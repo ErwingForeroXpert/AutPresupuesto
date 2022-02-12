@@ -30,11 +30,11 @@ def after_process_formulas_directa(
         # formato is included in columns
         table3 = table.merge(
             right=drivers[2][cols_drivers[2]], 
-            on='formato', 
+            on=columns[9], 
             how='left')
 
         # change values
-        mask = table['formato'].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
+        mask = table[columns[9]].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
 
         for idx, _column in enumerate(properties["add_columns"]):
             

@@ -46,6 +46,7 @@ class AFO(dfo):
         """
         mask = ~(self.table[columns] == 0).all(axis=1)
         self.delete_rows(mask)
+        self.table.reset_index(drop=True, inplace=True)
 
     def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
