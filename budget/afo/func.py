@@ -102,8 +102,7 @@ def after_process_formulas_directa(
             right_on='actual_codigo_ac', 
             how='left')  # formato is included in columns
 
-        mask = pd.isna(table3['cod_agente'])
-
+        mask = pd.isna(table3['cod_ac_reemplazar'])
         # replace not nan by new values
         table.loc[~mask, 'cod_agente'] = table3.loc[~mask,'cod_ac_reemplazar']
 
@@ -111,10 +110,12 @@ def after_process_formulas_directa(
         table4 = table.merge(
             right=drivers[4][cols_drivers[4]], 
             left_on='cod_agente', 
-            right_on='codigo_cliente', 
+            right_on=cols_drivers[4][0], 
             how='left')
+        
 
-        # new column with "agentes" found
-        table['agente'] = table4[cols_drivers[4][1]]
+        mask = pd.isna(table3[cols_drivers[4][1]])
+        # replace not nan by new values
+        table.loc[~mask, 'cod_agente'] = table3.loc[~mask,'cod_ac_reemplazar']
         
     return table
