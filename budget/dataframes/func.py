@@ -1,5 +1,5 @@
 from typing import Any
-from numpy import number, isnan, __name__, array, int64
+from numpy import number, isnan, __name__, array, int64, NaN
 from pandas import isnull, isna
 from utils.index import is_iterable
 
@@ -75,3 +75,12 @@ def mask_price(value: 'Any') -> str:
             return int64(found)
         except AttributeError:
             return int64(0)
+
+def mask_number(value: 'Any') -> str:
+    if isnull(value) or str(value) == "":
+        return NaN
+    else:
+        try:
+            return int64(value)
+        except AttributeError:
+            return NaN
