@@ -114,8 +114,8 @@ def after_process_formulas_directa(
             left_on=columns[2], 
             right_on=cols_drivers[4][0], 
             how='left')
-        mask = pd.isna(table3[cols_drivers[4][1]])
+        mask = pd.isna(table4[cols_drivers[4][1]])
         # replace not nan by new values
-        table.loc[~mask, columns[3]] = table3.loc[~mask, cols_drivers[4][1]]
+        table.loc[~mask, columns[3]] = table4.loc[~mask, cols_drivers[4][1]]
         
     return table
