@@ -97,7 +97,7 @@ class DataFrameOptimized():
 
             alert["description"] = description
             _alerts_columns = self.table.columns.tolist()
-            _required_of_alert = alert[_alerts_columns] #get only the columns that exist in the alerts
+            _required_of_alert = alert[[*_alerts_columns, "description"]] #get only the columns that exist in the alerts
 
             self.__alerts = pd.concat([self.__alerts, _required_of_alert], ignore_index=True)
 
@@ -166,7 +166,7 @@ class DataFrameOptimized():
             
         except Exception as e:
             raise Exception(f"get_table_excel - {e}")
-    
+
     @staticmethod
     def get_table_csv(path: str, *args, **kargs) -> 'DataFrameOptimized':
         """Returns a DataFrame instance that will be used to parse the table at the given path .

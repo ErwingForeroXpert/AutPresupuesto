@@ -203,7 +203,7 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "validate_nan_before": "sector",
+            "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "agg_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
                             "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato", #are the same in add_columns with dif
                             "sector", "categoria", "sub_categoria", "linea", "marca", #same key columns
@@ -222,7 +222,7 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "validate_nan_before": "sector",
+            "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
                             "trans_canal", "trans_sub_canal", "trans_segmento", #are the same in add_columns with dif
                             "sector", "categoria", "sub_categoria", "linea", "marca", #same key columns
@@ -237,7 +237,7 @@ PROCESSES = {
             "key_columns": ["sector", "categoria", "sub_categoria", "linea", "marca"],
             "key_column_name": "clave",
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-            "validate_nan_before": "sector",
+            "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "agg_columns": ["oficina_venta","cod_agente", 
                             "sector", "categoria", "sub_categoria","linea", "marca", #same key columns
                             "mes"],

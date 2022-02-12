@@ -80,7 +80,7 @@ def mask_price(value: 'Any') -> str:
 
             return int64(found)
         except AttributeError:
-            return int64(0)
+            return NaN
 
 def mask_number(value: 'Any') -> str:
     if isnull(value) or str(value) == "":

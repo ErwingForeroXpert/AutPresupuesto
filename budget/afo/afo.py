@@ -122,12 +122,11 @@ class AFO(dfo):
             )
         
         # insert in alerts if found nan in any column after ...
-        _dt_expected_values = dfo.get_from(_res_table, _properties["validate_nan_before"])
-        mask = pd.isna(_dt_expected_values).any(axis=1)
+        mask = pd.isna(_res_table[_properties["validate_nan_columns"]]).any(axis=1)
         if mask.sum() > 0:
             self.insert_alert(
                 alert=_res_table[mask],
-                description= f"No se encontraron valores en el driver, columnas \n {_dt_expected_values.columns.tolist()}")
+                description= f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}")
 
         self.table = _res_table
         return self
@@ -151,14 +150,9 @@ class AFO(dfo):
                 
         return self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)   
 
-    def execute_assignment(self, data: 'pd.DataFrame'= None, level: 'int'= 0, type_sale: 'int'=0):
+    def execute_assignment(self, agg_base: 'pd.DataFrame'= None, level: 'int'= 0, type_sale: 'int'=0):
 
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)
-
-        if data is not None:
-            agg_base = data
-        else:
-            agg_base = self.execute_agrupation()
 
         actual_level = _properties['levels'][level] #see utils/constants - AFO_PROCESSES
         agg_values = _properties['agg_values'] #[{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
