@@ -22,6 +22,9 @@ def after_process_formulas_directa(
     Returns:
         pd.DataFrame: table before process afo
     """
+
+    columns = table.columns.tolist()
+
     if type == "directa":
         # driver 3 merge with table by formato
         # formato is included in columns
@@ -98,24 +101,21 @@ def after_process_formulas_directa(
         # driver 4 merge with table by cod_agente_comercial
         table3 = table.merge(
             right=drivers[3][cols_drivers[3]], 
-            left_on='cod_agente',
-            right_on='actual_codigo_ac', 
+            left_on=columns[2],
+            right_on=cols_drivers[3][0], 
             how='left')  # formato is included in columns
-
-        mask = pd.isna(table3['cod_ac_reemplazar'])
+        mask = pd.isna(table3[cols_drivers[3][1]])
         # replace not nan by new values
-        table.loc[~mask, 'cod_agente'] = table3.loc[~mask,'cod_ac_reemplazar']
+        table.loc[~mask, columns[2]] = table3.loc[~mask,cols_drivers[3][1]]
 
         # driver 5 merge with table by cod cliente
         table4 = table.merge(
             right=drivers[4][cols_drivers[4]], 
-            left_on='cod_agente', 
+            left_on=columns[2], 
             right_on=cols_drivers[4][0], 
             how='left')
-        
-
         mask = pd.isna(table3[cols_drivers[4][1]])
         # replace not nan by new values
-        table.loc[~mask, 'cod_agente'] = table3.loc[~mask,'cod_ac_reemplazar']
+        table.loc[~mask, columns[3]] = table3.loc[~mask, cols_drivers[4][1]]
         
     return table

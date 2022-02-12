@@ -166,7 +166,7 @@ class DataFrameOptimized():
             
         except Exception as e:
             raise Exception(f"get_table_excel - {e}")
-
+    
     @staticmethod
     def get_table_csv(path: str, *args, **kargs) -> 'DataFrameOptimized':
         """Returns a DataFrame instance that will be used to parse the table at the given path .
