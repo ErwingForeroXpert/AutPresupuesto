@@ -40,6 +40,8 @@ AFO_TYPES = {
             "venta_nta_acum_anio_anterior"
         ],
         "converters": {
+            "cod_oficina": func.mask_number,
+            "mes": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price
@@ -69,6 +71,8 @@ AFO_TYPES = {
             "venta_nta_acum_anio_anterior"
         ],
         "converters": {
+            "cod_agente_comercial": func.mask_number,
+            "mes": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price
@@ -105,6 +109,8 @@ AFO_TYPES = {
             "venta_nta_acum_anio_anterior"
         ],
         "converters": {
+            "cod_oficina": func.mask_number,
+            "mes": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price,
@@ -180,7 +186,12 @@ DRIVER = {
         "nombre_cliente",
         "oficina_ventas_ecom"
     ],
-    "converters": None
+    "converters": {
+        "id_consecutivo": func.mask_number,
+        "actual_codigo_ac": func.mask_number,
+        "cod_ac_reemplazar": func.mask_number,
+        "codigo_cliente": func.mask_number
+    }
 }
 
 PROCESSES = {
