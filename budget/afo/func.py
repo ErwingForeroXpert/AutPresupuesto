@@ -30,12 +30,12 @@ def after_process_formulas_directa(
         # formato is included in columns
         table3 = table.merge(
             right=drivers[2][cols_drivers[2]], 
-            on=columns[9], 
+            on=columns[9], #formato
             how='left')
 
         # change values
         mask = table[columns[9]].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
-
+        
         for idx, _column in enumerate(properties["add_columns"]):
             
             new_column_name = f"{properties['add_columns_dif']}{_column}"
@@ -46,10 +46,6 @@ def after_process_formulas_directa(
                                         cols_drivers[1][idx]]
             table.loc[~mask, new_column_name] = table3.loc[~mask,
                                         cols_drivers[2][idx]]
-
-            # replace for "-" NaN values 
-            _mask_empty = pd.isna(table[new_column_name])
-            table.loc[_mask_empty, new_column_name] = '-'
 
     elif type == "calle":
         # replace if found "Sin asignar"

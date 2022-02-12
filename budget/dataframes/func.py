@@ -73,7 +73,7 @@ def mask_price(value: 'Any') -> str:
     else:
         try:
             found = str(value).replace(".", "").replace(",", "")
-            if (res:=re.search(r'\d+',found)) is not None:
+            if (res:=re.search(r'\-*\d+',found)) is not None:
                 found = res.group(0)
             else:
                 found = 0
@@ -87,7 +87,7 @@ def mask_number(value: 'Any') -> str:
         return NaN
     else:
         try:
-            if (res:=re.search(r'\d+',value)) is not None:
+            if (res:=re.search(r'\-*\d+',value)) is not None:
                 found = res.group(0)
             else:
                 found = 0

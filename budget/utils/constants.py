@@ -204,7 +204,7 @@ PROCESSES = {
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
             "validate_nan_before": "sector",
-            "agg_columns": ["cod_oficina", "oficina_venta","canal", "sub_canal", "tipologia",
+            "agg_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
                             "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato", #are the same in add_columns with dif
                             "sector", "categoria", "sub_categoria", "linea", "marca", #same key columns
                             "mes"],
