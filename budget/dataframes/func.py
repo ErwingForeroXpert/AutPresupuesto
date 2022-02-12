@@ -1,3 +1,4 @@
+import re
 from typing import Any
 from numpy import number, isnan, __name__, array, int64, NaN
 from pandas import isnull, isna
@@ -72,6 +73,11 @@ def mask_price(value: 'Any') -> str:
     else:
         try:
             found = str(value).replace(".", "").replace(",", "")
+            if (res:=re.search(r'\d+',found)):
+                found = "".join(res.group())
+            else:
+                found = 0
+
             return int64(found)
         except AttributeError:
             return int64(0)
@@ -81,6 +87,7 @@ def mask_number(value: 'Any') -> str:
         return NaN
     else:
         try:
-            return int64(value)
-        except AttributeError:
+            found = re.findall(r'\d+',str(value))[0]
+            return int64(found)
+        except ValueError:
             return NaN

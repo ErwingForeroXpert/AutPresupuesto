@@ -41,7 +41,6 @@ AFO_TYPES = {
         ],
         "converters": {
             "cod_oficina": func.mask_number,
-            "mes": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price
@@ -110,7 +109,7 @@ AFO_TYPES = {
         ],
         "converters": {
             "cod_oficina": func.mask_number,
-            "mes": func.mask_number,
+            "cod_agente": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price,
