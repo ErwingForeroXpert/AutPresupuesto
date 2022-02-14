@@ -4,7 +4,6 @@
 # 
 
 import tkinter as tk
-import gc
 import re
 from concurrent.futures import ThreadPoolExecutor
 from afo.afo_types import AFO_TYPES

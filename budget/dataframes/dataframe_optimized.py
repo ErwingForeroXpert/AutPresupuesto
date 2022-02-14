@@ -131,7 +131,36 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"delete_rows {e}")
 
-    def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> None:
+    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="not_nan", on=None, left_on=None, right_on=None, how="left", **kargs) -> self:
+
+        _temp_table = self.table.merge(
+            right=dataframe_right,
+            on=on, 
+            left_on=left_on, 
+            right_on=right_on, 
+            how=how,
+            **kargs
+            )
+
+        if on is None or right_on is None:
+            raise ValueError("Required a value key in dataframe_right")
+        
+        key 
+        mask = pd.isna(_temp_table[cols_drivers[4][1]])
+
+        if type_replace == "not_nan":
+            
+            # replace not nan by new values
+            table.loc[~mask, columns[3]] = table4.loc[~mask, cols_drivers[4][1]]
+        
+        elif type_replace == "nan":
+        
+        elif type_replace == "only_not_nan":
+        
+        elif type_replace == "only_nan":
+
+
+    def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:
         """Save the table to a CSV file .
 
         Args:
@@ -144,6 +173,8 @@ class DataFrameOptimized():
 
         route = os.path.normpath(os.path.join(folder_path, name))
         self.table.to_csv(path_or_buf=route, sep=sep, **kargs)
+
+        return route
 
     @staticmethod
     def get_table_excel(path: str, sheet: str, header_idx: 'list'= None, skiprows: 'list'= None, converters: 'list' = None, *args, **kargs) -> 'DataFrameOptimized':
