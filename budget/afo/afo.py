@@ -64,8 +64,7 @@ class AFO(dfo):
 
         # Dataframe
         _table = self.table
-
-        _table = dfo.combine_str_columns(
+        _table = self.combine_str_columns(
             dataframe=_table,
             columns=_properties["key_columns"],
             name_res=_properties["key_column_name"]
@@ -126,15 +125,13 @@ class AFO(dfo):
             table2=_res_table2
         )
 
-        # insert in alerts if found nan in any column after ...
-        mask = pd.isna(
-            _res_table[_properties["validate_nan_columns"]]).any(axis=1)
-        if mask.sum() > 0:
-            self.insert_alert(
-                alert=_res_table[mask],
-                description=f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}")
-
+        # insert in alerts if found nan in any column ...
+        self.validate_alert(
+            mask= pd.isna(self.table[_properties["validate_nan_columns"]]).any(axis=1),
+            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}"
+        )
         self.table = _res_table
+        
         return self
 
     def execute_agrupation(self) -> pd.DataFrame:

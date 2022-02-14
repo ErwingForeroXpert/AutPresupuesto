@@ -107,6 +107,14 @@ class DataFrameOptimized():
     def get_alerts(self):
         return self.__alerts
 
+    def validate_alert(self, mask: bool, description: str):
+        
+        if mask.sum() > 0:
+            self.insert_alert(
+                alert=self.table[mask],
+                description=description
+                )
+            
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
         Args:
@@ -170,6 +178,7 @@ class DataFrameOptimized():
         
         return self.table
 
+    
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:
         """Save the table to a CSV file .
 

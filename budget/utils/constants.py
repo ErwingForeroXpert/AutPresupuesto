@@ -229,7 +229,12 @@ PROCESSES = {
             "add_columns_dif": "trans_",
             "replacers": [
                 {
-                    "type_replace":
+                    "order": 0,
+                    "type": "replace",
+                    "num_driver": 3,
+                    "type_replace": "not_nan",
+                    "left_on": "cod_agente_comercial",
+                    "right_on": ""  
                 }
             ],
             "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
