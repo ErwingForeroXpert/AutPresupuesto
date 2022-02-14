@@ -131,7 +131,13 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"delete_rows {e}")
 
-    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="not_nan", on=None, left_on=None, right_on=None, how="left", **kargs) -> self:
+    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", **kargs) -> 'pd.DataFrame':
+
+        if on is None or right_on is None:
+            raise ValueError("Required a value key in dataframe_right")
+        
+        if mask is None and type_replace not in ["not_nan", "all"]:
+            raise ValueError("mask is required")
 
         _temp_table = self.table.merge(
             right=dataframe_right,
@@ -142,22 +148,23 @@ class DataFrameOptimized():
             **kargs
             )
 
-        if on is None or right_on is None:
-            raise ValueError("Required a value key in dataframe_right")
-        
-        key 
-        mask = pd.isna(_temp_table[cols_drivers[4][1]])
+        key_right = on if on is not None else right_on
+        key_left = on if on is not None else left_on
 
-        if type_replace == "not_nan":
-            
-            # replace not nan by new values
-            table.loc[~mask, columns[3]] = table4.loc[~mask, cols_drivers[4][1]]
+        if len(key_left) != len(key_right):
+            raise ValueError(f"Length of keys invalid, lenght left found {len(key_left)} ")
         
-        elif type_replace == "nan":
+        if type_replace == "mask":
+            pass
+        elif type_replace == "invert_mask":
+            mask = ~mask
+        elif type_replace == "not_nan":
+            mask = pd.isna(_temp_table[key_right])
+        elif type_replace == "all":
+            mask = np.full(len(self.table), True)
         
-        elif type_replace == "only_not_nan":
+        self.table.loc[mask, key_left] = _temp_table.loc[mask, key_right]
         
-        elif type_replace == "only_nan":
 
 
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:

@@ -119,7 +119,7 @@ class AFO(dfo):
             cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
 
         _res_table = AFO_TYPES[self._type].extra_formula_process(
-            table=_res_table,
+            actual_afo=self,
             drivers=_drivers,
             cols_drivers=cols_drivers,
             properties=_properties,

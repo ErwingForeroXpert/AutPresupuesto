@@ -3,7 +3,7 @@ import numpy as np
 
 def after_process_formulas_directa(
     type:str,
-    table: 'pd.DataFrame', 
+    actual_afo: 'pd.DataFrame', 
     drivers: 'list', 
     cols_drivers: 'list', 
     properties: 'object',
@@ -24,7 +24,7 @@ def after_process_formulas_directa(
     """
 
     columns = table.columns.tolist()
-
+    
     if type == "directa":
         # driver 3 merge with table by formato
         # formato is included in columns
