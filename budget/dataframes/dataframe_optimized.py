@@ -178,7 +178,7 @@ class DataFrameOptimized():
         
         return self.table
 
-    def replace_many_by(self, dataframe_right: 'pd.DataFrame', on=None, left_on=None, right_on=None, how="left", columns_right=None, columns_left=None, type= "change", type_replace="not_nan", **kargs):
+    def replace_many_by(self, dataframe_right: 'pd.DataFrame', on=None, left_on=None, right_on=None, how="left", columns_right=None, columns_left=None, type= "change", type_replace="not_nan", def_value=np.nan, **kargs):
 
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
@@ -198,18 +198,15 @@ class DataFrameOptimized():
         
         for idx, _column in enumerate(columns_left):
 
-            if type == "add_news":
-                mask = np.full(len(self.table), True)
-                mask = pd.isna(_res_table[columns_right[idx]])
-            elif type == "add_news_if_not_exist":
-                
+            if type == "add_news" and _column not in self.table.columns.tolist():
+                self.table[_column] = np.full((len(self.table), ), def_value)
 
             if type_replace == "not_nan":
                 mask = pd.isna(_temp_table[key_right])
             elif type_replace == "all":
                 mask = np.full(len(self.table), True)
 
-            _res_table.loc[mask,_column] = _temp_table.loc[mask, columns_right[idx]]
+            self.table.loc[mask,_column] = _temp_table.loc[mask, columns_right[idx]]
 
     
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:
