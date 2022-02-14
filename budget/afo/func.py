@@ -68,17 +68,15 @@ def after_process_formulas_directa(
             "TG", 
             "Tienda Mixta"])
 
-        # driver 4 merge with table by cod_agente_comercial
-        table3 = table.merge(
-            right=drivers[3][cols_drivers[3]], 
+        #replace cod_agente_comercial by actual_codigo_ac
+        actual_afo.replace_by(
+            dataframe_right=drivers[3][cols_drivers[3]],
+            type_replace="not_nan",
             left_on='cod_agente_comercial',
-            right_on='actual_codigo_ac', 
-            how='left')  # formato is included in columns
-
-        mask = pd.isna(table3['cod_ac_reemplazar'])
-
-        # replace not nan by new values
-        table.loc[~mask, 'cod_agente_comercial'] = table3.loc[~mask, 'cod_ac_reemplazar']
+            right_on='actual_codigo_ac',
+            right_replacer='cod_ac_reemplazar',
+            how="left"
+        )
 
         # driver 5 merge with table by cod cliente
         table4 = table.merge(
@@ -97,6 +95,7 @@ def after_process_formulas_directa(
 
     elif type == "compra":
 
+        #replace table by cod_agente_comercial
         actual_afo.replace_by(
             dataframe_right=drivers[3][cols_drivers[3]],
             type_replace="not_nan",
@@ -116,24 +115,6 @@ def after_process_formulas_directa(
             right_replacer=cols_drivers[4][1],
             how="left"
         )
-        # driver 4 merge with table by cod_agente_comercial
-        table3 = table.merge(
-            right=drivers[3][cols_drivers[3]], 
-            left_on=columns[2],
-            right_on=cols_drivers[3][0], 
-            how='left')  # formato is included in columns
-        mask = pd.isna(table3[cols_drivers[3][1]])
-        # replace not nan by new values
-        table.loc[~mask, columns[2]] = table3.loc[~mask,cols_drivers[3][1]]
 
-        # driver 5 merge with table by cod cliente
-        table4 = table.merge(
-            right=drivers[4][cols_drivers[4]], 
-            left_on=columns[2], 
-            right_on=cols_drivers[4][0], 
-            how='left')
-        mask = pd.isna(table4[cols_drivers[4][1]])
-        # replace not nan by new values
-        table.loc[~mask, columns[3]] = table4.loc[~mask, cols_drivers[4][1]]
         
     return table
