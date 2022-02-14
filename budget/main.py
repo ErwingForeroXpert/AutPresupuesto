@@ -93,15 +93,15 @@ def process_afo_files(get_file: 'Function'):
 
     with ThreadPoolExecutor() as executor:
             arguments = [
-                [_dt_afo_directa, {"driver": _dt_driver}],
-                [_dt_afo_calle, {"driver": _dt_driver}],
-                [_dt_afo_compra, {"driver": _dt_driver}]
+                [_dt_afo_directa, {"driver": _dt_driver}]
+                # [_dt_afo_calle, {"driver": _dt_driver}],
+                # [_dt_afo_compra, {"driver": _dt_driver}]
                 ]
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
-    # for result in results:
-    #     _dt_afo_directa = result
+    for result in results:
+        _dt_afo_directa = result
     _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
     agg_directa = _dt_afo_directa.execute_agrupation()
     agg_calle = _dt_afo_calle.execute_agrupation()
