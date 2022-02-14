@@ -102,9 +102,10 @@ def after_process_formulas_directa(
             type_replace="not_nan",
             left_on=columns[2],
             right_on=cols_drivers[3][0],
-            right_replacer=cols_drivers[4][1],
+            right_replacer=cols_drivers[3][1],
             how="left"
         )
+
         # replace table by cod cliente
         actual_afo.replace_by(
             dataframe_right=drivers[4][cols_drivers[4]],
