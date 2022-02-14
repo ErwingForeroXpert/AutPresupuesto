@@ -155,8 +155,12 @@ class AFO(dfo):
         _properties = self.properties_process
 
         if self._type == "directa":
-            # driver 3 merge with table by formato
-            # formato is included in columns
+
+            # replace by formato
+            self.replace_by(
+                dataframe_right=drivers[2][cols_drivers[2]],
+                
+            )
             table3 = table.merge(
                 right=drivers[2][cols_drivers[2]], 
                 on=columns[9], #formato

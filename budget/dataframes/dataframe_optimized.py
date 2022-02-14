@@ -178,21 +178,38 @@ class DataFrameOptimized():
         
         return self.table
 
-    def replace_many_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, create_columns=False, **kargs):
+    def replace_many_by(self, dataframe_right: 'pd.DataFrame', on=None, left_on=None, right_on=None, how="left", columns_right=None, columns_left=None, type= "change", type_replace="not_nan", **kargs):
+
+        if on is None or right_on is None:
+            raise ValueError("Required a value key in dataframe_right")
+
+        if len(columns_right) != len(columns_left):
+            raise ValueError(f"Length of columns invalid, columns right length found {len(columns_right)} and columns left length found {len(columns_left)}")
+
+        _temp_table = self.table.merge(
+            right=dataframe_right,
+            on=on, 
+            left_on=left_on, 
+            right_on=right_on, 
+            how=how,
+            **kargs
+            )
 
         
         for idx, _column in enumerate(columns_left):
-            self.replace_by(
-                dataframe_right=dataframe_right,
-                type_replace=type_replace,
-                left_on=_column,
-                right_on=columns_right[idx],
+
+            if type == "add_news":
+                mask = np.full(len(self.table), True)
+                mask = pd.isna(_res_table[columns_right[idx]])
+            elif type == "add_news_if_not_exist":
                 
-            )
-            mask = pd.isna(_res_table[cols_drivers[0][idx]])
-            # if the found value is nan, the one be had will be left
-            _res_table.loc[~mask,
-                           _column] = _res_table.loc[~mask, cols_drivers[0][idx]]
+
+            if type_replace == "not_nan":
+                mask = pd.isna(_temp_table[key_right])
+            elif type_replace == "all":
+                mask = np.full(len(self.table), True)
+
+            _res_table.loc[mask,_column] = _temp_table.loc[mask, columns_right[idx]]
 
     
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:

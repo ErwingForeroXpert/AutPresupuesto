@@ -230,16 +230,6 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "replacers": [
-                {
-                    "order": 0,
-                    "type": "replace",
-                    "num_driver": 3,
-                    "type_replace": "not_nan",
-                    "left_on": ,
-                    "right_on": ""
-                }
-            ],
             "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "filter_replace_columns": {"column": "tipologia", "pattern": "(?i)sin asignar"},
             "replace_columns_for": {"cod_canal": "T", "canal": "Tradicional", "cod_sub_canal": "TD", "sub_canal": "Tiendas", "cod_tipologia": "TG", "tipologia": "Tienda Mixta"},
