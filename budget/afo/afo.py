@@ -127,7 +127,6 @@ class AFO(dfo):
         """
 
         columns = self.table.columns.tolist()
-        table = self.table
         _properties = self.properties_process
 
         # add optionals extra columns
@@ -150,38 +149,38 @@ class AFO(dfo):
         if self._type == "directa":
 
             # replace by formato
-            self.replace_by(
-                dataframe_right=drivers[2][cols_drivers[2]],
-                on=columns[9], #formato
-                
-
-            )
-            table3 = table.merge(
+            other_table2 = self.table.merge(
                 right=drivers[2][cols_drivers[2]], 
                 on=columns[9], #formato
                 how='left')
 
+            # change values
             new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
 
-            # change values
-            mask = table[columns[9]].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
-            
-            for idx, _column in enumerate(_properties["add_columns"]):
-                
-                new_column_name = f"{_properties['add_columns_dif']}{_column}"
-                table[new_column_name] = np.nan #empty column
-
-                #asigned or not asigned
-                table.loc[mask,new_column_name] = other_table.loc[mask, 
-                                            cols_drivers[1][idx]]
-                table.loc[~mask, new_column_name] = table3.loc[~mask,
-                                            cols_drivers[2][idx]]
+            self.replace_many_by(
+                dataframe_right=[other_table, other_table2],
+                on=columns[9], #formato
+                mask=self.table[columns[9]].str.contains(pat='(?i)sin asignar'), # for format whitout be assigned
+                mask_idx=0,
+                columns_left=new_column_names,
+                columns_right=cols_drivers[1:3],
+                type="add_news",
+                type_replace="not_nan",
+                def_value=np.nan 
+            )
 
         elif self._type == "calle":
+
             # replace if found "Sin asignar"
-            mask = table[_properties["filter_replace_columns"]["column"]].str.contains(pat=_properties["filter_replace_columns"]["pattern"])
-            table.loc[mask,list(_properties["replace_columns_for"].keys())] = np.full(
-                (mask.sum(), 6),list(_properties["replace_columns_for"].values()))
+            mask = self.table[
+                _properties["filter_replace_columns"]["column"]
+                ].str.contains(pat=_properties["filter_replace_columns"]["pattern"])
+
+            self.table.loc[mask, list(_properties["replace_columns_for"].keys())] = np.full(
+                (mask.sum(), 
+                len(_properties["replace_columns_for"].values())), 
+                list(_properties["replace_columns_for"].values())
+                )
 
             #replace cod_agente_comercial by actual_codigo_ac
             self.replace_by(
@@ -205,6 +204,18 @@ class AFO(dfo):
                 how="left"
             )
             
+            self.replace_many_by(
+                dataframe_right=other_table[cols_drivers[1]],
+                on=columns[9], #formato
+                mask=self.table[columns[9]].str.contains(pat='(?i)sin asignar'), # for format whitout be assigned
+                mask_idx=0,
+                columns_left=new_column_names,
+                columns_right=cols_drivers[1:3],
+                type="add_news",
+                type_replace="not_nan",
+                def_value=np.nan 
+            )
+
             #add other columns
             new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
             table[new_column_name] = other_table[cols_drivers[1]]
