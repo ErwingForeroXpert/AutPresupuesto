@@ -53,20 +53,8 @@ def after_process_formulas_directa(
     elif type == "calle":
         # replace if found "Sin asignar"
         mask = table[properties["filter_replace_columns"]["column"]].str.contains(pat=properties["filter_replace_columns"]["pattern"])
-        table.loc[mask, 
-        ["cod_canal", 
-        "canal", 
-        "cod_sub_canal", 
-        "sub_canal", 
-        "cod_tipologia", 
-        "tipologia"]] = np.full(
-            (mask.sum(), 6),
-            ["T", 
-            "Tradicional", 
-            "TD", 
-            "Tiendas", 
-            "TG", 
-            "Tienda Mixta"])
+        table.loc[mask,list(properties["replace_columns_for"].keys())] = np.full(
+            (mask.sum(), 6),list(properties["replace_columns_for"].values()))
 
         #replace cod_agente_comercial by actual_codigo_ac
         actual_afo.replace_by(
@@ -91,9 +79,8 @@ def after_process_formulas_directa(
         )
         
         #add other columns
-        for idx, _column in enumerate(properties["add_columns"]):
-            new_column_name = f"{properties['add_columns_dif']}{_column}"
-            table[new_column_name] = table2[cols_drivers[1][idx]]
+        new_column_names = [f"{properties['add_columns_dif']}{_column}" for _column in properties["add_columns"]]
+        table[new_column_name] = table2[cols_drivers[1]]
 
     elif type == "compra":
 
@@ -119,4 +106,4 @@ def after_process_formulas_directa(
         )
 
         
-    return table
+    return actual_afo.table
