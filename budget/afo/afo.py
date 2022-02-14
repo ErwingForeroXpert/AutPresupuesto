@@ -68,12 +68,16 @@ class AFO(dfo):
             columns=_properties["key_columns"],
             name_res=_properties["key_column_name"]
         )
-        # search by 'key'
-        self.table = self.table.merge(
-            _drivers[0][[_properties["key_column_name"], *cols_drivers[0]]],
+
+        # search by 'clave'
+        self.replace_many_by(
+            dataframe_right=_drivers[0][[_properties["key_column_name"], *cols_drivers[0]]],
             on=_properties["key_column_name"],
-            how='left'
-        )
+            columns_left=_properties["columns_change"],
+            columns_right=cols_drivers[0],
+            type="change",
+            type_replace="not_nan"
+        ) 
 
         # only for the sub_categoria to begin with "amarr"
         # amarres filter
@@ -85,39 +89,14 @@ class AFO(dfo):
             description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver"
         )
 
-        # change values
-        # the same size or smaller than the columns would be expected
-        for idx, _column in enumerate(_properties["columns_change"]):
-            mask = pd.isna(_res_table[cols_drivers[0][idx]])
-            # if the found value is nan, the one be had will be left
-            _res_table.loc[~mask,
-                           _column] = _res_table.loc[~mask, cols_drivers[0][idx]]
-
         # delete columns unnecessary
         self.table.drop([_properties["key_column_name"], *cols_drivers[0]], axis=1, inplace=True)
         self.table.reset_index(drop=True, inplace=True)
 
-        # add optionals extra columns
-        other_table = None
-        if "extra_columns" in _properties.keys():
-            other_table = self.table.merge(
-                _drivers[1][[_properties["key_merge_extra_columns"],
-                             *cols_drivers[1]]],
-                on=_properties["key_merge_extra_columns"],
-                how='left'
-
-            )
-            other_table[_properties["extra_columns"]] = np.full(
-                # rows, cols
-                (len(other_table), len(_properties["extra_columns"])), '-')  # value to insert
-
-            # add agrupacion and formato columns
-            cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
-
-        self.table = self.sub_process_formula(
+        #execute individual process
+        self.sub_process_formula(
             drivers=_drivers,
-            cols_drivers=cols_drivers,
-            other_table=other_table
+            cols_drivers=cols_drivers
         )
 
         # insert in alerts if found nan in any column ...
@@ -125,7 +104,6 @@ class AFO(dfo):
             mask= pd.isna(self.table[_properties["validate_nan_columns"]]).any(axis=1),
             description=f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}"
         )
-        self.table = _res_table
 
         return self
 
@@ -133,7 +111,6 @@ class AFO(dfo):
         self,
         drivers: 'list', 
         cols_drivers: 'list', 
-        other_table: 'pd.DataFrame' = None,
         ) -> pd.DataFrame:
 
         """Individual process of afo files.
@@ -144,7 +121,6 @@ class AFO(dfo):
             drivers (list): drivers see afo/driver
             cols_drivers (list): columns of drivers
             properties (object): properties of afo type
-            table2 (pd.DataFrame, optional): util table used for "directa" and "calle" afo type. Defaults to None.
 
         Returns:
             pd.DataFrame: table before process afo
@@ -154,17 +130,38 @@ class AFO(dfo):
         table = self.table
         _properties = self.properties_process
 
+        # add optionals extra columns
+        other_table = None
+        if "extra_columns" in _properties.keys():
+
+            other_table = self.table.merge(
+                drivers[1][[_properties["key_merge_extra_columns"], *cols_drivers[1]]],
+                on=_properties["key_merge_extra_columns"],
+                how='left'
+            )
+            other_table[_properties["extra_columns"]] = np.full(
+                # rows, cols
+                (len(other_table), len(_properties["extra_columns"])), '-')  # value to insert
+
+            # add agrupacion and formato columns
+            cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
+
+
         if self._type == "directa":
 
             # replace by formato
             self.replace_by(
                 dataframe_right=drivers[2][cols_drivers[2]],
+                on=columns[9], #formato
                 
+
             )
             table3 = table.merge(
                 right=drivers[2][cols_drivers[2]], 
                 on=columns[9], #formato
                 how='left')
+
+            new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
 
             # change values
             mask = table[columns[9]].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
@@ -175,7 +172,7 @@ class AFO(dfo):
                 table[new_column_name] = np.nan #empty column
 
                 #asigned or not asigned
-                table.loc[mask,new_column_name] = table2.loc[mask, 
+                table.loc[mask,new_column_name] = other_table.loc[mask, 
                                             cols_drivers[1][idx]]
                 table.loc[~mask, new_column_name] = table3.loc[~mask,
                                             cols_drivers[2][idx]]
@@ -210,7 +207,7 @@ class AFO(dfo):
             
             #add other columns
             new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
-            table[new_column_name] = table2[cols_drivers[1]]
+            table[new_column_name] = other_table[cols_drivers[1]]
 
         elif self._type == "compra":
 
