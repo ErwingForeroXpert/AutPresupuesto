@@ -233,7 +233,10 @@ class DataFrameOptimized():
         for idx, _column in enumerate(columns_left):
 
             if type == "add_news" and _column not in self.table.columns.tolist():
-                self.table[_column] = np.full((len(self.table), ), def_value)
+                self.table[
+                    
+                    
+                ] = np.full((len(self.table), ), def_value)
             
             if type_replace == "mask":
                 pass
