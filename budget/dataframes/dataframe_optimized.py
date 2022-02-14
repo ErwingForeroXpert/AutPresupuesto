@@ -131,7 +131,7 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"delete_rows {e}")
 
-    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, **kargs) -> 'pd.DataFrame':
+    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, create_columns=False, **kargs) -> 'pd.DataFrame':
 
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
@@ -154,6 +154,9 @@ class DataFrameOptimized():
         if len(key_left) != len(key_right):
             raise ValueError(f"Length of keys invalid, lenght left found {len(key_left)} and right length found {len(key_right)}")
         
+        if create_columns:
+            self.table[key_left] = np.nan
+
         if type_replace == "mask":
             pass
         elif type_replace == "invert_mask":

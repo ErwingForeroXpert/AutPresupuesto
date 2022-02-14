@@ -52,7 +52,7 @@ def after_process_formulas_directa(
 
     elif type == "calle":
         # replace if found "Sin asignar"
-        mask = table['tipologia'].str.contains(pat='(?i)sin asignar')
+        mask = table[properties["filter_replace_columns"]["column"]].str.contains(pat=properties["filter_replace_columns"]["pattern"])
         table.loc[mask, 
         ["cod_canal", 
         "canal", 
@@ -73,20 +73,22 @@ def after_process_formulas_directa(
             dataframe_right=drivers[3][cols_drivers[3]],
             type_replace="not_nan",
             left_on='cod_agente_comercial',
-            right_on='actual_codigo_ac',
-            right_replacer='cod_ac_reemplazar',
+            right_on=cols_drivers[3][0],
+            right_replacer=cols_drivers[3][1],
+            how="left"
+        )  
+
+        #replace cod_agente_comercial by cod cliente
+        actual_afo.replace_by(
+            dataframe_right=drivers[4][cols_drivers[4]],
+            type_replace="not_nan",
+            left_on='cod_agente_comercial',
+            right_on=cols_drivers[4][0], #codigo_cliente
+            left_replace=['nombre_ac', 'oficina_venta'],
+            right_replacer=cols_drivers[4][1:3], #[nombre_cliente, oficina_ventas_ecom]
+            create_columns=True,
             how="left"
         )
-
-        # driver 5 merge with table by cod cliente
-        table4 = table.merge(
-            right=drivers[4][cols_drivers[4]], 
-            left_on='cod_agente_comercial',
-            right_on='codigo_cliente', how='left')  # formato is included in columns
-
-        # add new two columns "Nombre cliente" and "oficina de ventas"
-        table['nombre_ac'] = table4[cols_drivers[4][1]]
-        table['oficina_venta'] = table4[cols_drivers[4][2]]
         
         #add other columns
         for idx, _column in enumerate(properties["add_columns"]):

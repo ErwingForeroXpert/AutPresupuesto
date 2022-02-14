@@ -123,6 +123,7 @@ DRIVER = {
     "skiprows": [1, None],
     "delimiter": ";",
     "columns": [
+        #driver 0
         "clave",
         "id_consecutivo",
         "sector",
@@ -156,6 +157,7 @@ DRIVER = {
         "sep8",
         "sep9",
         "sep10",
+        #driver 1
         "codigo_tipologia",
         "tipologia",
         "codigo_canal_transformado",
@@ -168,6 +170,7 @@ DRIVER = {
         "sep12",
         "sep13",
         "sep14",
+        #driver 2
         "formato_orig",
         "canal_transformado2",
         "subcanal_transformado2",
@@ -177,10 +180,12 @@ DRIVER = {
         "sep15",
         "sep16",
         "sep17",
+        #driver 3
         "actual_codigo_ac",
         "cod_ac_reemplazar",
         "sep18",
         "sep19",
+        #driver 4
         "codigo_cliente",
         "nombre_cliente",
         "oficina_ventas_ecom"
@@ -222,7 +227,14 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
+            "replacers": [
+                {
+                    "type_replace":
+                }
+            ],
             "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+            "filter_replace_columns": {"column": "tipologia", "pattern":"(?i)sin asignar"},
+            "replace_columns_for": {"cod_canal":"T", "canal":"Tradicional", "cod_sub_canal":"TD", "sub_canal", "cod_tipologia", "tipologia"},
             "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
                             "trans_canal", "trans_sub_canal", "trans_segmento", #are the same in add_columns with dif
                             "sector", "categoria", "sub_categoria", "linea", "marca", #same key columns
