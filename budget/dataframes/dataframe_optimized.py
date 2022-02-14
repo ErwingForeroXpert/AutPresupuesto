@@ -131,7 +131,7 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"delete_rows {e}")
 
-    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", **kargs) -> 'pd.DataFrame':
+    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, **kargs) -> 'pd.DataFrame':
 
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
@@ -148,11 +148,11 @@ class DataFrameOptimized():
             **kargs
             )
 
-        key_right = on if on is not None else right_on
-        key_left = on if on is not None else left_on
+        key_right = (on if on is not None else right_on) if right_replacer is None else right_replacer
+        key_left = (on if on is not None else left_on) if left_replace is None else left_replace
 
         if len(key_left) != len(key_right):
-            raise ValueError(f"Length of keys invalid, lenght left found {len(key_left)} ")
+            raise ValueError(f"Length of keys invalid, lenght left found {len(key_left)} and right length found {len(key_right)}")
         
         if type_replace == "mask":
             pass
@@ -165,7 +165,7 @@ class DataFrameOptimized():
         
         self.table.loc[mask, key_left] = _temp_table.loc[mask, key_right]
         
-
+        return self.table
 
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:
         """Save the table to a CSV file .

@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 
+from afo.afo import AFO
+
 def after_process_formulas_directa(
     type:str,
-    actual_afo: 'pd.DataFrame', 
+    actual_afo: 'AFO', 
     drivers: 'list', 
     cols_drivers: 'list', 
     properties: 'object',
@@ -23,8 +25,9 @@ def after_process_formulas_directa(
         pd.DataFrame: table before process afo
     """
 
-    columns = table.columns.tolist()
-    
+    columns = actual_afo.table.columns.tolist()
+    table = actual_afo.table
+
     if type == "directa":
         # driver 3 merge with table by formato
         # formato is included in columns
@@ -94,6 +97,24 @@ def after_process_formulas_directa(
 
     elif type == "compra":
 
+        actual_afo.replace_by(
+            dataframe_right=drivers[3][cols_drivers[3]],
+            type_replace="not_nan",
+            left_on=columns[2],
+            right_on=cols_drivers[3][0],
+            right_replacer=cols_drivers[4][1],
+            how="left"
+        )
+        # replace table by cod cliente
+        actual_afo.replace_by(
+            dataframe_right=drivers[4][cols_drivers[4]],
+            type_replace="not_nan",
+            left_on=columns[2],
+            right_on=cols_drivers[4][0],
+            left_replace=columns[3],
+            right_replacer=cols_drivers[4][1],
+            how="left"
+        )
         # driver 4 merge with table by cod_agente_comercial
         table3 = table.merge(
             right=drivers[3][cols_drivers[3]], 
