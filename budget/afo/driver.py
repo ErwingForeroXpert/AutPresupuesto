@@ -53,6 +53,7 @@ class Driver(dfo):
                     ~isna(_drivers[-1].table)
                     .all(axis=1)
                     ]
+                _drivers[-1].table.reset_index(drop=True, inplace=True)
                 actual_columns = []
 
         self._drivers = _drivers
@@ -112,10 +113,10 @@ class Driver(dfo):
         result = []
         for idx_pos, index in enumerate(index_sub_drivers): #iterate index and position to other properties see constanst PROCESSES
             if drop_duplicates[idx_pos]:
-                _sub_drivers[index].table, res_columns = super().get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos],
+                _sub_drivers[index].table, res_columns = dfo.get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos],
                                                                 drop_duplicates=True, subset=subset_index_columns[idx_pos], keep="first", inplace=True)
             else:
-                 _, res_columns = super().get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos])
+                 _, res_columns = dfo.get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos])
             result.append((_sub_drivers[index].table, res_columns))
         
         self.sub_drivers_process = result #save actual sub_drivers

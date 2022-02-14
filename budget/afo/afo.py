@@ -11,6 +11,7 @@ from dataframes.dataframe_optimized import DataFrameOptimized as dfo
 from utils import constants as const
 from afo.afo_types import AFO_TYPES
 
+
 class AFO(dfo):
 
     def __init__(self, afo_type: str, *args, **kargs) -> None:
@@ -31,11 +32,12 @@ class AFO(dfo):
         """
         if not AFO_PROCESSES.exist(process):
             raise ValueError(f"Process {process} not found in AFO_PROCESSES")
-            
+
         if self.actual_process != process:
             self.actual_process = process
-            self.properties_process = AFO_PROCESSES[self.actual_process].get_properties()[AFO_TYPES[self._type].value] # afo properties for this process
-        
+            self.properties_process = AFO_PROCESSES[self.actual_process].get_properties(
+            )[AFO_TYPES[self._type].value]  # afo properties for this process
+
         return self.properties_process
 
     def drop_if_all_cero(self, columns: 'list|str'):
@@ -54,36 +56,38 @@ class AFO(dfo):
         Args:
             driver (Driver): driver of values
         """
-        _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(AFO_PROCESSES.FORMULA.name)) #destructuring tuples [(driver, cols), ...]
-        cols_drivers = list(cols_drivers) #so that it can be modified
-        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
+        _drivers, cols_drivers = zip(*driver.get_sub_drivers_for_process(
+            AFO_PROCESSES.FORMULA.name))  # destructuring tuples [(driver, cols), ...]
+        cols_drivers = list(cols_drivers)  # so that it can be modified
+        _properties = self.get_properties_for_process(
+            AFO_PROCESSES.FORMULA.name)
 
         # Dataframe
         _table = self.table
 
         _table = dfo.combine_str_columns(
-            dataframe=_table, 
-            columns=_properties["key_columns"], 
+            dataframe=_table,
+            columns=_properties["key_columns"],
             name_res=_properties["key_column_name"]
-            )
-        #search by 'key'
+        )
+        # search by 'key'
         _res_table = _table.merge(
-            _drivers[0][[_properties["key_column_name"], *cols_drivers[0]]], 
-            on=_properties["key_column_name"], 
+            _drivers[0][[_properties["key_column_name"], *cols_drivers[0]]],
+            on=_properties["key_column_name"],
             how='left'
-            )
+        )
 
         # only for the sub_categoria to begin with "amarr"
         # amarres filter
         mask_amarr = (
-            pd.isna(_res_table[cols_drivers[0]]).all(axis=1) & 
+            pd.isna(_res_table[cols_drivers[0]]).all(axis=1) &
             _res_table['sub_categoria'].str.contains(pat='(?i)amarr')
-            )
+        )
 
         if mask_amarr.sum() > 0:
             self.insert_alert(
-                alert=_res_table[mask_amarr], 
-                description= "Para la sub_categoria Amarre* no se encontraron reemplazos en el driver")
+                alert=_res_table[mask_amarr],
+                description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver")
 
         # change values
         # the same size or smaller than the columns would be expected
@@ -102,31 +106,34 @@ class AFO(dfo):
         _res_table2 = None
         if "extra_columns" in _properties.keys():
             _res_table2 = _res_table.merge(
-                _drivers[1][[_properties["key_merge_extra_columns"], *cols_drivers[1]]], 
-                on=_properties["key_merge_extra_columns"], 
+                _drivers[1][[_properties["key_merge_extra_columns"],
+                             *cols_drivers[1]]],
+                on=_properties["key_merge_extra_columns"],
                 how='left'
-                )
+                
+            )
             _res_table2[_properties["extra_columns"]] = np.full(
-                (len(_res_table2), len(_properties["extra_columns"])) #rows, cols
-                , '-') #value to insert
+                # rows, cols
+                (len(_res_table2), len(_properties["extra_columns"])), '-')  # value to insert
 
             # add agrupacion and formato columns
             cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
-        
+
         _res_table = AFO_TYPES[self._type].extra_formula_process(
-            table=_res_table, 
-            drivers= _drivers, 
-            cols_drivers= cols_drivers, 
-            properties= _properties,
+            table=_res_table,
+            drivers=_drivers,
+            cols_drivers=cols_drivers,
+            properties=_properties,
             table2=_res_table2
-            )
-        
+        )
+
         # insert in alerts if found nan in any column after ...
-        mask = pd.isna(_res_table[_properties["validate_nan_columns"]]).any(axis=1)
+        mask = pd.isna(
+            _res_table[_properties["validate_nan_columns"]]).any(axis=1)
         if mask.sum() > 0:
             self.insert_alert(
                 alert=_res_table[mask],
-                description= f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}")
+                description=f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}")
 
         self.table = _res_table
         return self
@@ -140,88 +147,102 @@ class AFO(dfo):
         Returns:
             pd.DataFrame: result of agrupation
         """
-        _properties = self.get_properties_for_process(AFO_PROCESSES.FORMULA.name)
-        agg_values = _properties["agg_values"] #[{"col_res":[], "column":""},...] 
+        _properties = self.get_properties_for_process(
+            AFO_PROCESSES.FORMULA.name)
+        # [{"col_res":[], "column":""},...]
+        agg_values = _properties["agg_values"]
 
         aggregations = {}
         for agg_val in agg_values:
             aggregations[f"{agg_val['col_res']}"] = pd.NamedAgg(
-                    column=agg_val['column'], aggfunc=np.sum)
-                
-        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)   
+                column=agg_val['column'], aggfunc=np.sum)
 
-    def execute_assignment(self, agg_base: 'pd.DataFrame'= None, level: 'int'= 0, type_sale: 'int'=0):
+        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)
 
-        _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)
+    def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'int' = 0):
 
-        actual_level = _properties['levels'][level] #see utils/constants - AFO_PROCESSES
-        agg_values = _properties['agg_values'] #[{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
+        _properties = self.get_properties_for_process(
+            AFO_PROCESSES.ASSIGNMENT.name)
 
-        #mask for not assignment
-        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"]) & agg_base[agg_values[type_sale]['column']] <= 0
+        # see utils/constants - AFO_PROCESSES
+        actual_level = _properties['levels'][level]
+        # [{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
+        agg_values = _properties['agg_values']
 
-        not_assign = agg_base[mask_not_assign] #sin asignar menores a 0
-        assign = agg_base[~mask_not_assign] 
+        # mask for not assignment
+        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"]) & agg_base[agg_values[type_sale]['column']] <= 0
 
-        #agrupation about "Ventas asignadas positivas"
+        not_assign = agg_base[mask_not_assign]  # sin asignar menores a 0
+        assign = agg_base[~mask_not_assign]
+
+        # agrupation about "Ventas asignadas positivas"
         aggregation = {
-                f"{agg_values[type_sale][0]['col_res']}":pd.NamedAgg(
-                    column=agg_values[type_sale]['column'], aggfunc=np.sum)
-            }
-        total_sales = assign.groupby(actual_level["columns"], as_index=False).agg(**aggregation)
+            f"{agg_values[type_sale][0]['col_res']}": pd.NamedAgg(
+                column=agg_values[type_sale]['column'], aggfunc=np.sum)
+        }
+        total_sales = assign.groupby(
+            actual_level["columns"], as_index=False).agg(**aggregation)
 
-        #agrupation about "Ventas sin asignar negativas"
+        # agrupation about "Ventas sin asignar negativas"
         aggregation = {
-                f"{agg_values[type_sale][1]['col_res']}":pd.NamedAgg(
-                    column=agg_values[type_sale]['column'], aggfunc=np.sum)
-            }
-        total_sales_not_assign = not_assign.groupby(actual_level["columns"], as_index=False).agg(**aggregation)
+            f"{agg_values[type_sale][1]['col_res']}": pd.NamedAgg(
+                column=agg_values[type_sale]['column'], aggfunc=np.sum)
+        }
+        total_sales_not_assign = not_assign.groupby(
+            actual_level["columns"], as_index=False).agg(**aggregation)
 
-        #insert two columns 
+        # insert two columns
         general_base = agg_base.merge(
-            right=total_sales, 
-            on=actual_level["columns"], 
+            right=total_sales,
+            on=actual_level["columns"],
             how="left").merge(
-            right=total_sales_not_assign, 
-            on=actual_level["columns"], 
+            right=total_sales_not_assign,
+            on=actual_level["columns"],
             how="left")
 
-        #0 for empty values
-        general_base.loc[pd.isna(general_base[agg_values[type_sale][0]['col_res']]), agg_values[type_sale][0]['col_res']] = 0 
-        general_base.loc[pd.isna(general_base[agg_values[type_sale][1]['col_res']]), agg_values[type_sale][1]['col_res']] = 0 
+        # 0 for empty values
+        general_base.loc[pd.isna(general_base[agg_values[type_sale]
+                                 [0]['col_res']]), agg_values[type_sale][0]['col_res']] = 0
+        general_base.loc[pd.isna(general_base[agg_values[type_sale]
+                                 [1]['col_res']]), agg_values[type_sale][1]['col_res']] = 0
 
-        #sum level act
-        mask_cero_total = general_base[agg_values[type_sale][0]['col_res']] == 0
-        general_base[actual_level["add_columns"][0]] = 0 #porc_participacion
-        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, agg_values[type_sale]['column']]/ \
-                                                                    general_base.loc[~mask_cero_total, agg_values[type_sale][0]['col_res']] #suma_venta_act / total_venta_act_asignada
+        # sum level act
+        mask_cero_total = general_base[agg_values[type_sale]
+                                       [0]['col_res']] == 0
+        general_base[actual_level["add_columns"][0]] = 0  # porc_participacion
+        general_base.loc[~mask_cero_total, actual_level["add_columns"][0]] = general_base.loc[~mask_cero_total, agg_values[type_sale]['column']] / \
+            general_base.loc[~mask_cero_total, agg_values[type_sale][0]
+                             ['col_res']]  # suma_venta_act / total_venta_act_asignada
 
-        #update sum sales
-        general_base[agg_values[type_sale]['column']] = agg_values[type_sale]['column']+(general_base[actual_level["add_columns"][0]]*\
-                                            general_base[agg_values[type_sale][1]['col_res']]) #suma_venta + (total_venta_act_sin_asignar * porc_participacion)
+        # update sum sales
+        general_base[agg_values[type_sale]['column']] = agg_values[type_sale]['column']+(general_base[actual_level["add_columns"][0]] *
+                                                                                         general_base[agg_values[type_sale][1]['col_res']])  # suma_venta + (total_venta_act_sin_asignar * porc_participacion)
 
-        #agrupation by "Ventas actuales positivas"
+        # agrupation by "Ventas actuales positivas"
         total_sales_now = assign.groupby(actual_level["columns"], as_index=False).agg(
             {
-                f"{agg_values[type_sale][0]['col_res']}":pd.NamedAgg(
+                f"{agg_values[type_sale][0]['col_res']}": pd.NamedAgg(
                     column=agg_values[type_sale]['column'], aggfunc=np.sum)
             }
         )
 
-        #difference between total sales of "suma venta"
-        mask_diff_results = ~(total_sales[agg_values[type_sale]['column']] == total_sales_now[agg_values[type_sale]['column']])
+        # difference between total sales of "suma venta"
+        mask_diff_results = ~(total_sales[agg_values[type_sale]['column']]
+                              == total_sales_now[agg_values[type_sale]['column']])
 
         if mask_diff_results.sum() > 0:
-            print(f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
+            print(
+                f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
             diff_totals = total_sales[mask_diff_results]
-            diff_results = general_base.merge(right=diff_totals[actual_level["columns"]], on=actual_level["columns"], how="left")
-            return 
+            diff_results = general_base.merge(
+                right=diff_totals[actual_level["columns"]], on=actual_level["columns"], how="left")
+            return
         else:
             return general_base
-        
 
     @staticmethod
-    def get_properties( _type: str) -> None:
+    def get_properties(_type: str) -> None:
 
         if not AFO_TYPES.exist(_type):
             raise ValueError(f"Type {_type} not found in AFO_TYPES")
@@ -237,19 +258,19 @@ class AFO(dfo):
 
         Returns:
             AFO: instance of AFO
-        """ 
+        """
         _properties = AFO.get_properties(afo_type)
         dto_instance = dfo.get_table_excel(
-            path=path, 
-            sheet=_properties["sheet"], 
-            skiprows=_properties["skiprows"], 
-            columns=_properties["columns"], 
-            converters=_properties["converters"], 
-            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
-                        #arguments or overwrite previous parameters see utils/constants 
+            path=path,
+            sheet=_properties["sheet"],
+            skiprows=_properties["skiprows"],
+            columns=_properties["columns"],
+            converters=_properties["converters"],
+            **kargs)  # permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
+        # arguments or overwrite previous parameters see utils/constants
 
         return AFO(afo_type=afo_type, table=dto_instance.table)
-    
+
     @staticmethod
     def from_csv(path: str, afo_type: str, **kargs):
         """Create a afo from an Csv file .
@@ -259,16 +280,16 @@ class AFO(dfo):
 
         Returns:
             AFO: instance of AFO
-        """ 
+        """
         _properties = AFO.get_properties(afo_type)
         dto_instance = dto_instance = dfo.get_table_csv(
-            path=path, 
-            delimiter= _properties["delimiter"], 
-            skiprows= _properties["skiprows"][0], 
-            header= None,
-            names= _properties["columns"], 
+            path=path,
+            delimiter=_properties["delimiter"],
+            skiprows=_properties["skiprows"][0],
+            header=None,
+            names=_properties["columns"],
             converters=_properties["converters"],
-            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
-                        #arguments or overwrite previous arguments see utils/constants  
+            **kargs)  # permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
+        # arguments or overwrite previous arguments see utils/constants
 
         return AFO(afo_type=afo_type, table=dto_instance.table)
