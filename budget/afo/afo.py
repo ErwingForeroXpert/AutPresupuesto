@@ -91,8 +91,7 @@ class AFO(dfo):
 
         # change values
         # the same size or smaller than the columns would be expected
-        columns_to_change = _properties["columns_change"]
-        for idx, _column in enumerate(columns_to_change):
+        for idx, _column in enumerate(_properties["columns_change"]):
             mask = pd.isna(_res_table[cols_drivers[0][idx]])
             # if the found value is nan, the one be had will be left
             _res_table.loc[~mask,
@@ -110,7 +109,7 @@ class AFO(dfo):
                              *cols_drivers[1]]],
                 on=_properties["key_merge_extra_columns"],
                 how='left'
-                
+
             )
             _res_table2[_properties["extra_columns"]] = np.full(
                 # rows, cols
