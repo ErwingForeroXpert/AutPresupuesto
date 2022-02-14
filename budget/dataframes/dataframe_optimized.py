@@ -178,6 +178,22 @@ class DataFrameOptimized():
         
         return self.table
 
+    def replace_many_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, create_columns=False, **kargs):
+
+        
+        for idx, _column in enumerate(columns_left):
+            self.replace_by(
+                dataframe_right=dataframe_right,
+                type_replace=type_replace,
+                left_on=_column,
+                right_on=columns_right[idx],
+                
+            )
+            mask = pd.isna(_res_table[cols_drivers[0][idx]])
+            # if the found value is nan, the one be had will be left
+            _res_table.loc[~mask,
+                           _column] = _res_table.loc[~mask, cols_drivers[0][idx]]
+
     
     def save_csv(self, folder_path: str, name: str = None, sep=";", **kargs) -> str:
         """Save the table to a CSV file .

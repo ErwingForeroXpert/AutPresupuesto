@@ -63,14 +63,13 @@ class AFO(dfo):
             AFO_PROCESSES.FORMULA.name)
 
         # Dataframe
-        _table = self.table
-        _table = self.combine_str_columns(
-            dataframe=_table,
+        self.table = self.combine_str_columns(
+            dataframe=self.table,
             columns=_properties["key_columns"],
             name_res=_properties["key_column_name"]
         )
         # search by 'key'
-        _res_table = _table.merge(
+        self.table = self.table.merge(
             _drivers[0][[_properties["key_column_name"], *cols_drivers[0]]],
             on=_properties["key_column_name"],
             how='left'
@@ -79,18 +78,12 @@ class AFO(dfo):
         # only for the sub_categoria to begin with "amarr"
         # amarres filter
         self.validate_alert(
-            mask= pd.isna(self.table[_properties["validate_nan_columns"]]).any(axis=1),
-            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}"
+            mask = (
+            pd.isna(self.table[cols_drivers[0]]).all(axis=1) &
+            self.table['sub_categoria'].str.contains(pat='(?i)amarr')
+            ),
+            description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver"
         )
-        mask_amarr = (
-            pd.isna(_res_table[cols_drivers[0]]).all(axis=1) &
-            _res_table['sub_categoria'].str.contains(pat='(?i)amarr')
-        )
-
-        if mask_amarr.sum() > 0:
-            self.insert_alert(
-                alert=_res_table[mask_amarr],
-                description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver")
 
         # change values
         # the same size or smaller than the columns would be expected
@@ -101,32 +94,30 @@ class AFO(dfo):
                            _column] = _res_table.loc[~mask, cols_drivers[0][idx]]
 
         # delete columns unnecessary
-        _res_table.drop(cols_drivers[0], axis=1, inplace=True)
-        _res_table.reset_index(drop=True, inplace=True)
+        self.table.drop([_properties["key_column_name"], *cols_drivers[0]], axis=1, inplace=True)
+        self.table.reset_index(drop=True, inplace=True)
 
         # add optionals extra columns
-        _res_table2 = None
+        other_table = None
         if "extra_columns" in _properties.keys():
-            _res_table2 = _res_table.merge(
+            other_table = self.table.merge(
                 _drivers[1][[_properties["key_merge_extra_columns"],
                              *cols_drivers[1]]],
                 on=_properties["key_merge_extra_columns"],
                 how='left'
 
             )
-            _res_table2[_properties["extra_columns"]] = np.full(
+            other_table[_properties["extra_columns"]] = np.full(
                 # rows, cols
-                (len(_res_table2), len(_properties["extra_columns"])), '-')  # value to insert
+                (len(other_table), len(_properties["extra_columns"])), '-')  # value to insert
 
             # add agrupacion and formato columns
             cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
 
-        _res_table = AFO_TYPES[self._type].extra_formula_process(
-            actual_afo=self,
+        self.table = self.sub_process_formula(
             drivers=_drivers,
             cols_drivers=cols_drivers,
-            properties=_properties,
-            table2=_res_table2
+            other_table=other_table
         )
 
         # insert in alerts if found nan in any column ...
@@ -139,13 +130,12 @@ class AFO(dfo):
         return self
 
     def sub_process_formula(
-        type:str,
-        actual_afo: 'AFO', 
+        self,
         drivers: 'list', 
         cols_drivers: 'list', 
-        properties: 'object',
-        table2: 'pd.DataFrame' = None,
+        other_table: 'pd.DataFrame' = None,
         ) -> pd.DataFrame:
+
         """Individual process of afo files.
 
         Args:
@@ -160,10 +150,11 @@ class AFO(dfo):
             pd.DataFrame: table before process afo
         """
 
-        columns = actual_afo.table.columns.tolist()
-        table = actual_afo.table
+        columns = self.table.columns.tolist()
+        table = self.table
+        _properties = self.properties_process
 
-        if type == "directa":
+        if self._type == "directa":
             # driver 3 merge with table by formato
             # formato is included in columns
             table3 = table.merge(
@@ -174,9 +165,9 @@ class AFO(dfo):
             # change values
             mask = table[columns[9]].str.contains(pat='(?i)sin asignar')  # for format whitout be assigned
             
-            for idx, _column in enumerate(properties["add_columns"]):
+            for idx, _column in enumerate(_properties["add_columns"]):
                 
-                new_column_name = f"{properties['add_columns_dif']}{_column}"
+                new_column_name = f"{_properties['add_columns_dif']}{_column}"
                 table[new_column_name] = np.nan #empty column
 
                 #asigned or not asigned
@@ -185,14 +176,14 @@ class AFO(dfo):
                 table.loc[~mask, new_column_name] = table3.loc[~mask,
                                             cols_drivers[2][idx]]
 
-        elif type == "calle":
+        elif self._type == "calle":
             # replace if found "Sin asignar"
-            mask = table[properties["filter_replace_columns"]["column"]].str.contains(pat=properties["filter_replace_columns"]["pattern"])
-            table.loc[mask,list(properties["replace_columns_for"].keys())] = np.full(
-                (mask.sum(), 6),list(properties["replace_columns_for"].values()))
+            mask = table[_properties["filter_replace_columns"]["column"]].str.contains(pat=_properties["filter_replace_columns"]["pattern"])
+            table.loc[mask,list(_properties["replace_columns_for"].keys())] = np.full(
+                (mask.sum(), 6),list(_properties["replace_columns_for"].values()))
 
             #replace cod_agente_comercial by actual_codigo_ac
-            actual_afo.replace_by(
+            self.replace_by(
                 dataframe_right=drivers[3][cols_drivers[3]],
                 type_replace="not_nan",
                 left_on='cod_agente_comercial',
@@ -202,7 +193,7 @@ class AFO(dfo):
             )  
 
             #replace cod_agente_comercial by cod cliente
-            actual_afo.replace_by(
+            self.replace_by(
                 dataframe_right=drivers[4][cols_drivers[4]],
                 type_replace="not_nan",
                 left_on='cod_agente_comercial',
@@ -214,13 +205,13 @@ class AFO(dfo):
             )
             
             #add other columns
-            new_column_names = [f"{properties['add_columns_dif']}{_column}" for _column in properties["add_columns"]]
+            new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
             table[new_column_name] = table2[cols_drivers[1]]
 
-        elif type == "compra":
+        elif self._type == "compra":
 
             #replace table by cod_agente_comercial
-            actual_afo.replace_by(
+            self.replace_by(
                 dataframe_right=drivers[3][cols_drivers[3]],
                 type_replace="not_nan",
                 left_on=columns[2],
@@ -230,7 +221,7 @@ class AFO(dfo):
             )
 
             # replace table by cod cliente
-            actual_afo.replace_by(
+            self.replace_by(
                 dataframe_right=drivers[4][cols_drivers[4]],
                 type_replace="not_nan",
                 left_on=columns[2],
@@ -241,7 +232,7 @@ class AFO(dfo):
             )
 
             
-        return actual_afo.table
+        return self.table
 
     def execute_agrupation(self) -> pd.DataFrame:
         """Get Agrupation by next values:
