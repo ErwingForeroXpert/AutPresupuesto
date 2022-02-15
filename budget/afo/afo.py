@@ -50,6 +50,8 @@ class AFO(dfo):
         self.delete_rows(mask)
         self.table.reset_index(drop=True, inplace=True)
 
+    def save_actual_progress():
+        pass
     def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
 
@@ -160,10 +162,11 @@ class AFO(dfo):
                 suffixes=("_left", "_right")
                 )
             
-            #delete "formato__right" and "formato_orig"
+            #delete "formato_left" and "formato_orig"
             other_table2.drop([f"{columns[9]}_left", _properties["key_merge_add_columns"]], axis = 1, inplace = True)
             other_table2.reset_index(drop=True, inplace=True)
-            other_table2.rename(columns={f"{columns[9]}_right":columns[9]}, inplace=True)
+            #rename "formato_right" by "formato"
+            other_table2.rename(columns={f"{columns[9]}_right":columns[9]}, inplace=True) 
 
             # change values
             new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
