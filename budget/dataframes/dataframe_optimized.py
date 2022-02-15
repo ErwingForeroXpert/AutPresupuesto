@@ -175,9 +175,9 @@ class DataFrameOptimized():
             how (str, optional): type of merge dataframes (it's recomended to leave the default value), Defaults to left.
             left_replace (str|list, optional): column to be replaced by (right_on or right_replacer), Defaults to None.
             right_replacer (str|list, optional): column to replace left column, Defaults to None.
-            create_columns
+            create_columns (bool, optional): if left columns not exist is created, Defaults to False.
         Returns:
-            [type]: [description]
+            pd.DataFrame: actual table updated
         """
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
@@ -219,19 +219,45 @@ class DataFrameOptimized():
 
         return self.table
 
-    def replace_many_by(self,
-                        dataframe_right: 'pd.DataFrame|list', 
-                        on=None, 
-                        left_on=None, 
-                        right_on=None, 
-                        how="left",
-                        mask=None, 
-                        mask_idx=0,
-                        columns_right=None, 
-                        columns_left=None, 
-                        type="change", 
-                        type_replace="not_nan", 
-                        def_value=np.nan, **kargs):
+    def replace_many_by(
+        self,
+        dataframe_right: 'pd.DataFrame|list', 
+        on=None, 
+        left_on=None, 
+        right_on=None, 
+        how="left",
+        mask=None, 
+        mask_idx=0,
+        columns_right=None, 
+        columns_left=None, 
+        type="change", 
+        type_replace="not_nan", 
+        def_value=np.nan, **kargs):
+        """Replace values in the dataframe with the values in the given dataframe_right.
+
+        first merge two dataframes by key (on or (left_on, right_on)), before replace column by column 
+
+        Args:
+            dataframe_right ([pd.DataFrame]): dataframe that contains key to merge with actual table
+            mask (bool, optional): mask for reaplace values, expected same length that given dataframe_right, Defaults to None.
+            on (str|list, optional): key-column in both dataframes, Defaults to None.
+            left_on (str|list, optional): key-column in left dataframe, Defaults to None.
+            right_on (str|list, optional): key-column in right dataframe, Defaults to None.
+            how (str, optional): type of merge dataframes (it's recomended to leave the default value), Defaults to left.
+            mask (list, optional): mask of columns, Defaults to None.
+            mask_idx (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
+            columns_right (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
+            columns_left
+            type (str, optional): type of replace columns, Defaults to change.
+            type_replace ([str]): type of replace values, valid: 
+                all: all values be reaplaced 
+                not_nan: only the values found that have not been NaN in "dataframe_right" will be replaced
+                mask: reaplace values by mask
+                invert_mask: replace values by invert mask
+            def_value (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
+        Returns:
+            pd.DataFrame: actual table updated
+        """
 
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
