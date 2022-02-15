@@ -169,7 +169,13 @@ class DataFrameOptimized():
                 mask: reaplace values by mask
                 invert_mask: replace values by invert mask
             mask (bool, optional): mask for reaplace values, expected same length that given dataframe_right, Defaults to None.
-
+            on (str|list, optional): key-column in both dataframes, Defaults to None.
+            left_on (str|list, optional): key-column in left dataframe, Defaults to None.
+            right_on (str|list, optional): key-column in right dataframe, Defaults to None.
+            how (str, optional): type of merge dataframes (it's recomended to leave the default value), Defaults to left.
+            left_replace (str|list, optional): column to be replaced by (right_on or right_replacer), Defaults to None.
+            right_replacer (str|list, optional): column to replace left column, Defaults to None.
+            create_columns
         Returns:
             [type]: [description]
         """
