@@ -136,7 +136,6 @@ class AFO(dfo):
         other_table = None
         if "extra_columns" in _properties.keys():
 
-
             other_table = self.table.merge(
                 drivers[1][[_properties["key_merge_extra_columns"], *cols_drivers[1]]],
                 on=_properties["key_merge_extra_columns"], #tipologia
@@ -154,9 +153,17 @@ class AFO(dfo):
 
             # replace by formato
             other_table2 = self.table.merge(
-                right=drivers[2][cols_drivers[2]], 
-                on=columns[9], #formato
-                how='left')
+                right=drivers[2][[_properties["key_merge_add_columns"], *cols_drivers[2]]], 
+                left_on=columns[9], #formato
+                right_on=_properties["key_merge_add_columns"], #formato_orig
+                how='left',
+                suffixes=("_left", "_right")
+                )
+            
+            #delete "formato__right" and "formato_orig"
+            other_table2.drop([f"{columns[9]}_left", _properties["key_merge_add_columns"]], axis = 1, inplace = True)
+            other_table2.reset_index(drop=True, inplace=True)
+            other_table2.rename(columns={f"{columns[9]}_right":columns[9]}, inplace=True)
 
             # change values
             new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]

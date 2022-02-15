@@ -213,6 +213,7 @@ PROCESSES = {
             "filter_add_columns": {"column": "formato", "pattern": "(?i)sin asignar"},
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
+            "key_merge_add_columns":"formato_orig",
             "validate_nan_columns": "all",
             "agg_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
                             # are the same in add_columns with dif
