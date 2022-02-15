@@ -144,8 +144,35 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"delete_rows {e}")
 
-    def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, create_columns=False, **kargs) -> 'pd.DataFrame':
-        ""
+    def replace_by(
+        self, 
+        dataframe_right: 'pd.DataFrame', 
+        type_replace: str="all", 
+        mask: list[bool]=None, 
+        on: 'str|list'=None, 
+        left_on: 'str|list'=None, 
+        right_on: 'str|list'=None, 
+        how: str="left", 
+        left_replace: 'list|str'=None, 
+        right_replacer: 'list|str'=None, 
+        create_columns: bool=False, 
+        **kargs) -> 'pd.DataFrame':
+        """Replace values in the dataframe with the values in the given dataframe_right.
+
+        first merge two dataframes by key (on or (left_on, right_on)), before replace the values 
+
+        Args:
+            dataframe_right ([pd.DataFrame]): dataframe that contains key to merge with actual table
+            type_replace ([str]): type of replace, valid: 
+                all: all values be reaplaced 
+                not_nan: only the values found that have not been NaN in "dataframe_right" will be replaced
+                mask: reaplace values by mask
+                invert_mask: replace values by invert mask
+            mask (bool, optional): mask for reaplace values, expected same length that given dataframe_right, Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
 
