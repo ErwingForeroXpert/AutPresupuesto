@@ -85,13 +85,13 @@ class DataFrameOptimized():
         else:
             raise Exception("Required table of DataFrameOptimized")
 
-    def insert_alert(self, alert: 'Any', description: str, exception: bool=False, exception_description: str = "") -> None:
+    def insert_alert(self, alert: 'Any', description: str) -> None:
         """Inserts an alert into the alert list .
 
         Args:
             alert ([Any]): Register with alert
             description (str): description of alert
-            exception (bool, optional): generate exception (stop process and launch message)
+            
         Raises:
             Exception: Generic Exception 
         """
@@ -106,21 +106,30 @@ class DataFrameOptimized():
             self.__alerts = pd.concat(
                 [self.__alerts, _required_of_alert], ignore_index=True)
 
-            if exception:
-                raise Exception(exception_description)
+            
         except Exception as e:
             raise Exception(f"insert_alert {e}")
 
     def get_alerts(self):
         return self.__alerts
 
-    def validate_alert(self, mask: bool, description: str):
+    def validate_alert(self, mask: bool, description: str, exception: bool=False, exception_description: str = ""):
+        """Validate an alert .
 
+        Args:
+            mask (bool): [description]
+            description (str): [description]
+            exception (bool, optional): [description]. Defaults to False.
+            exception_description (str, optional): [description]. Defaults to "".
+        """
         if mask.sum() > 0:
             self.insert_alert(
                 alert=self.table[mask],
                 description=description
             )
+            if exception:
+                
+                    raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
