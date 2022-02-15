@@ -6,7 +6,7 @@
 import os
 from sre_compile import isstring
 from time import time
-
+from utils import constants as const
 from pydantic import ListMinLengthError
 from utils import index as utils
 from typing import Any
@@ -113,7 +113,7 @@ class DataFrameOptimized():
     def get_alerts(self):
         return self.__alerts
 
-    def validate_alert(self, mask: bool, description: str, exception: bool=False, exception_description: str = ""):
+    def validate_alert(self, mask: bool, description: str, type: str, exception: bool=False, exception_description: str = ""):
         """Validate an alert .
 
         Args:
@@ -128,7 +128,11 @@ class DataFrameOptimized():
                 description=description
             )
             if exception:
-
+                    self.get_alerts().to_csv(
+                        os.path.normpath(os.path.join(const.ALERTS_DIR, f"{type}_alerts.csv")), 
+                        index=False, 
+                        encoding="latin-1", 
+                        sep=";")
                     raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
@@ -237,6 +241,7 @@ class DataFrameOptimized():
         left_on=None, 
         right_on=None, 
         how="left",
+        merge=True,
         mask=None, 
         mask_idx=0,
         columns_right=None, 
@@ -255,6 +260,7 @@ class DataFrameOptimized():
             left_on (str|list, optional): key-column in left dataframe, Defaults to None.
             right_on (str|list, optional): key-column in right dataframe, Defaults to None.
             how (str, optional): type of merge dataframes (it's recomended to leave the default value), Defaults to left.
+            merge (bool, optional): merge dataframes or not, Defaults to True.
             mask (list, optional): mask of columns, Defaults to None.
             mask_idx (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
             columns_right (str|list, optional): columns of dataframe_right to replace values, for create mask, Defaults to None.
@@ -272,10 +278,12 @@ class DataFrameOptimized():
             pd.DataFrame: actual table updated
         """
 
-        if on is None and right_on is None:
+        if on is None and right_on is None and merge:
             raise ValueError("Required a value key in dataframe_right")
 
-        if isinstance(dataframe_right, (list, tuple)):
+        if merge == False:
+            _temp_table = dataframe_right
+        elif isinstance(dataframe_right, (list, tuple)):
             if len(dataframe_right) > 2:
                 raise ListMinLengthError("Invalid size for dataframe_right")
 

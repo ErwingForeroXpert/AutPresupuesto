@@ -163,7 +163,7 @@ class AFO(dfo):
 
             self.replace_many_by(
                 dataframe_right=[other_table, other_table2], 
-                on=columns[9], #formato
+                merge=False,
                 mask=self.table[_properties["filter_add_columns"]["column"]].str.contains(pat=_properties["filter_add_columns"]["pattern"]), # for format whitout be assigned
                 mask_idx=0,
                 columns_left=new_column_names,
@@ -173,7 +173,6 @@ class AFO(dfo):
                 def_value=np.nan 
             )
 
-            print("stop")
         elif self._type == AFO_TYPES.CALLE.name:
 
             # replace if found "Sin asignar"
