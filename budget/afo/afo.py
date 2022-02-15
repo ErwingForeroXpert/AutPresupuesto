@@ -86,6 +86,7 @@ class AFO(dfo):
             self.table['sub_categoria'].str.contains(pat='(?i)amarr') # amarres filter
             ),
             description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver",
+            type = self._type,
             exception=True,
             exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
         )
@@ -105,6 +106,7 @@ class AFO(dfo):
         self.validate_alert(
             mask= pd.isna(columns_to_validate).any(axis=1),
             description=f"No se encontraron valores en el driver, en alguna de las columnas \n {' '.join(columns_to_validate.columns.tolist())}",
+            type = self._type,
             exception=True,
             exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
         )
@@ -120,11 +122,8 @@ class AFO(dfo):
         """Individual process of afo files.
 
         Args:
-            type (str): type of afo
-            table (pd.DataFrame): table of afo type
             drivers (list): drivers see afo/driver
             cols_drivers (list): columns of drivers
-            properties (object): properties of afo type
 
         Returns:
             pd.DataFrame: table before process afo
@@ -169,7 +168,7 @@ class AFO(dfo):
                 columns_left=new_column_names,
                 columns_right=cols_drivers[1:3], 
                 type="add_news",
-                type_replace="not_nan",
+                type_replace="mask",
                 def_value=np.nan 
             )
 
