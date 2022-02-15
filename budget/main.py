@@ -10,8 +10,10 @@ from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
 from gui.application import Application
+from gui.func import decorator_exception_message
 from utils import constants as const
 
+@decorator_exception_message(title=const.PROCESS_NAME)
 def process_afo_files(get_file: 'Function'):
     """Main process for AFO files
 

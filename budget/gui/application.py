@@ -69,6 +69,7 @@ class Application():
         self.buttons["rd_file"].grid(row=1, column=1)
         self.buttons["rd_file"].deselect()
 
+    
     def insert_action(self, _type: str, name: str, cb: 'Function', **kargs) -> None:
         """Inserts a function to the type selector.
 
