@@ -80,11 +80,10 @@ class AFO(dfo):
         ) 
 
         # only for the sub_categoria to begin with "amarr"
-        # amarres filter
         self.validate_alert(
             mask = (
             pd.isna(self.table[cols_drivers[0]]).all(axis=1) &
-            self.table['sub_categoria'].str.contains(pat='(?i)amarr')
+            self.table['sub_categoria'].str.contains(pat='(?i)amarr') # amarres filter
             ),
             description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver"
         )
@@ -100,9 +99,10 @@ class AFO(dfo):
         )
 
         # insert in alerts if found nan in any column ...
+        columns_to_validate = self.table if _properties["validate_nan_columns"] == "all" else self.table[_properties["validate_nan_columns"]]
         self.validate_alert(
-            mask= pd.isna(self.table[_properties["validate_nan_columns"]]).any(axis=1),
-            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {_properties['validate_nan_columns']}"
+            mask= pd.isna(columns_to_validate).any(axis=1),
+            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {' '.join(columns_to_validate.columns.tolist())}"
         )
 
         return self
@@ -160,7 +160,7 @@ class AFO(dfo):
             self.replace_many_by(
                 dataframe_right=[other_table, other_table2], 
                 on=columns[9], #formato
-                mask=self.table[columns[9]].str.contains(pat='(?i)sin asignar'), # for format whitout be assigned
+                mask=self.table[_properties["filter_add_columns"]["column"]].str.contains(pat=_properties["filter_add_columns"]["pattern"]), # for format whitout be assigned
                 mask_idx=0,
                 columns_left=new_column_names,
                 columns_right=cols_drivers[1:3], 
@@ -363,6 +363,7 @@ class AFO(dfo):
             skiprows=_properties["skiprows"],
             columns=_properties["columns"],
             converters=_properties["converters"],
+            encoding=_properties["encoding"],
             **kargs)  # permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
         # arguments or overwrite previous parameters see utils/constants
 
@@ -386,6 +387,7 @@ class AFO(dfo):
             header=None,
             names=_properties["columns"],
             converters=_properties["converters"],
+            encoding=_properties["encoding"],
             **kargs)  # permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
         # arguments or overwrite previous arguments see utils/constants
 

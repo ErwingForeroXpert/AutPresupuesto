@@ -18,6 +18,7 @@ AFO_TYPES = {
         "regex_name": r".*directa.*",
         "skiprows": [2, None],
         "delimiter": ";",
+        "encoding": "latin-1",
         "columns": [
             "cod_oficina",
             "oficina_venta",
@@ -51,6 +52,7 @@ AFO_TYPES = {
         "regex_name": r".*calle.*",
         "skiprows": [2, None],
         "delimiter": ";",
+        "encoding": "latin-1",
         "columns": [
             "cod_canal",
             "canal",
@@ -82,6 +84,7 @@ AFO_TYPES = {
         "regex_name": r".*compra.*",
         "skiprows": [2, None],
         "delimiter": ";",
+        "encoding": "latin-1",
         "columns": [
             "cod_oficina",
             "oficina_venta",
@@ -122,6 +125,7 @@ DRIVER = {
     "regex_name": r".*drive.*",
     "skiprows": [1, None],
     "delimiter": ";",
+    "encoding": "latin-1",
     "columns": [
         # driver 0
         "clave",
@@ -206,9 +210,10 @@ PROCESSES = {
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
+            "filter_add_columns": {"column": "formato", "pattern": "(?i)sin asignar"},
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+            "validate_nan_columns": "all",
             "agg_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
                             # are the same in add_columns with dif
                             "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato",
@@ -230,9 +235,9 @@ PROCESSES = {
             "key_merge_extra_columns": "tipologia",
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
-            "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "filter_replace_columns": {"column": "tipologia", "pattern": "(?i)sin asignar"},
             "replace_columns_for": {"cod_canal": "T", "canal": "Tradicional", "cod_sub_canal": "TD", "sub_canal": "Tiendas", "cod_tipologia": "TG", "tipologia": "Tienda Mixta"},
+            "validate_nan_columns": "all",
             "agg_columns": ["oficina_venta", "canal", "sub_canal", "tipologia", "cod_agente_comercial", "nombre_ac",
                             # are the same in add_columns with dif
                             "trans_canal", "trans_sub_canal", "trans_segmento",
@@ -250,7 +255,7 @@ PROCESSES = {
             "key_columns": ["sector", "categoria", "sub_categoria", "linea", "marca"],
             "key_column_name": "clave",
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-            "validate_nan_columns": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+            "validate_nan_columns": "all",
             "agg_columns": ["oficina_venta", "cod_agente",
                             "sector", "categoria", "sub_categoria", "linea", "marca",  # same key columns
                             "mes"],

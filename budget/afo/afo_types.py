@@ -2,7 +2,6 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
-from afo.func import after_process_formulas_directa
 from enum import Enum, unique
 from utils.constants import AFO_TYPES as CONST_AFO
 
@@ -23,6 +22,3 @@ class AFO_TYPES(Enum):
             object: properties of afo's type see constants for more
         """
         return CONST_AFO[self.value]
-
-    def extra_formula_process(self, **kargs):
-        return after_process_formulas_directa(type=self.value, **kargs)

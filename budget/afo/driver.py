@@ -149,7 +149,8 @@ class Driver(dfo):
             sheet=_properties["sheet"], 
             skiprows=_properties["skiprows"], 
             columns=_properties["columns"], 
-            converters=_properties["converters"], 
+            converters=_properties["converters"],
+            encoding=_properties["encoding"], 
             **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html 
                         #arguments or overwrite previous parameters see utils/constants 
         return Driver(table=dto_instance.table)
@@ -172,6 +173,7 @@ class Driver(dfo):
             skiprows= _properties["skiprows"][0], 
             names= _properties["columns"], 
             converters=_properties["converters"],
+            encoding=_properties["encoding"],
             header= None,
             **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
                         #arguments or overwrite previous arguments see utils/constants  
