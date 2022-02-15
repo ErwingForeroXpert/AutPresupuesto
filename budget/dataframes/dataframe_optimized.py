@@ -246,15 +246,15 @@ class DataFrameOptimized():
             how (str, optional): type of merge dataframes (it's recomended to leave the default value), Defaults to left.
             mask (list, optional): mask of columns, Defaults to None.
             mask_idx (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
-            columns_right (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
-            columns_left
+            columns_right (str|list, optional): columns of dataframe_right to replace values, for create mask, Defaults to None.
+            columns_left (str|list, optional): columns of dataframe_right to replace values, for create mask, Defaults to None.
             type (str, optional): type of replace columns, Defaults to change.
             type_replace ([str]): type of replace values, valid: 
                 all: all values be reaplaced 
                 not_nan: only the values found that have not been NaN in "dataframe_right" will be replaced
                 mask: reaplace values by mask
                 invert_mask: replace values by invert mask
-            def_value (inst, optional): if mask not exist found in dataframe_right index 0 or 1, for create mask, Defaults to 0.
+            def_value (Any, optional): optional value for columns, Defaults to NaN. 
         Returns:
             pd.DataFrame: actual table updated
         """
