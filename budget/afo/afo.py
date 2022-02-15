@@ -85,7 +85,9 @@ class AFO(dfo):
             pd.isna(self.table[_properties["columns_change"]]).all(axis=1) &
             self.table['sub_categoria'].str.contains(pat='(?i)amarr') # amarres filter
             ),
-            description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver"
+            description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver",
+            exception=True,
+            exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
         )
 
         # delete columns unnecessary
@@ -102,7 +104,9 @@ class AFO(dfo):
         columns_to_validate = self.table if _properties["validate_nan_columns"] == "all" else self.table[_properties["validate_nan_columns"]]
         self.validate_alert(
             mask= pd.isna(columns_to_validate).any(axis=1),
-            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {' '.join(columns_to_validate.columns.tolist())}"
+            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {' '.join(columns_to_validate.columns.tolist())}",
+            exception=True,
+            exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
         )
 
         return self

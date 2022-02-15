@@ -297,3 +297,4 @@ PRINCIPAL_FILE_SOURCE = ""
 ROOT_DIR = path.abspath(
     path.join(__file__, "../../..")
 ) if ENVIROMENT == "DEV" else getcwd()
+ALERTS_DIR = path.normpath(path.join(ROOT_DIR, "files/alerts"))
