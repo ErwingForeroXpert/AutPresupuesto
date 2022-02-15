@@ -125,7 +125,7 @@ DRIVER = {
     "regex_name": r".*drive.*",
     "skiprows": [1, None],
     "delimiter": ";",
-    "encoding": "latin-1",
+    "encoding": "utf-8",
     "columns": [
         # driver 0
         "clave",
@@ -271,7 +271,7 @@ PROCESSES = {
             # same size and same order in all properties of this object
             "index_sub_drivers": [0, 1, 2, 3, 4],
             "cols_required_sub_drivers": [[15, 17, 19, 21, 23], [3, 5, 7], [1, 2, 3, 4, 5], [0, 1], [0, 1, 2]],
-            "subset_index_columns": [None, 'tipologia', 'formato', 'actual_codigo_ac', 'codigo_cliente'],
+            "subset_index_columns": [None, 'tipologia', 'formato_orig', 'actual_codigo_ac', 'codigo_cliente'],
             "drop_duplicates": [False, True, True, True, True]
         }
     },
