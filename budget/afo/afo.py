@@ -158,12 +158,12 @@ class AFO(dfo):
             new_column_names = [f"{_properties['add_columns_dif']}{_column}" for _column in _properties["add_columns"]]
 
             self.replace_many_by(
-                dataframe_right=[other_table, other_table2], #use first for the mask
+                dataframe_right=[other_table, other_table2], 
                 on=columns[9], #formato
                 mask=self.table[columns[9]].str.contains(pat='(?i)sin asignar'), # for format whitout be assigned
                 mask_idx=0,
                 columns_left=new_column_names,
-                columns_right=cols_drivers[1:3], #use first for the mask
+                columns_right=cols_drivers[1:3], 
                 type="add_news",
                 type_replace="not_nan",
                 def_value=np.nan 

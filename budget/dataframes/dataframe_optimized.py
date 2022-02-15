@@ -145,7 +145,7 @@ class DataFrameOptimized():
             raise Exception(f"delete_rows {e}")
 
     def replace_by(self, dataframe_right: 'pd.DataFrame', type_replace="all", mask=None, on=None, left_on=None, right_on=None, how="left", left_replace=None, right_replacer=None, create_columns=False, **kargs) -> 'pd.DataFrame':
-
+        ""
         if on is None or right_on is None:
             raise ValueError("Required a value key in dataframe_right")
 
@@ -238,7 +238,7 @@ class DataFrameOptimized():
             if type_replace == "mask":
                 pass
             elif type_replace == "not_nan":
-                mask = ~pd.isna(_temp_table[mask_idx][columns_right[0][idx]]) if isinstance(_temp_table, (list, tuple)) else ~pd.isna(_temp_table[columns_right[idx]])
+                mask = ~pd.isna(_temp_table[mask_idx][columns_right[mask_idx][idx]]) if isinstance(_temp_table, (list, tuple)) else ~pd.isna(_temp_table[columns_right[idx]])
             elif type_replace == "all":
                 mask = np.full(len(self.table), True)
 
