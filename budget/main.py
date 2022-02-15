@@ -69,28 +69,29 @@ def process_afo_files(get_file: 'Function'):
                 const.PROCESS_NAME, "No se encontraron el archivo driver en la carpeta")
 
         with ThreadPoolExecutor() as executor:
-            arguments = [{"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
-                         {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
-                         {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+            arguments = [{"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name}
+                        #  {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
+                        #  {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
             ]
             results = executor.map(lambda x: AFO.from_csv(**x), arguments)
 
             temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
             _dt_driver = temp_driver.result()
         
-        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
-
+        # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+        for result in results:
+            _dt_afo_directa = result
 
     # DIRECTA - 
     _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     # CALLE
-    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
-    # COMPRA
-    _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # # COMPRA
+    # _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     with ThreadPoolExecutor() as executor:
             arguments = [
