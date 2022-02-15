@@ -128,7 +128,7 @@ class DataFrameOptimized():
                 description=description
             )
             if exception:
-                
+
                     raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
@@ -275,24 +275,28 @@ class DataFrameOptimized():
         if on is None and right_on is None:
             raise ValueError("Required a value key in dataframe_right")
 
-        if len(columns_right) != len(columns_left):
-            raise ValueError(
-                f"Length of columns invalid, columns right length found {len(columns_right)} and columns left length found {len(columns_left)}")
-
         if isinstance(dataframe_right, (list, tuple)):
             if len(dataframe_right) > 2:
                 raise ListMinLengthError("Invalid size for dataframe_right")
 
+            if len(columns_right[0]) != len(columns_left):
+                raise ValueError(
+                    f"Length of columns invalid, columns right length found {len(columns_right)} and columns left length found {len(columns_left)}")
+
             _temp_table = [
                     self.table.merge(
-                    right=dataframe_right[i],
+                    right=data,
                     on=on,
                     left_on=left_on,
                     right_on=right_on,
                     how=how,
-                    **kargs) for i in enumerate(dataframe_right)
+                    **kargs) for data in dataframe_right
             ]
         else:
+            if len(columns_right) != len(columns_left):
+                raise ValueError(
+                    f"Length of columns invalid, columns right length found {len(columns_right)} and columns left length found {len(columns_left)}")
+
             _temp_table = self.table.merge(
                 right=dataframe_right,
                 on=on,

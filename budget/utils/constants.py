@@ -16,7 +16,7 @@ AFO_TYPES = {
     "directa": {
         "sheet": "AFO -  Directa",
         "regex_name": r".*directa.*",
-        "skiprows": [2, None],
+        "skiprows": [1, None],
         "delimiter": ";",
         "encoding": "latin-1",
         "columns": [

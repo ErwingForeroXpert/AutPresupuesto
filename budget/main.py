@@ -104,10 +104,10 @@ def process_afo_files(get_file: 'Function'):
             
     for result in results:
         _dt_afo_directa = result
-    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+    # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
     agg_directa = _dt_afo_directa.execute_agrupation()
-    agg_calle = _dt_afo_calle.execute_agrupation()
-    agg_compra = _dt_afo_compra.execute_agrupation()
+    # agg_calle = _dt_afo_calle.execute_agrupation()
+    # agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")
 

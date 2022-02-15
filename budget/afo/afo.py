@@ -91,7 +91,7 @@ class AFO(dfo):
         )
 
         # delete columns unnecessary
-        self.table.drop([_properties["key_column_name"], *cols_drivers[0]], axis=1, inplace=True)
+        self.table.drop([_properties["key_column_name"]], axis=1, inplace=True)
         self.table.reset_index(drop=True, inplace=True)
 
         #execute individual process
@@ -150,7 +150,7 @@ class AFO(dfo):
             cols_drivers[1] = [*cols_drivers[1], *_properties["extra_columns"]]
 
 
-        if self._type == "directa":
+        if self._type == AFO_TYPES.DIRECTA.name:
 
             # replace by formato
             other_table2 = self.table.merge(
@@ -173,7 +173,8 @@ class AFO(dfo):
                 def_value=np.nan 
             )
 
-        elif self._type == "calle":
+            print("stop")
+        elif self._type == AFO_TYPES.CALLE.name:
 
             # replace if found "Sin asignar"
             mask = self.table[
@@ -213,7 +214,7 @@ class AFO(dfo):
                 new_column_name = f"{_properties['add_columns_dif']}{_column}"
                 self.table[new_column_name] = other_table[cols_drivers[1][idx]]
 
-        elif self._type == "compra":
+        elif self._type == AFO_TYPES.COMPRA.name:
 
             #replace table by cod_agente_comercial
             self.replace_by(
