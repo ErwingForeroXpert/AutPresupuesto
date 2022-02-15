@@ -136,9 +136,10 @@ class AFO(dfo):
         other_table = None
         if "extra_columns" in _properties.keys():
 
+
             other_table = self.table.merge(
                 drivers[1][[_properties["key_merge_extra_columns"], *cols_drivers[1]]],
-                on=_properties["key_merge_extra_columns"],
+                on=_properties["key_merge_extra_columns"], #tipologia
                 how='left'
             )
             other_table[_properties["extra_columns"]] = np.full(
