@@ -82,7 +82,7 @@ class AFO(dfo):
         # only for the sub_categoria to begin with "amarr"
         self.validate_alert(
             mask = (
-            pd.isna(self.table[cols_drivers[0]]).all(axis=1) &
+            pd.isna(self.table[_properties["columns_change"]]).all(axis=1) &
             self.table['sub_categoria'].str.contains(pat='(?i)amarr') # amarres filter
             ),
             description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver"

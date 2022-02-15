@@ -10,7 +10,6 @@ from time import time
 from pydantic import ListMinLengthError
 from utils import index as utils
 from typing import Any
-import vaex as vx
 import pandas as pd
 import numpy as np
 
@@ -86,12 +85,13 @@ class DataFrameOptimized():
         else:
             raise Exception("Required table of DataFrameOptimized")
 
-    def insert_alert(self, alert: 'Any', description: str) -> None:
+    def insert_alert(self, alert: 'Any', description: str, exception: bool=False, exception_description: str = "") -> None:
         """Inserts an alert into the alert list .
 
         Args:
             alert ([Any]): Register with alert
             description (str): description of alert
+            exception (bool, optional): generate exception (stop process and launch message)
         Raises:
             Exception: Generic Exception 
         """
@@ -106,6 +106,8 @@ class DataFrameOptimized():
             self.__alerts = pd.concat(
                 [self.__alerts, _required_of_alert], ignore_index=True)
 
+            if exception:
+                raise Exception(exception_description)
         except Exception as e:
             raise Exception(f"insert_alert {e}")
 
@@ -179,7 +181,7 @@ class DataFrameOptimized():
         Returns:
             pd.DataFrame: actual table updated
         """
-        if on is None or right_on is None:
+        if on is None and right_on is None:
             raise ValueError("Required a value key in dataframe_right")
 
         if mask is None and type_replace not in ["not_nan", "all"]:
@@ -261,7 +263,7 @@ class DataFrameOptimized():
             pd.DataFrame: actual table updated
         """
 
-        if on is None or right_on is None:
+        if on is None and right_on is None:
             raise ValueError("Required a value key in dataframe_right")
 
         if len(columns_right) != len(columns_left):
