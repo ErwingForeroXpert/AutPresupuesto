@@ -14,15 +14,16 @@ from gui.func import decorator_exception_message
 from utils import constants as const
 
 @decorator_exception_message(title=const.PROCESS_NAME)
-def process_afo_files(get_file: 'Function', texts: object):
+def process_afo_files(self: 'Application'):
     """Main process for AFO files
 
     Args:
-        get_file (Function): function that brings the file or folder with the files
+        app (Application): actual instance of application
     """
-    _files = get_file()
+    _files = self.get_file()
 
-    texts["status_project"].set("Validando archivos...")
+    self.labels_text["status_project"].set("Validando archivos...")
+    self.labels_text["status_project"].pack()
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
@@ -69,7 +70,7 @@ def process_afo_files(get_file: 'Function', texts: object):
             tk.messagebox.showerror(
                 const.PROCESS_NAME, "No se encontro el archivo driver en la carpeta")
 
-        texts["status_project"].set("Convirtiendo archivos...")
+        self.labels_text["status_project"].set("Convirtiendo archivos...")
         with ThreadPoolExecutor() as executor:
             arguments = [
                         # {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name}
@@ -85,7 +86,7 @@ def process_afo_files(get_file: 'Function', texts: object):
         for result in results:
             _dt_afo_compra = result
 
-    texts["status_project"].set("Eliminando ceros de los totales...")
+    self.labels_text["status_project"].set("Eliminando ceros de los totales...")
     # DIRECTA - 
     # _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
     #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
@@ -97,7 +98,7 @@ def process_afo_files(get_file: 'Function', texts: object):
     _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
-    texts["status_project"].set("Creando dinamicas...")
+    self.labels_text["status_project"].set("Creando dinamicas...")
     with ThreadPoolExecutor() as executor:
             arguments = [
                 # [_dt_afo_directa, {"driver": _dt_driver}]
@@ -107,7 +108,7 @@ def process_afo_files(get_file: 'Function', texts: object):
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
-    texts["status_project"].set("Obteniendo totales...")
+    self.labels_text["status_project"].set("Obteniendo totales...")
     for result in results:
         _dt_afo_compra = result
     # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
         size ="300x400"
     )
     # process_afo_files(App.get_file())
-    App.insert_action("button", "btn_insert_file", process_afo_files, get_file=App.get_file())
+    App.insert_action("button", "btn_insert_file", process_afo_files)
     App.run()
 
 

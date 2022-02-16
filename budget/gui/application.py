@@ -96,14 +96,14 @@ class Application():
             ValueError: name not found in list names of selector
         """
         def _sub_func(**options):
-            return lambda: cb(**options)
+            return lambda: cb(self, **options)
 
         if _type == "button":
             if name not in self.buttons.keys(): raise ValueError(f"{name} not found in buttons")
-            self.buttons[name]["command"] = _sub_func(**kargs, texts=self.labels_text)
+            self.buttons[name]["command"] = _sub_func(**kargs)
         elif _type == "input":
             if name not in self.inputs.keys(): raise ValueError(f"{name} not found in inputs")
-            self.inputs[name]["command"] = _sub_func(**kargs, texts=self.labels_text)
+            self.inputs[name]["command"] = _sub_func(**kargs)
 
     def make_message(self, message: str, _type: str = "info", others_cb: 'list[function]' = []) -> 'Function':
         """Create a messagebox with a messagebox .
@@ -125,23 +125,20 @@ class Application():
             return lambda: [tk.messagebox.showinfo(_title, message), *others_cb]
 
     def get_file(self) -> 'list[str]':
-        def _sub_func():
-            print(self.labels_text["type_route"])
-            if self.labels_text["type_route"].get() == "file":
-                _path = self.search_for_file_path(types= self.extensions, required=True)
-                self.files.append(_path)
-            elif self.labels_text["type_route"].get() == "folder":
-                _path = self.search_for_folder_path(required=True)
-                patterns = " ".join([patt[1] for patt in self.extensions])
-                patterns = patterns.replace(" ", "|")
+        print(self.labels_text["type_route"])
+        if self.labels_text["type_route"].get() == "file":
+            _path = self.search_for_file_path(types= self.extensions, required=True)
+            self.files.append(_path)
+        elif self.labels_text["type_route"].get() == "folder":
+            _path = self.search_for_folder_path(required=True)
+            patterns = " ".join([patt[1] for patt in self.extensions])
+            patterns = patterns.replace(" ", "|")
 
-                for _file in listdir(_path):
-                    if len(re.findall(patterns, _file)) > 0:
-                        self.files.append(path.normpath(path.join(_path, _file)))
+            for _file in listdir(_path):
+                if len(re.findall(patterns, _file)) > 0:
+                    self.files.append(path.normpath(path.join(_path, _file)))
 
-            return self.files
-        
-        return _sub_func
+        return self.files
     
     def search_for_file_path (self, required: bool = False, types: 'tuple|str' = "*")-> 'str|None':
         """Search for a file path.
@@ -198,7 +195,8 @@ class Application():
 
     def run(self) -> None:
         self.root.mainloop()
-
+    
+    
     @staticmethod
     def change_text(variable: 'tk.StringVar', text: str):
         return lambda: variable.set(text)
