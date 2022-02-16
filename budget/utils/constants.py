@@ -52,7 +52,7 @@ AFO_TYPES = {
         "regex_name": r".*calle.*",
         "skiprows": [2, None],
         "delimiter": ";",
-        "encoding": "latin-1",
+        "encoding": "utf-8",
         "columns": [
             "cod_canal",
             "canal",
@@ -84,7 +84,7 @@ AFO_TYPES = {
         "regex_name": r".*compra.*",
         "skiprows": [2, None],
         "delimiter": ";",
-        "encoding": "latin-1",
+        "encoding": "utf-8",
         "columns": [
             "cod_oficina",
             "oficina_venta",

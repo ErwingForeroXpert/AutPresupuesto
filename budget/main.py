@@ -57,21 +57,22 @@ def process_afo_files(get_file: 'Function'):
 
         if _file_directa is None:
             tk.messagebox.showerror(
-                const.PROCESS_NAME, "No se encontraron el archivo directa en la carpeta")
+                const.PROCESS_NAME, "No se encontro el archivo directa en la carpeta")
         if _file_calle is None:
             tk.messagebox.showerror(
-                const.PROCESS_NAME, "No se encontraron el archivo calle en la carpeta")
+                const.PROCESS_NAME, "No se encontro el archivo calle en la carpeta")
         if _file_compra is None:
             tk.messagebox.showerror(
-                const.PROCESS_NAME, "No se encontraron el archivo compra en la carpeta")
+                const.PROCESS_NAME, "No se encontro el archivo compra en la carpeta")
         if _file_driver is None:
             tk.messagebox.showerror(
-                const.PROCESS_NAME, "No se encontraron el archivo driver en la carpeta")
+                const.PROCESS_NAME, "No se encontro el archivo driver en la carpeta")
 
         with ThreadPoolExecutor() as executor:
-            arguments = [{"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name}
-                        #  {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
-                        #  {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+            arguments = [
+                        # {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name}
+                        {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name}
+                    #   {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
             ]
             results = executor.map(lambda x: AFO.from_csv(**x), arguments)
 
@@ -80,33 +81,33 @@ def process_afo_files(get_file: 'Function'):
         
         # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
         for result in results:
-            _dt_afo_directa = result
+            _dt_afo_calle = result
 
     # DIRECTA - 
-    _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     # CALLE
-    # _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
-    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
     # # COMPRA
     # _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
     #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     with ThreadPoolExecutor() as executor:
             arguments = [
-                [_dt_afo_directa, {"driver": _dt_driver}]
-                # [_dt_afo_calle, {"driver": _dt_driver}],
+                # [_dt_afo_directa, {"driver": _dt_driver}]
+                [_dt_afo_calle, {"driver": _dt_driver}]
                 # [_dt_afo_compra, {"driver": _dt_driver}]
                 ]
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
     for result in results:
-        _dt_afo_directa = result
+        _dt_afo_calle = result
     # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
-    agg_directa = _dt_afo_directa.execute_agrupation()
-    # agg_calle = _dt_afo_calle.execute_agrupation()
+    # agg_directa = _dt_afo_directa.execute_agrupation()
+    agg_calle = _dt_afo_calle.execute_agrupation()
     # agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")

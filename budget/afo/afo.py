@@ -2,6 +2,8 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
+import datetime
+import os
 from typing import Any
 import numpy as np
 import pandas as pd
@@ -50,8 +52,27 @@ class AFO(dfo):
         self.delete_rows(mask)
         self.table.reset_index(drop=True, inplace=True)
 
-    def save_actual_progress():
-        pass
+    def save_actual_progress(self, data: 'pd.DataFrame'=None):
+        """Save actual progress to file.
+
+        Args:
+            data (pd.Dataframe, optional): data to be saved if is None will be use the table, Defaults to None
+        """
+        dt = datetime.datetime.now()
+        now_str = int(dt.strftime("%Y%m%d%H%M%S"))
+        route_file = os.path.join(const.ROOT_DIR, f"{self._type}_progress_{now_str}.csv")
+        route_file_alerts = os.path.join(const.ALERTS_DIR, f"{type}_alerts.csv")
+
+        #save progress in file
+        if data is None:
+            self.table.to_csv(route_file, sep=";", index=False, encoding="latin-1")
+        else:
+            data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
+        
+        #delete alerts
+        if os.path.exists(route_file_alerts):
+            os.remove(route_file_alerts)
+
     def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
 
@@ -268,7 +289,9 @@ class AFO(dfo):
             aggregations[f"{agg_val['col_res']}"] = pd.NamedAgg(
                 column=agg_val['column'], aggfunc=np.sum)
 
-        return self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)
+        result = self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)
+        self.save_actual_progress(result)
+        return result
 
     def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'int' = 0):
 
