@@ -131,7 +131,7 @@ class AFO(dfo):
             type = self._type,
             exception=True,
             exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
-        )
+        ) 
 
         return self
 
