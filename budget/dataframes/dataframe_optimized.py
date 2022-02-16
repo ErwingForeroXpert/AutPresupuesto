@@ -217,7 +217,7 @@ class DataFrameOptimized():
         if isinstance(key_right, (list, tuple)):
             if len(key_left) != len(key_right):
                 raise ValueError(f"Invalid size of keys list, left length {len(key_left)}, right length {len(key_right)}")
-                
+
             for idx, key_r in enumerate(key_right):
                 self.replace_by(
                     dataframe_right=dataframe_right,
@@ -227,7 +227,7 @@ class DataFrameOptimized():
                     how=how, 
                     type_replace=type_replace, 
                     mask=mask, 
-                    left_replace=left_replace, 
+                    left_replace=key_left[idx], 
                     right_replacer=key_r, 
                     create_columns=create_columns, 
                     **kargs
