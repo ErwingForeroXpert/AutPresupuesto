@@ -7,6 +7,7 @@ import os
 from sre_compile import isstring
 from time import time
 from utils import constants as const
+from afo import afo_types
 from pydantic import ListMinLengthError
 from utils import index as utils
 from typing import Any
@@ -129,7 +130,7 @@ class DataFrameOptimized():
             )
             if exception:
                     self.get_alerts().to_csv(
-                        os.path.normpath(os.path.join(const.ALERTS_DIR, f"{const.AFO_TYPES[self._type].value}_alerts.csv")), 
+                        os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[self._type].value}_alerts.csv")), 
                         index=False, 
                         encoding="latin-1", 
                         sep=";")
