@@ -215,7 +215,9 @@ class DataFrameOptimized():
             on if on is not None else left_on) if left_replace is None else left_replace
 
         if isinstance(key_right, (list, tuple)):
-            if len(key_left) != key_right
+            if len(key_left) != len(key_right):
+                raise ValueError(f"Invalid size of keys list, left length {len(key_left)}, right length {len(key_right)}")
+                
             for idx, key_r in enumerate(key_right):
                 self.replace_by(
                     dataframe_right=dataframe_right,
