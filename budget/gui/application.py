@@ -58,7 +58,7 @@ class Application():
         _cols = list(np.arange(start=_w//_divs[1], stop=_w, step=_w//_divs[0]))
 
         self.labels_text["type_selector"].set("Seleccionar Carpeta:")
-        self.labels["lbl_type_selector"] = tk.Label(self.root, text=self.labels_text["type_selector"]).grid(row=0, column=0)
+        self.labels["lbl_type_selector"] = tk.Label(self.root, textvariable=self.labels_text["type_selector"]).grid(row=0, column=0)
 
         self.inputs["path"] = tk.Entry(self.root)
         self.inputs["path"].grid(row=0, column=1)
@@ -68,19 +68,21 @@ class Application():
 
         self.buttons["rd_folder"] = tk.Radiobutton(self.root, text="Carpeta", value="folder", \
             variable=self.labels_text["type_route"], 
-            command=self.make_message("Debera seleccionar una carpeta donde se encuentren los archivos"), other_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Carpeta:")])
+            command=self.make_message("Debera seleccionar una carpeta donde se encuentren los archivos", others_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Carpeta:")])
+            )
         self.buttons["rd_folder"].grid(row=1, column=0)
         self.buttons["rd_folder"].select()
 
         self.buttons["rd_file"] = tk.Radiobutton(self.root, text="Archivo", value="file", \
             variable=self.labels_text["type_route"], 
-            command=self.make_message("Debera seleccionar el archivo"), state=tk.DISABLED, other_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Archivo:")])
+            command=self.make_message("Debera seleccionar el archivo", others_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Archivo:")]), 
+            state=tk.DISABLED)
         self.buttons["rd_file"].grid(row=1, column=1)
         self.buttons["rd_file"].deselect()
 
-        self.labels_text["status_project"].set("Seleccionar Carpeta:")
-        self.labels["lbl_status"] = tk.Label(self.root, text="Sin archivos")
-        self.labels["lbl_status"].grid(row=2, column=1)
+        self.labels_text["status_project"].set("Sin archivos")
+        self.labels["lbl_status"] = tk.Label(self.root, textvariable=self.labels_text["status_project"])
+        self.labels["lbl_status"].grid(row=2, column=0)
     
     def insert_action(self, _type: str, name: str, cb: 'Function', **kargs) -> None:
         """Inserts a function to the type selector.
@@ -98,10 +100,10 @@ class Application():
 
         if _type == "button":
             if name not in self.buttons.keys(): raise ValueError(f"{name} not found in buttons")
-            self.buttons[name]["command"] = _sub_func(**kargs)
+            self.buttons[name]["command"] = _sub_func(**kargs, texts=self.labels_text)
         elif _type == "input":
             if name not in self.inputs.keys(): raise ValueError(f"{name} not found in inputs")
-            self.inputs[name]["command"] = _sub_func(**kargs)
+            self.inputs[name]["command"] = _sub_func(**kargs, texts=self.labels_text)
 
     def make_message(self, message: str, _type: str = "info", others_cb: 'list[function]' = []) -> 'Function':
         """Create a messagebox with a messagebox .
