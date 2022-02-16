@@ -24,7 +24,13 @@ class Application():
         self.files = []
         self.buttons = {}
         self.inputs = {}
-        self.type_route = tk.StringVar()
+        self.labels = {}
+        self.labels_text = {
+            "type_route": tk.StringVar(),
+            "type_selector": tk.StringVar(),
+            "status_project": tk.StringVar(),
+        }
+
         self.extensions = [
             ("Excel files", ".xlsx .xls .xlsb"),
             ("Csv Files", ".csv .txt")
@@ -50,8 +56,9 @@ class Application():
 
         _rows = list(np.arange(start=_h//_divs[0], stop=_h, step=_h//_divs[0]))
         _cols = list(np.arange(start=_w//_divs[1], stop=_w, step=_w//_divs[0]))
- 
-        tk.Label(self.root, text="Seleccionar Archivo: ").grid(row=0, column=0)
+
+        self.labels_text["type_selector"].set("Seleccionar Carpeta:")
+        self.labels["lbl_type_selector"] = tk.Label(self.root, text=self.labels_text["type_selector"]).grid(row=0, column=0)
 
         self.inputs["path"] = tk.Entry(self.root)
         self.inputs["path"].grid(row=0, column=1)
@@ -60,15 +67,20 @@ class Application():
         self.buttons["btn_insert_file"].grid(row=0, column=2)
 
         self.buttons["rd_folder"] = tk.Radiobutton(self.root, text="Carpeta", value="folder", \
-            variable=self.type_route, command=self.make_message("Debera seleccionar una carpeta donde se encuentren los archivos"))
+            variable=self.labels_text["type_route"], 
+            command=self.make_message("Debera seleccionar una carpeta donde se encuentren los archivos"), other_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Carpeta:")])
         self.buttons["rd_folder"].grid(row=1, column=0)
         self.buttons["rd_folder"].select()
 
         self.buttons["rd_file"] = tk.Radiobutton(self.root, text="Archivo", value="file", \
-            variable=self.type_route, command=self.make_message("Debera seleccionar el archivo"), state=tk.DISABLED)
+            variable=self.labels_text["type_route"], 
+            command=self.make_message("Debera seleccionar el archivo"), state=tk.DISABLED, other_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Archivo:")])
         self.buttons["rd_file"].grid(row=1, column=1)
         self.buttons["rd_file"].deselect()
 
+        self.labels_text["status_project"].set("Seleccionar Carpeta:")
+        self.labels["lbl_status"] = tk.Label(self.root, text="Sin archivos")
+        self.labels["lbl_status"].grid(row=2, column=1)
     
     def insert_action(self, _type: str, name: str, cb: 'Function', **kargs) -> None:
         """Inserts a function to the type selector.
@@ -91,7 +103,7 @@ class Application():
             if name not in self.inputs.keys(): raise ValueError(f"{name} not found in inputs")
             self.inputs[name]["command"] = _sub_func(**kargs)
 
-    def make_message(self, message: str, _type: str = "info") -> 'Function':
+    def make_message(self, message: str, _type: str = "info", others_cb: 'list[function]' = []) -> 'Function':
         """Create a messagebox with a messagebox .
 
         Args:
@@ -104,19 +116,19 @@ class Application():
         """
         _title = self.root.title()
         if _type == "error":
-            return lambda: tk.messagebox.showerror(_title, message) 
+            return lambda: [tk.messagebox.showerror(_title, message), *others_cb]
         elif _type == "warning":
-            return lambda: tk.messagebox.showwarning(_title, message) 
+            return lambda: [tk.messagebox.showwarning(_title, message), *others_cb]
         elif _type == "info":
-            return lambda: tk.messagebox.showinfo(_title, message) 
+            return lambda: [tk.messagebox.showinfo(_title, message), *others_cb]
 
     def get_file(self) -> 'list[str]':
         def _sub_func():
-            print(self.type_route)
-            if self.type_route.get() == "file":
+            print(self.labels_text["type_route"])
+            if self.labels_text["type_route"].get() == "file":
                 _path = self.search_for_file_path(types= self.extensions, required=True)
                 self.files.append(_path)
-            elif self.type_route.get() == "folder":
+            elif self.labels_text["type_route"].get() == "folder":
                 _path = self.search_for_folder_path(required=True)
                 patterns = " ".join([patt[1] for patt in self.extensions])
                 patterns = patterns.replace(" ", "|")
@@ -184,3 +196,7 @@ class Application():
 
     def run(self) -> None:
         self.root.mainloop()
+
+    @staticmethod
+    def change_text(variable: 'tk.StringVar', text: str):
+        return lambda: variable.set(text)
