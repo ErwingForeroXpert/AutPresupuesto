@@ -234,6 +234,7 @@ PROCESSES = {
             "columns_change": ['sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
             "extra_columns": ['agrupacion', 'formato'],
             "key_merge_extra_columns": "tipologia",
+            "new_columns": ['nombre_ac', 'oficina_venta'],
             "add_columns": ['canal', 'sub_canal', 'segmento', 'agrupacion', 'formato'],
             "add_columns_dif": "trans_",
             "filter_replace_columns": {"column": "tipologia", "pattern": "(?i)sin asignar"},

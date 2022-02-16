@@ -221,9 +221,9 @@ class AFO(dfo):
             self.replace_by(
                 dataframe_right=drivers[3][cols_drivers[3]],
                 type_replace="not_nan",
-                left_on='cod_agente_comercial',
-                right_on=cols_drivers[3][0],
-                right_replacer=cols_drivers[3][1],
+                left_on=columns[6], #cod_agente_comercial
+                right_on=cols_drivers[3][0], #actual_codigo_ac
+                right_replacer=cols_drivers[3][1], #cod_ac_reemplazar
                 how="left"
             )  
 
@@ -231,9 +231,9 @@ class AFO(dfo):
             self.replace_by(
                 dataframe_right=drivers[4][cols_drivers[4]],
                 type_replace="not_nan",
-                left_on='cod_agente_comercial',
+                left_on=columns[6], #cod_agente_comercial
                 right_on=cols_drivers[4][0], #codigo_cliente
-                left_replace=['nombre_ac', 'oficina_venta'],
+                left_replace=_properties["new_columns"], #new columns ['nombre_ac', 'oficina_venta']
                 right_replacer=cols_drivers[4][1:3], #[nombre_cliente, oficina_ventas_ecom]
                 create_columns=True,
                 how="left"

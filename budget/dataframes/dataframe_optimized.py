@@ -214,23 +214,36 @@ class DataFrameOptimized():
         key_left = (
             on if on is not None else left_on) if left_replace is None else left_replace
 
-        if len(key_left) != len(key_right):
-            raise ValueError(
-                f"Length of keys invalid, lenght left found {len(key_left)} and right length found {len(key_right)}")
+        if isinstance(key_right, (list, tuple)):
+            if len(key_left) != key_right
+            for idx, key_r in enumerate(key_right):
+                self.replace_by(
+                    dataframe_right=dataframe_right,
+                    on=on,
+                    left_on=left_on,
+                    right_on=right_on,
+                    how=how, 
+                    type_replace=type_replace, 
+                    mask=mask, 
+                    left_replace=left_replace, 
+                    right_replacer=key_r, 
+                    create_columns=create_columns, 
+                    **kargs
+                )
+        else:
+            if create_columns:
+                self.table[key_left] = np.nan
 
-        if create_columns:
-            self.table[key_left] = np.nan
+            if type_replace == "mask":
+                pass
+            elif type_replace == "invert_mask":
+                mask = ~mask
+            elif type_replace == "not_nan":
+                mask = ~pd.isna(_temp_table[key_right])
+            elif type_replace == "all":
+                mask = np.full(len(self.table), True)
 
-        if type_replace == "mask":
-            pass
-        elif type_replace == "invert_mask":
-            mask = ~mask
-        elif type_replace == "not_nan":
-            mask = ~pd.isna(_temp_table[key_right])
-        elif type_replace == "all":
-            mask = np.full(len(self.table), True)
-
-        self.table.loc[mask, key_left] = _temp_table.loc[mask, key_right]
+            self.table.loc[mask, key_left] = _temp_table.loc[mask, key_right]
 
         return self.table
 
@@ -287,10 +300,6 @@ class DataFrameOptimized():
             if len(dataframe_right) > 2:
                 raise ListMinLengthError("Invalid size for dataframe_right")
 
-            if len(columns_right[0]) != len(columns_left):
-                raise ValueError(
-                    f"Length of columns invalid, columns right length found {len(columns_right)} and columns left length found {len(columns_left)}")
-
             _temp_table = [
                     self.table.merge(
                     right=data,
@@ -301,10 +310,6 @@ class DataFrameOptimized():
                     **kargs) for data in dataframe_right
             ]
         else:
-            if len(columns_right) != len(columns_left):
-                raise ValueError(
-                    f"Length of columns invalid, columns right length found {len(columns_right)} and columns left length found {len(columns_left)}")
-
             _temp_table = self.table.merge(
                 right=dataframe_right,
                 on=on,
