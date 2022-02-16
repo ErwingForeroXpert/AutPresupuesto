@@ -134,7 +134,7 @@ class DataFrameOptimized():
                         index=False, 
                         encoding="latin-1", 
                         sep=";")
-                    raise Exception(exception_description)
+                    # raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
@@ -463,7 +463,7 @@ class DataFrameOptimized():
                 raise ValueError(
                     "subset is required with drop_duplicates true")
 
-            dataframe.drop_duplicates(subset=subset, **kargs)
+            dataframe = dataframe.drop_duplicates(subset=subset, ignore_index=True, **kargs)
 
         return dataframe, _columns_name
 

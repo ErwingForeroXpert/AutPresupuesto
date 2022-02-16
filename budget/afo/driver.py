@@ -114,7 +114,7 @@ class Driver(dfo):
         for idx_pos, index in enumerate(index_sub_drivers): #iterate index and position to other properties see constanst PROCESSES
             if drop_duplicates[idx_pos]:
                 _sub_drivers[index].table, res_columns = dfo.get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos],
-                                                                drop_duplicates=True, subset=subset_index_columns[idx_pos], keep="first", inplace=True)
+                                                                drop_duplicates=True, subset=subset_index_columns[idx_pos], keep="first")
             else:
                  _, res_columns = dfo.get_header_names_of(_sub_drivers[index].table, cols_required_sub_drivers[idx_pos])
             result.append((_sub_drivers[index].table, res_columns))

@@ -118,7 +118,8 @@ def process_afo_files(self: 'Application'):
     agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")
-
+    self.labels_text["status_project"].set("Proceso Terminado")
+    
 if __name__ == "__main__":
     # process_afo_files([""])
     App = Application(
