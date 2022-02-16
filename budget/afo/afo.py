@@ -239,6 +239,8 @@ class AFO(dfo):
                 how="left"
             )
 
+            
+
             #add other columns
             for idx, _column in enumerate(_properties["add_columns"]):
                 new_column_name = f"{_properties['add_columns_dif']}{_column}"
