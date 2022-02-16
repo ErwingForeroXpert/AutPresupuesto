@@ -129,7 +129,7 @@ class DataFrameOptimized():
             )
             if exception:
                     self.get_alerts().to_csv(
-                        os.path.normpath(os.path.join(const.ALERTS_DIR, f"{type}_alerts.csv")), 
+                        os.path.normpath(os.path.join(const.ALERTS_DIR, f"{const.AFO_TYPES[self._type].value}_alerts.csv")), 
                         index=False, 
                         encoding="latin-1", 
                         sep=";")

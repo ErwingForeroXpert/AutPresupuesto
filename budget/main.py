@@ -22,8 +22,8 @@ def process_afo_files(self: 'Application'):
     """
     _files = self.get_file()
 
-    self.labels_text["status_project"].set("Validando archivos...")
-    self.labels_text["status_project"].pack()
+    self.update_label(label="lbl_status", label_text="status_project", text="Validando archivos...")
+
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
@@ -70,30 +70,31 @@ def process_afo_files(self: 'Application'):
             tk.messagebox.showerror(
                 const.PROCESS_NAME, "No se encontro el archivo driver en la carpeta")
 
-        self.labels_text["status_project"].set("Convirtiendo archivos...")
+        self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
+
         with ThreadPoolExecutor() as executor:
             arguments = [
-                        # {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name}
-                        # {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name}
-                      {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
-            ]
+                        {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
+                        {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
+                        {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+                    ]
             results = executor.map(lambda x: AFO.from_csv(**x), arguments)
 
             temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
             _dt_driver = temp_driver.result()
         
-        # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
-        for result in results:
-            _dt_afo_compra = result
+        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+        # for result in results:
+        #     _dt_afo_compra = result
 
     self.labels_text["status_project"].set("Eliminando ceros de los totales...")
-    # DIRECTA - 
-    # _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
-    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
+    # DIRECTA
+    _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
     # CALLE
-    # _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
-    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
     # COMPRA
     _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
@@ -101,19 +102,19 @@ def process_afo_files(self: 'Application'):
     self.labels_text["status_project"].set("Creando dinamicas...")
     with ThreadPoolExecutor() as executor:
             arguments = [
-                # [_dt_afo_directa, {"driver": _dt_driver}]
-                # [_dt_afo_calle, {"driver": _dt_driver}]
+                [_dt_afo_directa, {"driver": _dt_driver}],
+                [_dt_afo_calle, {"driver": _dt_driver}],
                 [_dt_afo_compra, {"driver": _dt_driver}]
                 ]
 
             results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
     self.labels_text["status_project"].set("Obteniendo totales...")
-    for result in results:
-        _dt_afo_compra = result
-    # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
-    # agg_directa = _dt_afo_directa.execute_agrupation()
-    # agg_calle = _dt_afo_calle.execute_agrupation()
+    # for result in results:
+    #     _dt_afo_compra = result
+    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+    agg_directa = _dt_afo_directa.execute_agrupation()
+    agg_calle = _dt_afo_calle.execute_agrupation()
     agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")

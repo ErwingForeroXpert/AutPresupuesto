@@ -52,16 +52,15 @@ class AFO(dfo):
         self.delete_rows(mask)
         self.table.reset_index(drop=True, inplace=True)
 
-    def save_actual_progress(self, data: 'pd.DataFrame'=None):
+    def save_actual_progress(self, data: 'pd.DataFrame'=None, level=0):
         """Save actual progress to file.
 
         Args:
             data (pd.Dataframe, optional): data to be saved if is None will be use the table, Defaults to None
         """
-        dt = datetime.datetime.now()
-        now_str = int(dt.strftime("%Y%m%d%H%M%S"))
-        route_file = os.path.join(const.ROOT_DIR, f"{self._type}_progress_{now_str}.csv")
-        route_file_alerts = os.path.join(const.ALERTS_DIR, f"{type}_alerts.csv")
+
+        route_file = os.path.join(const.ROOT_DIR, f"files/{AFO_TYPES[self._type].value}_progress_{level}.csv")
+        route_file_alerts = os.path.join(const.ALERTS_DIR, f"{AFO_TYPES[self._type].value}_alerts.csv")
 
         #save progress in file
         if data is None:
@@ -239,7 +238,7 @@ class AFO(dfo):
                 how="left"
             )
 
-            
+
 
             #add other columns
             for idx, _column in enumerate(_properties["add_columns"]):
@@ -292,7 +291,7 @@ class AFO(dfo):
                 column=agg_val['column'], aggfunc=np.sum)
 
         result = self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)
-        self.save_actual_progress(result)
+        self.save_actual_progress(data=result, level=1)
         return result
 
     def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'int' = 0):

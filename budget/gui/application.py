@@ -81,9 +81,21 @@ class Application():
         self.buttons["rd_file"].deselect()
 
         self.labels_text["status_project"].set("Sin archivos")
-        self.labels["lbl_status"] = tk.Label(self.root, textvariable=self.labels_text["status_project"])
+        self.labels["lbl_status"] = tk.Label(self.root, textvariable=self.labels_text["status_project"], )
         self.labels["lbl_status"].grid(row=2, column=0)
     
+    def update_label(self, label: str, label_text: str, text: str):
+        self.labels_text[label_text].set(text)
+        self.labels[label]["textvariable"] = self.labels_text[label_text]
+
+    # def app_action(self):
+    #     def parent_wrapper(func):
+    #         def function_wrapper(*args, **kargs):
+    #             func(self, *args, **kargs)
+    #         return function_wrapper
+        
+    #     return parent_wrapper
+
     def insert_action(self, _type: str, name: str, cb: 'Function', **kargs) -> None:
         """Inserts a function to the type selector.
 
@@ -125,7 +137,6 @@ class Application():
             return lambda: [tk.messagebox.showinfo(_title, message), *others_cb]
 
     def get_file(self) -> 'list[str]':
-        print(self.labels_text["type_route"])
         if self.labels_text["type_route"].get() == "file":
             _path = self.search_for_file_path(types= self.extensions, required=True)
             self.files.append(_path)
@@ -196,7 +207,7 @@ class Application():
     def run(self) -> None:
         self.root.mainloop()
     
-    
+
     @staticmethod
     def change_text(variable: 'tk.StringVar', text: str):
         return lambda: variable.set(text)
