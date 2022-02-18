@@ -130,13 +130,14 @@ async def process_afo_files(self: 'Application'):
     
 if __name__ == "__main__":
     # process_afo_files([""])
+    async_loop = asyncio.get_event_loop()
     App = Application(
         title=const.PROCESS_NAME,
         divisions=[2,2],
         size ="300x400"
     )
     # process_afo_files(App.get_file())
-    App.insert_action("button", "btn_insert_file", lambda *args, **kargs: asyncio.run(process_afo_files(*args, **kargs)))
+    App.insert_action("button", "btn_insert_file", process_afo_files)
     App.run()
 
 

@@ -2,10 +2,9 @@ import tkinter as tk
 import numpy as np
 import re
 from os import getcwd,path, listdir
-from pathlib import Path
 from utils.constants import ROOT_DIR, ICON_IMAGE
 from utils.index import validate_or_create_folder
-from gui.file import File
+
 
 class Application():
 
@@ -96,7 +95,14 @@ class Application():
         
     #     return parent_wrapper
 
-    def insert_action(self, _type: str, name: str, cb: 'Function', **kargs) -> None:
+    def _asyncio_thread(async_loop):
+        async_loop.run_until_complete(do_urls())
+
+    def do_tasks(async_loop):
+        """ Button-Event-Handler starting the asyncio part. """
+        threading.Thread(target=_asyncio_thread, args=(async_loop,)).start()
+
+    def insert_action(self, _type: str, name: str, cb: 'Function', type="sequential", **kargs) -> None:
         """Inserts a function to the type selector.
 
         Args:
