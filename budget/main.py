@@ -5,9 +5,10 @@
 
 import tkinter as tk
 import re
-# from concurrent.futures import ThreadPoolExecutor
 import asyncio
+import functools
 
+from concurrent.futures import ThreadPoolExecutor
 from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
@@ -23,6 +24,7 @@ async def process_afo_files(self: 'Application'):
         app (Application): actual instance of application
     """
     _files = self.get_file()
+    loop = asyncio.get_running_loop()
 
     self.update_label(label="lbl_status", label_text="status_project", text="Validando archivos...")
 
@@ -77,13 +79,16 @@ async def process_afo_files(self: 'Application'):
 
         self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
-        # with ThreadPoolExecutor() as executor:
-        #     arguments = [
-        #                 {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
-        #                 {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
-        #                 {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
-        #             ]
-        #     results = executor.map(lambda x: AFO.from_csv(**x), arguments)
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                        {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
+                        {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
+                        {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+                    ]
+            results = executor.map(lambda x: AFO.from_csv(**x), arguments)
+            futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, path=_file_directa, ), i)
+                   for i in (1, 1, 1)]
+        result = await asyncio.gather(*futures)
 
         #     temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
         #     _dt_driver = temp_driver.result()
