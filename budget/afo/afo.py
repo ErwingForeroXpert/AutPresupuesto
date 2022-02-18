@@ -69,8 +69,8 @@ class AFO(dfo):
             data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
         
         #delete alerts
-        # if os.path.exists(route_file_alerts):
-        #     os.remove(route_file_alerts)
+        if os.path.exists(route_file_alerts):
+            os.remove(route_file_alerts)
 
     def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
@@ -272,11 +272,8 @@ class AFO(dfo):
         return self.table
 
     def execute_agrupation(self) -> pd.DataFrame:
-        """Get Agrupation by next values:
-            "venta actual"
-            "venta ppto"
-            "venta anterior"
-
+        """Get Agrupation
+            
         Returns:
             pd.DataFrame: result of agrupation
         """
@@ -294,7 +291,7 @@ class AFO(dfo):
         self.save_actual_progress(data=result, level=1)
         return result
 
-    def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'int' = 0):
+    def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'str' = "actual"):
 
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.ASSIGNMENT.name)
@@ -337,8 +334,8 @@ class AFO(dfo):
             how="left")
 
         # 0 for empty values
-        general_base.loc[pd.isna(general_base[agg_values[type_sale]
-                                 [0]['col_res']]), agg_values[type_sale][0]['col_res']] = 0
+        general_base.loc[pd.isna(general_base[agg_values[type_sale]['col_res']]), 
+                                agg_values[type_sale]['col_res']] = 0
         general_base.loc[pd.isna(general_base[agg_values[type_sale]
                                  [1]['col_res']]), agg_values[type_sale][1]['col_res']] = 0
 
