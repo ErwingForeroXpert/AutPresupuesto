@@ -5,7 +5,8 @@
 
 import tkinter as tk
 import re
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
+import asyncio
 from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
@@ -14,7 +15,7 @@ from gui.func import decorator_exception_message
 from utils import constants as const
 
 @decorator_exception_message(title=const.PROCESS_NAME)
-def process_afo_files(self: 'Application'):
+async def process_afo_files(self: 'Application'):
     """Main process for AFO files
 
     Args:
@@ -27,15 +28,18 @@ def process_afo_files(self: 'Application'):
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
-            with ThreadPoolExecutor() as executor:
+            # with ThreadPoolExecutor() as executor:
 
-                arguments = [{"path": _file}]*3
-                results = executor.map(lambda x: AFO.from_excel(**x), arguments)
+            #     arguments = [{"path": _file}]*3
+            #     results = executor.map(lambda x: AFO.from_excel(**x), arguments)
 
-                temp_driver = executor.submit(lambda x: Driver.from_excel(**x), {"path": _file})
-                _dt_driver = temp_driver.result()
+            #     temp_driver = executor.submit(lambda x: Driver.from_excel(**x), {"path": _file})
+            #     temp_driver.result()
 
-            _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results
+            _dt_driver = await Driver.from_excel(path=_file)
+            _dt_afo_directa = await AFO.from_excel(path=_file)
+            _dt_afo_calle = await AFO.from_excel(path=_file)
+            _dt_afo_compra = await AFO.from_excel(path=_file)
 
         else:
             tk.messagebox.showerror(
@@ -72,18 +76,22 @@ def process_afo_files(self: 'Application'):
 
         self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
-        with ThreadPoolExecutor() as executor:
-            arguments = [
-                        {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
-                        {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
-                        {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
-                    ]
-            results = executor.map(lambda x: AFO.from_csv(**x), arguments)
+        # with ThreadPoolExecutor() as executor:
+        #     arguments = [
+        #                 {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
+        #                 {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
+        #                 {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+        #             ]
+        #     results = executor.map(lambda x: AFO.from_csv(**x), arguments)
 
-            temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
-            _dt_driver = temp_driver.result()
-        
-        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+        #     temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
+        #     _dt_driver = temp_driver.result()
+
+        _dt_driver = await Driver.from_csv(path=_file)
+        _dt_afo_directa = await AFO.from_csv(path=_file_directa, afo_type=AFO_TYPES.DIRECTA.name)
+        _dt_afo_calle = await AFO.from_csv(path=_file_calle, afo_type=AFO_TYPES.CALLE.name)
+        _dt_afo_compra = await AFO.from_csv(path=_file_compra, afo_type=AFO_TYPES.COMPRA.name)
+        # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
         # for result in results:
         #     _dt_afo_compra = result
 
@@ -100,14 +108,14 @@ def process_afo_files(self: 'Application'):
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     self.labels_text["status_project"].set("Creando dinamicas...")
-    with ThreadPoolExecutor() as executor:
-            arguments = [
-                [_dt_afo_directa, {"driver": _dt_driver}],
-                [_dt_afo_calle, {"driver": _dt_driver}],
-                [_dt_afo_compra, {"driver": _dt_driver}]
-                ]
+    # with ThreadPoolExecutor() as executor:
+    #         arguments = [
+    #             [_dt_afo_directa, {"driver": _dt_driver}],
+    #             [_dt_afo_calle, {"driver": _dt_driver}],
+    #             [_dt_afo_compra, {"driver": _dt_driver}]
+    #             ]
 
-            results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
+    #         results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
             
     self.labels_text["status_project"].set("Obteniendo totales...")
     # for result in results:
@@ -128,7 +136,7 @@ if __name__ == "__main__":
         size ="300x400"
     )
     # process_afo_files(App.get_file())
-    App.insert_action("button", "btn_insert_file", process_afo_files)
+    App.insert_action("button", "btn_insert_file", lambda *args, **kargs: asyncio.run(process_afo_files(*args, **kargs)))
     App.run()
 
 
