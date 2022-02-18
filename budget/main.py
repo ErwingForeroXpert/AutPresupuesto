@@ -31,7 +31,7 @@ async def process_afo_files(self: 'Application'):
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
-            with ProcessPoolExecutor() as executor:
+            with ThreadPoolExecutor(max_workers=4) as executor:
 
                 arguments = [{"path": _file}]*3
 
@@ -76,7 +76,7 @@ async def process_afo_files(self: 'Application'):
 
         self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
-        with ProcessPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=4) as executor:
             arguments = [
                         {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
                         {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
@@ -105,19 +105,24 @@ async def process_afo_files(self: 'Application'):
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     self.labels_text["status_project"].set("Creando dinamicas...")
-    # with ThreadPoolExecutor() as executor:
-    #         arguments = [
-    #             [_dt_afo_directa, {"driver": _dt_driver}],
-    #             [_dt_afo_calle, {"driver": _dt_driver}],
-    #             [_dt_afo_compra, {"driver": _dt_driver}]
-    #             ]
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        arguments = [
+            [_dt_afo_directa, {"driver": _dt_driver}],
+            [_dt_afo_calle, {"driver": _dt_driver}],
+            [_dt_afo_compra, {"driver": _dt_driver}]
+        ]
 
-    #         results = executor.map(lambda x: x[0].execute_formulas(**x[1]), arguments)
+        futures = [loop.run_in_executor(
+            executor, 
+            functools.partial(lambda x: x[0].execute_formulas(**x[1]), **args)) 
+            for args in arguments
+            ]
+        results = asyncio.gather(*futures)
             
     self.labels_text["status_project"].set("Obteniendo totales...")
     # for result in results:
     #     _dt_afo_compra = result
-    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
+    _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = await results 
     agg_directa = _dt_afo_directa.execute_agrupation()
     agg_calle = _dt_afo_calle.execute_agrupation()
     agg_compra = _dt_afo_compra.execute_agrupation()
