@@ -69,8 +69,8 @@ class AFO(dfo):
             data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
         
         #delete alerts
-        if os.path.exists(route_file_alerts):
-            os.remove(route_file_alerts)
+        # if os.path.exists(route_file_alerts):
+        #     os.remove(route_file_alerts)
 
     def execute_formulas(self, driver: 'Driver') -> 'Driver':
         """Execute process of the formulas in the driver.
