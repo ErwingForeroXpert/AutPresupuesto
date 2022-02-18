@@ -96,7 +96,15 @@ class Application():
     #     return parent_wrapper
 
     def do_task(self, async_loop, action):
-        
+        """AI is creating summary for do_task
+
+        Args:
+            async_loop (event): actual event_loop
+                The event loop is the core of every asyncio application. 
+                Event loops run asynchronous tasks and callbacks, 
+                perform network IO operations, and run subprocesses.
+            action (function): async function to be executed
+        """
         try:
             async_loop.run_until_complete(action())
         finally:

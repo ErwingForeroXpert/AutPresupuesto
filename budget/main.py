@@ -17,16 +17,16 @@ from gui.func import decorator_exception_message
 from utils import constants as const
 
 @decorator_exception_message(title=const.PROCESS_NAME)
-async def process_afo_files(self: 'Application'):
+async def process_afo_files(app: 'Application'):
     """Main process for AFO files
 
     Args:
         app (Application): actual instance of application
     """
-    _files = self.get_file()
+    _files = app.get_file()
     loop = asyncio.get_running_loop()
 
-    self.update_label(label="lbl_status", label_text="status_project", text="Validando archivos...")
+    app.update_label(label="lbl_status", label_text="status_project", text="Validando archivos...")
 
     if len(_files) == 1:
         _file = _files[0]
@@ -74,7 +74,7 @@ async def process_afo_files(self: 'Application'):
             tk.messagebox.showerror(
                 const.PROCESS_NAME, "No se encontro el archivo driver en la carpeta")
 
-        self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
+        app.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
         with ThreadPoolExecutor(max_workers=4) as executor:
             arguments = [
@@ -92,24 +92,24 @@ async def process_afo_files(self: 'Application'):
         # for result in results:
         #     _dt_afo_compra = result
 
-    self.labels_text["status_project"].set("Eliminando ceros de los totales...")
+    app.labels_text["status_project"].set("Eliminando ceros de los totales...")
 
     # DIRECTA
     _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
              "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
-    # CALLE
-    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
-    # COMPRA
-    _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
-             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # # CALLE
+    # _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # # COMPRA
+    # _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
+    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
-    self.labels_text["status_project"].set("Creando dinamicas...")
+    app.labels_text["status_project"].set("Creando dinamicas...")
     with ThreadPoolExecutor(max_workers=4) as executor:
         arguments = [
             [_dt_afo_directa, {"driver": _dt_driver}],
-            [_dt_afo_calle, {"driver": _dt_driver}],
-            [_dt_afo_compra, {"driver": _dt_driver}]
+            # [_dt_afo_calle, {"driver": _dt_driver}],
+            # [_dt_afo_compra, {"driver": _dt_driver}]
         ]
 
         futures = [loop.run_in_executor(
@@ -119,7 +119,7 @@ async def process_afo_files(self: 'Application'):
             ]
         results = asyncio.gather(*futures)
             
-    self.labels_text["status_project"].set("Obteniendo totales...")
+    app.labels_text["status_project"].set("Obteniendo totales...")
     # for result in results:
     #     _dt_afo_compra = result
     _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = await results 
@@ -128,7 +128,7 @@ async def process_afo_files(self: 'Application'):
     agg_compra = _dt_afo_compra.execute_agrupation()
 
     print("hi")
-    self.labels_text["status_project"].set("Proceso Terminado")
+    app.labels_text["status_project"].set("Proceso Terminado")
     
 if __name__ == "__main__":
     # process_afo_files([""])
