@@ -114,7 +114,7 @@ async def process_afo_files(self: 'Application'):
 
         futures = [loop.run_in_executor(
             executor, 
-            functools.partial(lambda x: x[0].execute_formulas(**x[1]), **args)) 
+            functools.partial(lambda x: x[0].execute_formulas(**x[1]), args)) 
             for args in arguments
             ]
         results = asyncio.gather(*futures)
