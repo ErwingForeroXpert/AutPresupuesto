@@ -88,7 +88,7 @@ async def process_afo_files(self: 'Application'):
         #     temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
         #     _dt_driver = temp_driver.result()
 
-        _dt_driver = await Driver.from_csv(path=_file)
+        _dt_driver = await Driver.from_csv(path=_file_driver)
         _dt_afo_directa = await AFO.from_csv(path=_file_directa, afo_type=AFO_TYPES.DIRECTA.name)
         _dt_afo_calle = await AFO.from_csv(path=_file_calle, afo_type=AFO_TYPES.CALLE.name)
         _dt_afo_compra = await AFO.from_csv(path=_file_compra, afo_type=AFO_TYPES.COMPRA.name)

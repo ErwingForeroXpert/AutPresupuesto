@@ -118,7 +118,7 @@ class Application():
                 return lambda: cb(self, **options)   
             else:
                 async def func_temp(): 
-                    cb(self, **options)
+                    await cb(self, **options)
                 return func_temp
 
         sub =  _sub_func(**kargs)

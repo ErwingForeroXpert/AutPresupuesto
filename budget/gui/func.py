@@ -8,9 +8,9 @@ def decorator_exception_message(title: str):
         title (str): title of project
     """
     def parent_wrapper(func):
-        def function_wrapper(*args, **kargs):
+        async def function_wrapper(*args, **kargs):
             try:
-                func(*args, **kargs)
+                await func(*args, **kargs)
             except Exception as e:
                 messagebox.showerror(message=f"{e}", title=title)
                 print(f"Exception found in {func.__name__}, {e}")
