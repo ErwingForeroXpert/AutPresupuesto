@@ -95,14 +95,14 @@ class Application():
         
     #     return parent_wrapper
 
-    def _asyncio_thread(async_loop):
-        async_loop.run_until_complete(do_urls())
+    def do_task(self, async_loop, action):
+        
+        try:
+            async_loop.run_until_complete(action())
+        finally:
+            async_loop.close()
 
-    def do_tasks(async_loop):
-        """ Button-Event-Handler starting the asyncio part. """
-        threading.Thread(target=_asyncio_thread, args=(async_loop,)).start()
-
-    def insert_action(self, _type: str, name: str, cb: 'Function', type="sequential", **kargs) -> None:
+    def insert_action(self, _type: str, name: str, cb: 'Function', event_loop=None, **kargs) -> None:
         """Inserts a function to the type selector.
 
         Args:
@@ -114,14 +114,21 @@ class Application():
             ValueError: name not found in list names of selector
         """
         def _sub_func(**options):
-            return lambda: cb(self, **options)
+            if event_loop is None:
+                return lambda: cb(self, **options)   
+            else:
+                async def func_temp(): 
+                    cb(self, **options)
+                return func_temp
+
+        sub =  _sub_func(**kargs)
 
         if _type == "button":
             if name not in self.buttons.keys(): raise ValueError(f"{name} not found in buttons")
-            self.buttons[name]["command"] = _sub_func(**kargs)
+            self.buttons[name]["command"] = sub if event_loop is None else lambda:self.do_task(event_loop, sub)
         elif _type == "input":
             if name not in self.inputs.keys(): raise ValueError(f"{name} not found in inputs")
-            self.inputs[name]["command"] = _sub_func(**kargs)
+            self.inputs[name]["command"] = sub if event_loop is None else lambda:self.do_task(event_loop, sub)
 
     def make_message(self, message: str, _type: str = "info", others_cb: 'list[function]' = []) -> 'Function':
         """Create a messagebox with a messagebox .

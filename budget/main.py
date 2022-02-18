@@ -7,6 +7,7 @@ import tkinter as tk
 import re
 # from concurrent.futures import ThreadPoolExecutor
 import asyncio
+
 from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
@@ -131,13 +132,14 @@ async def process_afo_files(self: 'Application'):
 if __name__ == "__main__":
     # process_afo_files([""])
     async_loop = asyncio.get_event_loop()
+
     App = Application(
         title=const.PROCESS_NAME,
         divisions=[2,2],
         size ="300x400"
     )
     # process_afo_files(App.get_file())
-    App.insert_action("button", "btn_insert_file", process_afo_files)
+    App.insert_action("button", "btn_insert_file", process_afo_files, event_loop=async_loop)
     App.run()
 
 
