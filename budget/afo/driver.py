@@ -2,6 +2,7 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
+from functools import lru_cache
 from afo.afo_processes import AFO_PROCESSES
 from pandas import isna
 from dataframes.dataframe_optimized import DataFrameOptimized as dfo
@@ -76,6 +77,7 @@ class Driver(dfo):
         
         return self.properties_process
 
+    @lru_cache
     @property
     def sub_drivers(self) -> 'list[super()]':
         """List of subdrivers.
