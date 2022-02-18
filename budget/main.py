@@ -80,23 +80,20 @@ async def process_afo_files(self: 'Application'):
         self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
         with ThreadPoolExecutor() as executor:
-            futures = [
+            arguments = [
                         {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
                         {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
                         {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
                     ]
-            results = executor.map(lambda x: AFO.from_csv(**x), arguments)
-            futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, path=_file_directa, ), i)
-                   for i in (1, 1, 1)]
-        result = await asyncio.gather(*futures)
+
+            futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, **args)) for args in arguments]
+            results = await asyncio.gather(*futures)
 
         #     temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
         #     _dt_driver = temp_driver.result()
 
-        _dt_driver = await Driver.from_csv(path=_file_driver)
-        _dt_afo_directa = await AFO.from_csv(path=_file_directa, afo_type=AFO_TYPES.DIRECTA.name)
-        _dt_afo_calle = await AFO.from_csv(path=_file_calle, afo_type=AFO_TYPES.CALLE.name)
-        _dt_afo_compra = await AFO.from_csv(path=_file_compra, afo_type=AFO_TYPES.COMPRA.name)
+        _dt_driver = await loop.run_in_executor(executor, functools.partial(Driver.from_csv, path=_file_driver))
+        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results
         # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
         # for result in results:
         #     _dt_afo_compra = result
