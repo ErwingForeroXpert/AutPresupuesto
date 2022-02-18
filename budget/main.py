@@ -8,7 +8,7 @@ import re
 import asyncio
 import functools
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
@@ -31,18 +31,15 @@ async def process_afo_files(self: 'Application'):
     if len(_files) == 1:
         _file = _files[0]
         if "xls" in _file:
-            # with ThreadPoolExecutor() as executor:
+            with ProcessPoolExecutor() as executor:
 
-            #     arguments = [{"path": _file}]*3
-            #     results = executor.map(lambda x: AFO.from_excel(**x), arguments)
+                arguments = [{"path": _file}]*3
 
-            #     temp_driver = executor.submit(lambda x: Driver.from_excel(**x), {"path": _file})
-            #     temp_driver.result()
+                futures = [loop.run_in_executor(executor, functools.partial(AFO.from_excel, **args)) for args in arguments]
+                future_driver = loop.run_in_executor(executor, functools.partial(Driver.from_excel, path=_file))
+                results = asyncio.gather([*futures, future_driver])
 
-            _dt_driver = await Driver.from_excel(path=_file)
-            _dt_afo_directa = await AFO.from_excel(path=_file)
-            _dt_afo_calle = await AFO.from_excel(path=_file)
-            _dt_afo_compra = await AFO.from_excel(path=_file)
+            _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = await results
 
         else:
             tk.messagebox.showerror(
@@ -79,7 +76,7 @@ async def process_afo_files(self: 'Application'):
 
         self.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
-        with ThreadPoolExecutor() as executor:
+        with ProcessPoolExecutor() as executor:
             arguments = [
                         {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
                         {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
@@ -87,13 +84,10 @@ async def process_afo_files(self: 'Application'):
                     ]
 
             futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, **args)) for args in arguments]
-            results = await asyncio.gather(*futures)
-
-        #     temp_driver = executor.submit(lambda x: Driver.from_csv(**x), {"path": _file_driver})
-        #     _dt_driver = temp_driver.result()
-
-        _dt_driver = await loop.run_in_executor(executor, functools.partial(Driver.from_csv, path=_file_driver))
-        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results
+            future_driver = loop.run_in_executor(executor, functools.partial(Driver.from_csv, path=_file_driver))
+            results = asyncio.gather(*futures, future_driver)
+        
+        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = await results
         # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
         # for result in results:
         #     _dt_afo_compra = result
