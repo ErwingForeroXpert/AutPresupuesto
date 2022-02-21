@@ -296,6 +296,9 @@ class AFO(dfo):
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.ASSIGNMENT.name)
 
+        #initial columns
+        original_columns = agg_base.columns.tolist()
+
         # see utils/constants - AFO_PROCESSES
         columns_level = _properties['levels'][level]
         # [{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
@@ -369,28 +372,29 @@ class AFO(dfo):
             how="left",
             suffixes=suffixes
         )
+
+        #if there was a difference in total
         mask_diff_results = ((result_diff[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[0]}"] - \
                             result_diff[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[1]}"]) != 0)
-
+        
         if mask_diff_results.sum() > 0:
             print(
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
-            diff_totals = total_sales[mask_diff_results]
-            diff_results = general_base.merge(
-                right=diff_totals[columns_level], 
-                on=columns_level, 
-                how="left")
+            
+            #get the registers of "columns level" with difference in total
+            base_of_diff = general_base.merge(right=result_diff[mask_diff_results], on=columns_level, how="left")
 
-            mask_total_price = pd.isna(diff_results[agg_values[type_sale]['column']]).any(axis=1)
-            diff_results_without_nan = diff_results[~mask_total_price]
+            #only the registers with difference in the total
+            mask_diff_by_register = ~pd.isna(base_of_diff[[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[0]}", 
+                                                        f"{agg_values[type_sale]['cols_res'][0]}{suffixes[1]}"]]).any(axis=1)
 
             result = self.execute_assignment(
-                agg_base=diff_results_without_nan,
+                agg_base=general_base[mask_diff_by_register],
                 level=level+1,
                 type_sale=type_sale
             ) 
 
-            diff_results[~mask_total_price] = result
+            general_base[~mask_diff_by_register] = result
         
             return diff_results
         else:
