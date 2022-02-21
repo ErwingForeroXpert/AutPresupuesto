@@ -300,11 +300,11 @@ class AFO(dfo):
         columns_level = _properties['levels'][level]
         # [{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
         agg_values = _properties['agg_values']
-        
+
         aggregations = [{
-            f"{agg['cols_res'][idx]}": pd.NamedAgg(
-                column=agg['column'], aggfunc=np.sum)
-        } for idx, agg in enumerate(agg_values[type_sale])]
+            f"{agg_values[type_sale]['cols_res'][idx]}": pd.NamedAgg(
+                column=agg_values[type_sale]['column'], aggfunc=np.sum)
+        } for idx in range(len(agg_values[type_sale]['cols_res']))]
 
         #delete invalid sectors
         mask_sectors = agg_base[_properties["filter_sector"]["column"]].str.contains(
@@ -350,15 +350,25 @@ class AFO(dfo):
 
         # update sum sales
         general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']]+(general_base[_properties["add_columns"][0]] *
-                                                                                         general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (total_venta_*_sin_asignar * porc_participacion)
+                                                                                         general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
-        # agrupation by "Ventas actuales positivas"
+        # mask for not assignment
+        mask_not_assign = (general_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"])) & (general_base[agg_values[type_sale]['column']] < 0)
+        assign = general_base[~mask_not_assign]
+
+        # agrupation by "suma venta asignada"
         total_sales_now = assign.groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
-        # difference between total sales of "suma venta"
-        mask_diff_results = ~(total_sales[agg_values[type_sale]['column']]
-                              == total_sales_now[agg_values[type_sale]['column']])
+        result_diff = total_sales_now.merge(
+            right=total_sales,
+            on=columns_level,
+            how="left"
+            prefi
+        )
+        # difference between total sales of "suma venta asignada"
+        mask_diff_results = ~(result_diff)
 
         if mask_diff_results.sum() > 0:
             print(
