@@ -401,11 +401,11 @@ class AFO(dfo):
                 type_sale=type_sale
             ) 
 
-            general_base[mask_diff_by_register] = result
+            general_base.loc[mask_diff_by_register, original_columns] = result[original_columns]
         
-            return general_base
+            return general_base[original_columns]
         else:
-            return general_base
+            return general_base[original_columns]
 
     @staticmethod
     def get_properties(_type: str) -> None:
