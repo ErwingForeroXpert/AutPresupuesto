@@ -361,14 +361,16 @@ class AFO(dfo):
         total_sales_now = assign.groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
+        # difference between total sales of "suma venta asignada"
+        suffixes=('_x', '_y')
         result_diff = total_sales_now.merge(
             right=total_sales,
             on=columns_level,
-            how="left"
-            prefi
+            how="left",
+            suffixes=suffixes
         )
-        # difference between total sales of "suma venta asignada"
-        mask_diff_results = ~(result_diff)
+        mask_diff_results = ((result_diff[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[0]}"] - \
+                            result_diff[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[1]}"]) != 0)
 
         if mask_diff_results.sum() > 0:
             print(
