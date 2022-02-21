@@ -300,6 +300,11 @@ class AFO(dfo):
         columns_level = _properties['levels'][level]
         # [{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
         agg_values = _properties['agg_values']
+        
+        aggregations = [{
+            f"{agg['cols_res'][idx]}": pd.NamedAgg(
+                column=agg['column'], aggfunc=np.sum)
+        } for idx, agg in enumerate(agg_values[type_sale])]
 
         #delete invalid sectors
         mask_sectors = agg_base[_properties["filter_sector"]["column"]].str.contains(
@@ -314,20 +319,12 @@ class AFO(dfo):
         assign = agg_base[~mask_not_assign]
 
         # agrupation about "Ventas asignadas positivas"
-        aggregation = {
-            f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(
-                column=agg_values[type_sale]['column'], aggfunc=np.sum)
-        }
         total_sales = assign.groupby(
-            columns_level, as_index=False).agg(**aggregation)
+            columns_level, as_index=False).agg(**aggregations[0])
 
         # agrupation about "Ventas sin asignar negativas"
-        aggregation = {
-            f"{agg_values[type_sale]['cols_res'][1]}": pd.NamedAgg(
-                column=agg_values[type_sale]['column'], aggfunc=np.sum)
-        }
         total_sales_not_assign = not_assign.groupby(
-            columns_level, as_index=False).agg(**aggregation)
+            columns_level, as_index=False).agg(**aggregations[1])
 
         # insert two columns
         general_base = agg_base.merge(
@@ -352,17 +349,12 @@ class AFO(dfo):
             general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]]  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
-        
         general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']]+(general_base[_properties["add_columns"][0]] *
                                                                                          general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (total_venta_*_sin_asignar * porc_participacion)
 
         # agrupation by "Ventas actuales positivas"
-        total_sales_now = assign.groupby(columns_level, as_index=False).agg(
-            {
-                f"{agg_values[type_sale][0]['cols_res']}": pd.NamedAgg(
-                    column=agg_values[type_sale]['column'], aggfunc=np.sum)
-            }
-        )
+        total_sales_now = assign.groupby(
+            columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta"
         mask_diff_results = ~(total_sales[agg_values[type_sale]['column']]
