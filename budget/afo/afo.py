@@ -2,16 +2,16 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
-import datetime
+
 import os
-from typing import Any
 import numpy as np
 import pandas as pd
+from typing import Any
+from dataframes.dataframe_optimized import DataFrameOptimized as dfo
+from utils import constants as const, feature_flags
+from afo.afo_types import AFO_TYPES
 from afo.afo_processes import AFO_PROCESSES
 from afo.driver import Driver
-from dataframes.dataframe_optimized import DataFrameOptimized as dfo
-from utils import constants as const
-from afo.afo_types import AFO_TYPES
 
 
 class AFO(dfo):
@@ -60,13 +60,17 @@ class AFO(dfo):
         """
 
         route_file = os.path.join(const.ROOT_DIR, f"files/{AFO_TYPES[self._type].value}_progress_{level}.csv")
+        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/{AFO_TYPES[self._type].value}_progress_{level}.ftr")
         route_file_alerts = os.path.join(const.ALERTS_DIR, f"{AFO_TYPES[self._type].value}_alerts.csv")
-
+        
         #save progress in file
-        if data is None:
-            self.table.to_csv(route_file, sep=";", index=False, encoding="latin-1")
-        else:
-            data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
+        temp_data = self.table if data is None else data
+
+        temp_data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
+
+        #save progress for test 
+        
+        temp_data.to_feather(route_file_test)
         
         #delete alerts
         if os.path.exists(route_file_alerts):
@@ -381,22 +385,25 @@ class AFO(dfo):
             print(
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
             
+            if level >= len(_properties["levels"])-1:
+                raise ValueError(f"El ultimo nivel de agrupacion de asignación posee diferencias \n nivel: {level} \n tipo: {type_sale}")
+
             #get the registers of "columns level" with difference in total
             base_of_diff = general_base.merge(right=result_diff[mask_diff_results], on=columns_level, how="left")
 
-            #only the registers with difference in the total
+            #only the registers WITH difference in the total
             mask_diff_by_register = ~pd.isna(base_of_diff[[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[0]}", 
                                                         f"{agg_values[type_sale]['cols_res'][0]}{suffixes[1]}"]]).any(axis=1)
 
             result = self.execute_assignment(
-                agg_base=general_base[mask_diff_by_register],
+                agg_base=general_base[mask_diff_by_register][original_columns],
                 level=level+1,
                 type_sale=type_sale
             ) 
 
-            general_base[~mask_diff_by_register] = result
+            general_base[mask_diff_by_register] = result
         
-            return diff_results
+            return general_base
         else:
             return general_base
 
