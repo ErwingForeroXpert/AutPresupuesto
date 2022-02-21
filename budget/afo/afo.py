@@ -69,7 +69,6 @@ class AFO(dfo):
         temp_data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
 
         #save progress for test 
-        
         temp_data.to_feather(route_file_test)
         
         #delete alerts
