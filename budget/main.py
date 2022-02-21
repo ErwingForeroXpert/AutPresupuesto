@@ -129,7 +129,9 @@ async def process_afo_files(app: 'Application'):
     # agg_calle = _dt_afo_calle.execute_agrupation()
     # agg_compra = _dt_afo_compra.execute_agrupation()
 
-    _dt_afo_directa.
+    _dt_afo_directa.execute_assignment(
+        agg_base=_dt_afo_directa.execute_agrupation()
+    )
     print("hi")
     app.labels_text["status_project"].set("Proceso Terminado")
     

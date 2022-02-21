@@ -77,7 +77,6 @@ class Driver(dfo):
         
         return self.properties_process
 
-    @lru_cache
     @property
     def sub_drivers(self) -> 'list[super()]':
         """List of subdrivers.
