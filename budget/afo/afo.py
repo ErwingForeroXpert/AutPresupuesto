@@ -368,7 +368,7 @@ class AFO(dfo):
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
             diff_totals = total_sales[mask_diff_results]
             diff_results = general_base.merge(
-                right=diff_totals[actual_level["columns"]], on=actual_level["columns"], how="left")
+                right=diff_totals[actual_level], on=actual_level, how="left")
             return
         else:
             return general_base

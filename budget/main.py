@@ -122,13 +122,14 @@ async def process_afo_files(app: 'Application'):
     app.labels_text["status_project"].set("Obteniendo totales...")
     
     for result in await results:
-        _dt_afo_compra = result
+        _dt_afo_directa = result
 
     # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = await results 
     # agg_directa = _dt_afo_directa.execute_agrupation()
     # agg_calle = _dt_afo_calle.execute_agrupation()
     # agg_compra = _dt_afo_compra.execute_agrupation()
 
+    _dt_afo_directa.
     print("hi")
     app.labels_text["status_project"].set("Proceso Terminado")
     
