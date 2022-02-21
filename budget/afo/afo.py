@@ -387,6 +387,9 @@ class AFO(dfo):
             if level >= len(_properties["levels"])-1:
                 raise ValueError(f"El ultimo nivel de agrupacion de asignación posee diferencias \n nivel: {level} \n tipo: {type_sale}")
 
+            #next columns level
+            columns_level = _properties['levels'][level+1]
+            
             #get the registers of "columns level" with difference in total
             base_of_diff = general_base.merge(right=result_diff[mask_diff_results], on=columns_level, how="left")
 
