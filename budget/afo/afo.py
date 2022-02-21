@@ -302,8 +302,8 @@ class AFO(dfo):
         agg_values = _properties['agg_values']
 
         #delete invalid sectors
-        pattern_sectors = "|".join([f"(?i){str(sector).lower()}" for sector in _properties["invalid_sectors"]])
-        mask_sectors = agg_base[_properties["filter_assignment"]["column"]].str.contains(pattern_sectors)
+        mask_sectors = agg_base[_properties["filter_sector"]["column"]].str.contains(
+            pat=_properties["filter_sector"]["pattern"])
         agg_base = agg_base[~mask_sectors]
 
         # mask for not assignment
@@ -340,7 +340,7 @@ class AFO(dfo):
 
         # 0 for empty values
         general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
-                                agg_values[type_sale]['cols_res'][1]] = 0
+                                agg_values[type_sale]['cols_res'][0]] = 0
         general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][1]]), 
                                 agg_values[type_sale]['cols_res'][1]] = 0
 
@@ -352,8 +352,9 @@ class AFO(dfo):
             general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]]  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
-        general_base[agg_values[type_sale]['column']] = agg_values[type_sale]['column']+(general_base[_properties["add_columns"][0]] *
-                                                                                         general_base[agg_values[type_sale][1]['cols_res']])  # suma_venta + (total_venta_*_sin_asignar * porc_participacion)
+        
+        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']]+(general_base[_properties["add_columns"][0]] *
+                                                                                         general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (total_venta_*_sin_asignar * porc_participacion)
 
         # agrupation by "Ventas actuales positivas"
         total_sales_now = assign.groupby(columns_level, as_index=False).agg(
