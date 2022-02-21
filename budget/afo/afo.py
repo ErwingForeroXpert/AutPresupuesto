@@ -301,9 +301,14 @@ class AFO(dfo):
         # [{"col_res":[], "column":""},...]  see utils/constants - AFO_PROCESSES
         agg_values = _properties['agg_values']
 
+        #delete invalid sectors
+        pattern_sectors = "|".join([f"(?i){str(sector).lower()}" for sector in _properties["invalid_sectors"]])
+        mask_sectors = agg_base[_properties["filter_assignment"]["column"]].str.contains(pattern_sectors)
+        agg_base = agg_base[~mask_sectors]
+
         # mask for not assignment
-        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
-            pat=_properties["filter_assignment"]["pattern"]) & agg_base[agg_values[type_sale]['column']] <= 0
+        mask_not_assign = (agg_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0)
 
         not_assign = agg_base[mask_not_assign]  # sin asignar menores a 0
         assign = agg_base[~mask_not_assign]
