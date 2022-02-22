@@ -318,11 +318,16 @@ class AFO(dfo):
         agg_base = agg_base[~mask_sectors]
 
         # mask for not assignment
-        mask_not_assign = (agg_base[_properties["filter_assignment"]["column"]].str.contains(
-            pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0)
+        mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"])
 
         not_assign = agg_base[mask_not_assign]  # sin asignar menores a 0
         assign = agg_base[~mask_not_assign]
+        
+        #save assign with negative values
+        mask_negative_assigns = assign[assign[agg_values[type_sale]['column']] < 0]
+        assign_negative = assign[mask_negative_assigns]
+        assign = assign[~mask_negative_assigns]
 
         # agrupation about "Ventas asignadas positivas"
         total_sales = assign.groupby(
@@ -377,7 +382,7 @@ class AFO(dfo):
         )
 
         total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffixes[idx]}" for idx in range(suffixes.__len__())]
-        
+
         #if there was a difference in total
         mask_diff_results = ((result_diff[total_columns[0]] - \
                             result_diff[total_columns[1]]) != 0)
@@ -411,9 +416,7 @@ class AFO(dfo):
 
             general_base.loc[mask_diff_by_register, original_columns] = result[original_columns]
         
-            return general_base[original_columns]
-        else:
-            return general_base[original_columns]
+        return pd.concat((assign_negative[original_columns], general_base[original_columns]), ignore_index=True, axis=0)
 
     @staticmethod
     def get_properties(_type: str) -> None:
