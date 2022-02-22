@@ -360,8 +360,8 @@ class AFO(dfo):
             general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]]  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
-        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']]+(general_base[_properties["add_columns"][0]] *
-                                                                                         general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
+        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']]+ \
+            (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
         # mask for not assignment
         mask_not_assign = (general_base[_properties["filter_assignment"]["column"]].str.contains(
@@ -389,11 +389,10 @@ class AFO(dfo):
         
         if mask_diff_results.sum() > 0:
             print( 
-                f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}, \
-                    margen: {_properties['permissible_diff_totals']}")
+                f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level+1}, tipo: {type_sale}, margen: {_properties['permissible_diff_totals']}, revisar en \n {const.ALERTS_DIR}")
             
             if level >= len(_properties["levels"])-1: 
-                exec_desc = f"El ultimo nivel de agrupacion de asignación aun posee diferencias \n nivel: {level} \n tipo: {type_sale}"  
+                exec_desc = f"El ultimo nivel de agrupacion de asignación aun posee diferencias \n nivel: {level+1} \n tipo: {type_sale}"  
                 self.validate_alert(
                     mask=mask_diff_results,
                     description="aun se encuentran diferencias despues de la ultima asignación",
@@ -401,7 +400,6 @@ class AFO(dfo):
                     exception_description=exec_desc,
                     aux_table=result_diff
                 )
-                raise ValueError(f"{exec_desc}, revisar en \n {const.ALERTS_DIR}")
 
             #next columns level
             columns_level = _properties['levels'][level+1]
