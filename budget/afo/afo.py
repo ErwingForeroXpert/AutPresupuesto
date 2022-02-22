@@ -325,7 +325,7 @@ class AFO(dfo):
         assign = agg_base[~mask_not_assign]
         
         #save assign with negative values
-        mask_negative_assigns = assign[assign[agg_values[type_sale]['column']] < 0]
+        mask_negative_assigns = assign[agg_values[type_sale]['column']] < 0
         assign_negative = assign[mask_negative_assigns]
         assign = assign[~mask_negative_assigns]
 
@@ -381,7 +381,7 @@ class AFO(dfo):
             suffixes=suffixes
         )
 
-        total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffixes[idx]}" for idx in range(suffixes.__len__())]
+        total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffix}" for suffix in suffixes]
 
         #if there was a difference in total
         mask_diff_results = ((result_diff[total_columns[0]] - \
