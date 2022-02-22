@@ -398,7 +398,8 @@ class AFO(dfo):
             columns_level = _properties['levels'][level+1]
 
             #agroup by news columns level
-            result_diff = result_diff[mask_diff_results].groupby(columns_level, as_index=False).agg(**{
+            result_diff = result_diff[mask_diff_results]
+            result_diff = result_diff.groupby(columns_level, as_index=False).agg(**{
                 f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
                 })
 
