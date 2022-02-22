@@ -291,6 +291,7 @@ PROCESSES = {
                             "column": "sum_venta_anterior"}
             },
             "add_columns": ["porc_participacion"],
+            "permissible_diff_totals": 1000,
             "levels": [["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector", "mes"],
                        ["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector"],
                        ["oficina_venta", "trans_segmento", "sector"]],

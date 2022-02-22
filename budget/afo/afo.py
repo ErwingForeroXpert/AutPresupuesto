@@ -384,12 +384,13 @@ class AFO(dfo):
         total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffix}" for suffix in suffixes]
 
         #if there was a difference in total
-        mask_diff_results = ((result_diff[total_columns[0]] - \
-                            result_diff[total_columns[1]]) != 0)
+        mask_diff_results = (np.absolute(result_diff[total_columns[0]] - \
+                            result_diff[total_columns[1]]) > _properties["permissible_diff_totals"])
         
         if mask_diff_results.sum() > 0:
             print(
-                f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}")
+                f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}, \
+                    margen: {_properties['permissible_diff_totals']}")
             
             if level >= len(_properties["levels"])-1:
                 raise ValueError(f"El ultimo nivel de agrupacion de asignación posee diferencias \n nivel: {level} \n tipo: {type_sale}")
