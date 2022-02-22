@@ -345,7 +345,7 @@ class AFO(dfo):
             right=total_sales_not_assign,
             on=columns_level,
             how="left")
-
+ 
         # 0 for empty values
         general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
                                 agg_values[type_sale]['cols_res'][0]] = 0
