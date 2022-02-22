@@ -312,9 +312,9 @@ class AFO(dfo):
                 column=agg_values[type_sale]['column'], aggfunc=np.sum)
         } for idx in range(len(agg_values[type_sale]['cols_res']))]
 
-        #delete invalid sectors
-        mask_sectors = agg_base[_properties["filter_sector"]["column"]].str.contains(
-            pat=_properties["filter_sector"]["pattern"])
+        #delete invalid sectors or cero values in sum
+        mask_sectors = (agg_base[_properties["filter_sector"]["column"]].str.contains(
+            pat=_properties["filter_sector"]["pattern"]) | (agg_base[agg_values[type_sale]['column']] == 0))
         agg_base = agg_base[~mask_sectors]
 
         # mask for not assignment
@@ -389,7 +389,7 @@ class AFO(dfo):
 
             #next columns level
             columns_level = _properties['levels'][level+1]
-            
+
             #get the registers of "columns level" with difference in total
             base_of_diff = general_base.merge(right=result_diff[mask_diff_results], on=columns_level, how="left")
 
