@@ -376,9 +376,10 @@ class AFO(dfo):
             suffixes=suffixes
         )
 
+        total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffixes[idx]}" for idx in suffixes]
         #if there was a difference in total
-        mask_diff_results = ((result_diff[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[0]}"] - \
-                            result_diff[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[1]}"]) != 0)
+        mask_diff_results = ((result_diff[total_columns[0]] - \
+                            result_diff[total_columns[1]]) != 0)
         
         if mask_diff_results.sum() > 0:
             print(
@@ -390,12 +391,15 @@ class AFO(dfo):
             #next columns level
             columns_level = _properties['levels'][level+1]
 
+            #agroup by news columns level
+            result_diff = result_diff[mask_diff_results].groupby(columns_level, as_index=False).agg(**{
+                f"{agg_values[type_sale]['column']}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
+                })
             #get the registers of "columns level" with difference in total
-            base_of_diff = general_base.merge(right=result_diff[mask_diff_results], on=columns_level, how="left")
+            base_of_diff = general_base.merge(right=result_diff.loc[mask_diff_results, [*columns_level, *total_columns]], on=columns_level, how="left")
 
             #only the registers WITH difference in the total
-            mask_diff_by_register = ~pd.isna(base_of_diff[[f"{agg_values[type_sale]['cols_res'][0]}{suffixes[0]}", 
-                                                        f"{agg_values[type_sale]['cols_res'][0]}{suffixes[1]}"]]).any(axis=1)
+            mask_diff_by_register = ~pd.isna(base_of_diff[total_columns]).any(axis=1)
 
             result = self.execute_assignment(
                 agg_base=general_base[mask_diff_by_register][original_columns],
