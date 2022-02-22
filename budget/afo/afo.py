@@ -388,12 +388,20 @@ class AFO(dfo):
                             result_diff[total_columns[1]]) > _properties["permissible_diff_totals"])
         
         if mask_diff_results.sum() > 0:
-            print(
+            print( 
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level}, tipo: {type_sale}, \
                     margen: {_properties['permissible_diff_totals']}")
             
-            if level >= len(_properties["levels"])-1:
-                raise ValueError(f"El ultimo nivel de agrupacion de asignación posee diferencias \n nivel: {level} \n tipo: {type_sale}")
+            if level >= len(_properties["levels"])-1: 
+                exec_desc = f"El ultimo nivel de agrupacion de asignación aun posee diferencias \n nivel: {level} \n tipo: {type_sale}"  
+                self.validate_alert(
+                    mask=mask_diff_results,
+                    description="aun se encuentran diferencias despues de la ultima asignación",
+                    type=self._type,
+                    exception_description=exec_desc,
+                    aux_table=result_diff
+                )
+                raise ValueError(f"{exec_desc}, revisar en \n {const.ALERTS_DIR}")
 
             #next columns level
             columns_level = _properties['levels'][level+1]

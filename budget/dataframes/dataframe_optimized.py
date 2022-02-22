@@ -114,7 +114,7 @@ class DataFrameOptimized():
     def get_alerts(self):
         return self.__alerts
 
-    def validate_alert(self, mask: bool, description: str, type: str, exception: bool=False, exception_description: str = ""):
+    def validate_alert(self, mask: bool, description: str, type: str, exception: bool=False, exception_description: str = "", aux_table: 'pd.DataFrame'=None):
         """Validate an alert .
 
         Args:
@@ -129,12 +129,13 @@ class DataFrameOptimized():
                 description=description
             )
             if exception:
-                    self.get_alerts().to_csv(
-                        os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts.csv")), 
-                        index=False, 
-                        encoding="latin-1", 
-                        sep=";")
-                    # raise Exception(exception_description)
+                table = self.get_alerts() if aux_table is None else aux_table[mask]
+                table.to_csv(
+                    os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts.csv")), 
+                    index=False, 
+                    encoding="latin-1", 
+                    sep=";")
+                # raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
