@@ -365,16 +365,20 @@ class AFO(dfo):
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]))   # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
 
-        # agrupation by "suma venta asignados"
-        mask_not_assign = general_base[_properties["filter_assignment"]["column"]].str.contains(
-            pat=_properties["filter_assignment"]["pattern"])
+        # mask of only values assigment positives
+        mask_assign_positive = ((~general_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"])) & (general_base[agg_values[type_sale]['column']] > 0))
         
         #general base without "sin asignar" and "asignaciones negativas"
-        total_sales_now = general_base[~mask_not_assign].groupby(
+        total_sales_now = general_base[mask_assign_positive].groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
-        #general base without "asignar negativos"
-        total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
+        #mask of only values assigment negatives
+        mask_assign_negatives = ((~agg_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0))
+
+        #get 
+        total_sales_before = agg_base[~mask_assign_negatives].groupby(columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta asignada"
         suffixes=('_x', '_y')
