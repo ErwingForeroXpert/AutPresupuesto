@@ -370,10 +370,10 @@ class AFO(dfo):
             pat=_properties["filter_assignment"]["pattern"])
         
         #general base without "sin asignar" and "asignaciones negativas"
-        total_sales_now = pd.concat((general_base[~mask_not_assign], assign_negative), ignore_index=True).groupby(
+        total_sales_now = general_base[~mask_not_assign].groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
-        #general base without "sin asignar" and "asignaciones negativas"
+        #general base without "asignar negativos"
         total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta asignada"
