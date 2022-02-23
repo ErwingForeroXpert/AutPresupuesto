@@ -357,8 +357,8 @@ class AFO(dfo):
         mask_cero_total = general_base[agg_values[type_sale]['cols_res'][0]] == 0
         general_base[_properties["add_columns"][0]] = 0  # porc_participacion
         general_base.loc[~mask_cero_total, _properties["add_columns"][0]] = \
-            np.round(general_base.loc[~mask_cero_total, agg_values[type_sale]['column']] / \
-            general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]], decimals = 4)  # suma_venta_* / total_venta_*_asignada
+            general_base.loc[~mask_cero_total, agg_values[type_sale]['column']] / \
+            general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]]  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
         general_base[agg_values[type_sale]['column']] = np.round(general_base[agg_values[type_sale]['column']] + \
