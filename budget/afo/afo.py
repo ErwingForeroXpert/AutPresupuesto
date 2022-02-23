@@ -360,7 +360,7 @@ class AFO(dfo):
             general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]]  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
-        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']]+ \
+        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']] + \
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
         # mask for not assignment
@@ -411,18 +411,20 @@ class AFO(dfo):
                 })
 
             #get the registers of "columns level" with difference in total
-            base_of_diff = general_base.merge(right=result_diff, on=columns_level, how="left", suffixes=suffixes)
+            base_of_diff = agg_base.merge(right=result_diff, on=columns_level, how="left", suffixes=suffixes)
 
             #only the registers WITH difference in the total
             mask_diff_by_register = ~pd.isna(base_of_diff[total_columns[1]])
 
             result = self.execute_assignment(
-                agg_base=general_base[mask_diff_by_register][original_columns],
+                agg_base=agg_base[mask_diff_by_register][original_columns],
                 level=level+1,
                 type_sale=type_sale
             ) 
 
-            general_base.loc[mask_diff_by_register, original_columns] = result[original_columns]
+            base_merge = general_base.merge(right=result, on=original_columns, how="left", suffixes=suffixes)
+            mask_no_empty_totals = ~pd.isna(base_merge[total_columns[1]])
+            general_base.loc[mask_no_empty_totals, ] = base_merge[total_columns[1]]
         
         return pd.concat((assign_negative[original_columns], general_base[original_columns]), ignore_index=True, axis=0)
 
