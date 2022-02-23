@@ -364,20 +364,22 @@ class AFO(dfo):
         general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']] + \
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
-        # mask for not assignment
+
+        # agrupation by "suma venta asignados"
         mask_not_assign = general_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"])
-        assign = general_base[~mask_not_assign]
-
-        # agrupation by "suma venta asignados y no asignados"
-        # agrupation by "suma venta asignados y no asignados"
-        total_sales_now = assign.groupby(
+        
+        #general base without "sin asignar" and "asignaciones negativas"
+        total_sales_now = pd.concat((general_base[~mask_not_assign], assign_negative), ignore_index=True).groupby(
             columns_level, as_index=False).agg(**aggregations[0])
+            
+        #general base without "sin asignar" and "asignaciones negativas"
+        total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta asignada"
         suffixes=('_x', '_y')
         result_diff = total_sales_now.merge(
-            right=total_sales,
+            right=total_sales_before,
             on=columns_level,
             how="left",
             suffixes=suffixes
