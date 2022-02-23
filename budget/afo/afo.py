@@ -316,7 +316,8 @@ class AFO(dfo):
         mask_sectors = (agg_base[_properties["filter_sector"]["column"]].str.contains(
             pat=_properties["filter_sector"]["pattern"]) | (agg_base[agg_values[type_sale]['column']] == 0))
         agg_base = agg_base[~mask_sectors]
-
+        agg_base.reset_index(drop=True, inplace=True)
+        
         # mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"])
