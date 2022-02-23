@@ -346,7 +346,7 @@ class AFO(dfo):
             right=total_sales_not_assign,
             on=columns_level,
             how="left")
- 
+
         # 0 for empty values
         general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
                                 agg_values[type_sale]['cols_res'][0]] = 0
@@ -358,11 +358,11 @@ class AFO(dfo):
         general_base[_properties["add_columns"][0]] = 0  # porc_participacion
         general_base.loc[~mask_cero_total, _properties["add_columns"][0]] = \
             np.round(general_base.loc[~mask_cero_total, agg_values[type_sale]['column']] / \
-            general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]], decimals = 5)  # suma_venta_* / total_venta_*_asignada
+            general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]], decimals = 4)  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
-        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']] + \
-            (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
+        general_base[agg_values[type_sale]['column']] = np.round(general_base[agg_values[type_sale]['column']] + \
+            (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]))   # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
 
         # agrupation by "suma venta asignados"
@@ -372,7 +372,7 @@ class AFO(dfo):
         #general base without "sin asignar" and "asignaciones negativas"
         total_sales_now = pd.concat((general_base[~mask_not_assign], assign_negative), ignore_index=True).groupby(
             columns_level, as_index=False).agg(**aggregations[0])
-            
+
         #general base without "sin asignar" and "asignaciones negativas"
         total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
 
@@ -430,7 +430,7 @@ class AFO(dfo):
             mask_no_empty_totals = ~pd.isna(base_merge[total_columns[1]])
             general_base.loc[mask_no_empty_totals, ] = base_merge[total_columns[1]]
         
-        return pd.concat((assign_negative[original_columns], general_base[original_columns]), ignore_index=True, axis=0)
+        return pd.concat((assign_negative[original_columns], general_base[original_columns]), ignore_index=True)
 
     @staticmethod
     def get_properties(_type: str) -> None:
