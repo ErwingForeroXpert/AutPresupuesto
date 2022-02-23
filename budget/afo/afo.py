@@ -312,19 +312,23 @@ class AFO(dfo):
                 column=agg_values[type_sale]['column'], aggfunc=np.sum)
         } for idx in range(len(agg_values[type_sale]['cols_res']))]
 
-        #delete invalid sectors or cero values in sum
+        #mask for invalid sector or values equals to cero
         mask_sectors = (agg_base[_properties["filter_sector"]["column"]].str.contains(
             pat=_properties["filter_sector"]["pattern"]) | (agg_base[agg_values[type_sale]['column']] == 0))
-        agg_base = agg_base[~mask_sectors]
-        agg_base.reset_index(drop=True, inplace=True)
+        
+        #mask for assign with negative values
+        mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] < 0))
+
+        agg_base = agg_base[((~mask_sectors) | (~mask_assign_negatives))].reset_index(drop=True, inplace=True) # delete invalid sectors or assign negatives
 
         # mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"])
 
-        not_assign = agg_base[mask_not_assign]  # sin asignar menores a 0
-        assign = agg_base[~mask_not_assign]
+        not_assign = agg_base[mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
+        assign = agg_base[~mask_not_assign] # delete invalid sectors or assign negatives and assigment
         
+
         #save assign with negative values
         mask_negative_assigns = assign[agg_values[type_sale]['column']] < 0
         assign_negative = assign[mask_negative_assigns]
@@ -365,20 +369,20 @@ class AFO(dfo):
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]))   # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
 
-        # mask of only values assigment positives
-        mask_assign_positive = ((~general_base[_properties["filter_assignment"]["column"]].str.contains(
-            pat=_properties["filter_assignment"]["pattern"])) & (general_base[agg_values[type_sale]['column']] > 0))
+        # mask of only values assigment
+        mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"]))
         
         #general base without "sin asignar" and "asignaciones negativas"
-        total_sales_now = general_base[mask_assign_positive].groupby(
+        total_sales_now = general_base[mask_assing].groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
-        #mask of only values assigment negatives
-        mask_assign_negatives = ((~agg_base[_properties["filter_assignment"]["column"]].str.contains(
-            pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0))
+        # #mask of only values assigment negatives
+        # mask_assign_negatives = ((~agg_base[_properties["filter_assignment"]["column"]].str.contains(
+        #     pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0))
 
         #get only "sin asignar" and "asignar positivos"
-        total_sales_before = agg_base[~mask_assign_negatives].groupby(columns_level, as_index=False).agg(**aggregations[0])
+        total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta asignada"
         suffixes=('_x', '_y')
