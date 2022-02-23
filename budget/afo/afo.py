@@ -317,7 +317,7 @@ class AFO(dfo):
             pat=_properties["filter_sector"]["pattern"]) | (agg_base[agg_values[type_sale]['column']] == 0))
         agg_base = agg_base[~mask_sectors]
         agg_base.reset_index(drop=True, inplace=True)
-        
+
         # mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"])
@@ -412,10 +412,10 @@ class AFO(dfo):
                 })
 
             #get the registers of "columns level" with difference in total
-            base_of_diff = agg_base.merge(right=result_diff, on=columns_level, how="left", suffixes=suffixes)
+            base_of_diff = agg_base.merge(right=result_diff, on=columns_level, how="left")
 
             #only the registers WITH difference in the total
-            mask_diff_by_register = ~pd.isna(base_of_diff[total_columns[1]])
+            mask_diff_by_register = ~pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][0]])
 
             result = self.execute_assignment(
                 agg_base=agg_base[mask_diff_by_register][original_columns],
