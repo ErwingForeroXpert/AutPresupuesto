@@ -377,7 +377,7 @@ class AFO(dfo):
         mask_assign_negatives = ((~agg_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0))
 
-        #get 
+        #get only "sin asignar" and "asignar positivos"
         total_sales_before = agg_base[~mask_assign_negatives].groupby(columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta asignada"
