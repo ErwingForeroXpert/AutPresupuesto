@@ -364,9 +364,14 @@ class AFO(dfo):
         general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']] + \
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]])  # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
 
+        # mask for not assignment
+        mask_not_assign = general_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"])
+        assign = general_base[~mask_not_assign]
 
         # agrupation by "suma venta asignados y no asignados"
-        total_sales_now = general_base.groupby(
+        # agrupation by "suma venta asignados y no asignados"
+        total_sales_now = assign.groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
         # difference between total sales of "suma venta asignada"
