@@ -288,6 +288,8 @@ PROCESSES = {
                 "actual":{"cols_res": ["total_venta_act_asignada",
                               "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
                 "anterior": {"cols_res": ["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], 
+                            "column": "sum_venta_anterior"},
+                "anterior": {"cols_res": ["total_venta_ppto_asignada", "total_venta_ppto_sin_asignar"], 
                             "column": "sum_venta_anterior"}
             },
             "add_columns": ["porc_participacion"],
