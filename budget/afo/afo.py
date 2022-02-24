@@ -136,6 +136,9 @@ class AFO(dfo):
             exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
         ) 
 
+        if const.ENVIROMENT == "DEV":
+            self.save_actual_progress(level=1)
+
         return self
 
     def sub_process_formula(
@@ -291,7 +294,6 @@ class AFO(dfo):
                 column=agg_val['column'], aggfunc=np.sum)
 
         result = self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)
-        self.save_actual_progress(data=result, level=1)
         return result
 
     def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'str' = "actual"):
@@ -372,10 +374,6 @@ class AFO(dfo):
         total_sales_now = general_base[mask_assing].groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
-        # #mask of only values assigment negatives
-        # mask_assign_negatives = ((~agg_base[_properties["filter_assignment"]["column"]].str.contains(
-        #     pat=_properties["filter_assignment"]["pattern"])) & (agg_base[agg_values[type_sale]['column']] < 0))
-
         #get only "sin asignar" and "asignar positivos"
         total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
 
@@ -431,7 +429,8 @@ class AFO(dfo):
 
             base_merge = general_base.merge(right=result, on=original_columns, how="left", suffixes=suffixes)
             mask_no_empty_totals = ~pd.isna(base_merge[total_columns[1]])
-            general_base.loc[mask_no_empty_totals, ] = base_merge[total_columns[1]]
+            general_base.loc[mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[1]]
+            general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
         
         return pd.concat((assign_negative[original_columns], general_base[original_columns]), ignore_index=True)
 
