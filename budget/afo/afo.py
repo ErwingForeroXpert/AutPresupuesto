@@ -316,23 +316,17 @@ class AFO(dfo):
         mask_sectors = (agg_base[_properties["filter_sector"]["column"]].str.contains(
             pat=_properties["filter_sector"]["pattern"]) | (agg_base[agg_values[type_sale]['column']] == 0))
         
-        #mask for assign with negative values
-        mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] < 0))
-
-        agg_base = agg_base[((~mask_sectors) | (~mask_assign_negatives))].reset_index(drop=True, inplace=True) # delete invalid sectors or assign negatives
-
         # mask for not assignment
         mask_not_assign = agg_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"])
 
-        not_assign = agg_base[mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
-        assign = agg_base[~mask_not_assign] # delete invalid sectors or assign negatives and assigment
-        
+        #mask for assign with negative values
+        mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] < 0))
 
-        #save assign with negative values
-        mask_negative_assigns = assign[agg_values[type_sale]['column']] < 0
-        assign_negative = assign[mask_negative_assigns]
-        assign = assign[~mask_negative_assigns]
+        not_assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
+        assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
+        assign_negative = agg_base[mask_assign_negatives] #save assign with negative values
+        agg_base = agg_base[~(mask_sectors | mask_assign_negatives)].reset_index(drop=True, inplace=True) # delete invalid sectors or assign negatives
 
         # agrupation about "Ventas asignadas positivas"
         total_sales = assign.groupby(
