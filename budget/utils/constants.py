@@ -290,7 +290,7 @@ PROCESSES = {
                 "anterior": {"cols_res": ["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], 
                             "column": "sum_venta_anterior"},
                 "presupuesto": {"cols_res": ["total_venta_ppto_asignada", "total_venta_ppto_sin_asignar"], 
-                            "column": "sum_ppto_anterior"}
+                            "column": "sum_venta_ppto"}
             },
             "add_columns": ["porc_participacion"],
             "permissible_diff_totals": 1000,
