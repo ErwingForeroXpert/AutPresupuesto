@@ -328,7 +328,7 @@ class AFO(dfo):
         assign_negative = agg_base[mask_assign_negatives] #save assign with negative values
         agg_base = agg_base[~(mask_sectors | mask_assign_negatives)] # delete invalid sectors or assign negatives
         agg_base.reset_index(drop=True, inplace=True)
-        
+
         # agrupation about "Ventas asignadas positivas"
         total_sales = assign.groupby(
             columns_level, as_index=False).agg(**aggregations[0])
@@ -362,7 +362,7 @@ class AFO(dfo):
         # update sum sales
         general_base[agg_values[type_sale]['column']] = np.round(general_base[agg_values[type_sale]['column']] + \
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]))   # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
-
+ 
 
         # mask of only values assigment
         mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
