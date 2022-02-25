@@ -45,7 +45,8 @@ AFO_TYPES = {
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price
-        }
+        },
+        "processes": ["formula", "assigment"]
     },
     "calle": {
         "sheet": "AFO -  Directa",
@@ -77,7 +78,8 @@ AFO_TYPES = {
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price
-        }
+        },
+        "processes": ["formula"]
     },
     "compra": {
         "sheet": "AFO -  Directa",
@@ -116,7 +118,8 @@ AFO_TYPES = {
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price,
-        }
+        },
+        "processes": ["formula", "assigment"]
     },
 }
 
@@ -297,6 +300,26 @@ PROCESSES = {
             "levels": [["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector", "mes"],
                        ["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector"],
                        ["oficina_venta", "trans_segmento", "sector"]],
+        },
+        "compra": {
+            "filter_assignment": {"column": "categoria", "pattern": "(?i)sin asignar"},
+            "filter_sector": {
+                "column": "sector",
+                "pattern": "(?i)helados|otros no operacional|otros oper no ccial|servicios"
+            },
+            "agg_values": {
+                "actual":{"cols_res": ["total_venta_act_asignada",
+                              "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
+                "anterior": {"cols_res": ["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], 
+                            "column": "sum_venta_anterior"},
+                "presupuesto": {"cols_res": ["total_venta_ppto_asignada", "total_venta_ppto_sin_asignar"], 
+                            "column": "sum_venta_ppto"}
+            },
+            "add_columns": ["porc_participacion"],
+            "permissible_diff_totals": 1000,
+            "levels": [["oficina_venta", "cod_agente", "sector", "mes"],
+                       ["oficina_venta", "cod_agente", "sector"],
+                       ["oficina_venta", "cod_agente"]],
         },
     }
 }

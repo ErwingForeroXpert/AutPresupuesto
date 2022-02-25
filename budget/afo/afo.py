@@ -42,6 +42,27 @@ class AFO(dfo):
 
         return self.properties_process
 
+    def process(self, drivers: 'Driver'):
+        if const.ENVIROMENT == "DEV":
+                self.save_actual_progress(level=0) #save base loaded
+
+        if "formula" in self.properties["processes"]: 
+            self.execute_formulas(drivers)
+            if const.ENVIROMENT == "DEV":
+                self.save_actual_progress(level=1)
+        
+        if "assigment" in self.properties["processes"]:  
+            type_sales = AFO_TYPES[self._type].get_properties()["agg_values"].keys() #get types of sales, see utils/contants
+            assigments = [
+                self.execute_assignment(
+                    agg_base=self.execute_agrupation(), 
+                    level=0, 
+                    type_sale=_type_sale) for _type_sale in type_sales
+                ]
+            if const.ENVIROMENT == "DEV":
+                for idx,  assigment in enumerate(assigments):
+                    self.save_actual_progress(data=assigment, level=2, optional_end=f"_{type_sales[idx]}")
+
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
 
@@ -52,15 +73,15 @@ class AFO(dfo):
         self.delete_rows(mask)
         self.table.reset_index(drop=True, inplace=True)
 
-    def save_actual_progress(self, data: 'pd.DataFrame'=None, level=0):
+    def save_actual_progress(self, data: 'pd.DataFrame'=None, level=0, optional_end= ""):
         """Save actual progress to file.
 
         Args:
             data (pd.Dataframe, optional): data to be saved if is None will be use the table, Defaults to None
         """
 
-        route_file = os.path.join(const.ROOT_DIR, f"files/{AFO_TYPES[self._type].value}_progress_{level}.csv")
-        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/{AFO_TYPES[self._type].value}_progress_{level}.ftr")
+        route_file = os.path.join(const.ROOT_DIR, f"files/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.csv")
+        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.ftr")
         route_file_alerts = os.path.join(const.ALERTS_DIR, f"{AFO_TYPES[self._type].value}_alerts.csv")
         
         #save progress in file
@@ -135,11 +156,6 @@ class AFO(dfo):
             exception=True,
             exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
         ) 
-
-        if const.ENVIROMENT == "DEV":
-            self.save_actual_progress(level=1)
-
-        return self
 
     def sub_process_formula(
         self,
