@@ -53,7 +53,8 @@ class AFO(dfo):
                 self.save_actual_progress(level=1)
         
         if "assigment" in self.properties["processes"]:  
-            type_sales = AFO_TYPES[self._type].get_properties()["agg_values"].keys() #get types of sales, see utils/contants
+            type_sales = AFO_TYPES[self._type]
+             #get types of sales, see utils/contants
             assigments = [
                 self.execute_assignment(
                     agg_base=self.execute_agrupation(), 
