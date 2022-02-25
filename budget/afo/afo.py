@@ -450,7 +450,10 @@ class AFO(dfo):
             general_base.loc[mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[1]]
             general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
         
-        return pd.concat((assign_negative[original_columns], general_base[original_columns]), ignore_index=True)
+        mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
+            pat=_properties["filter_assignment"]["pattern"]))
+
+        return pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
 
     @staticmethod
     def get_properties(_type: str) -> None:
