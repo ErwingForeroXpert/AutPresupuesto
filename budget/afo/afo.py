@@ -43,12 +43,13 @@ class AFO(dfo):
         return self.properties_process
 
     def process(self, drivers: 'Driver'):
-        if const.ENVIROMENT == "DEV":
+        
+        if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(level=0) #save base loaded
 
         if "formula" in self.properties["processes"]: 
             self.execute_formulas(drivers)
-            if const.ENVIROMENT == "DEV":
+            if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(level=1)
         
         if "assigment" in self.properties["processes"]:  
@@ -59,7 +60,7 @@ class AFO(dfo):
                     level=0, 
                     type_sale=_type_sale) for _type_sale in type_sales
                 ]
-            if const.ENVIROMENT == "DEV":
+            if feature_flags.ENVIROMENT == "DEV":
                 for idx,  assigment in enumerate(assigments):
                     self.save_actual_progress(data=assigment, level=2, optional_end=f"_{type_sales[idx]}")
 

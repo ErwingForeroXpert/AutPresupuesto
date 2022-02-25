@@ -8,7 +8,7 @@ import re
 import asyncio
 import functools
 
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from afo.afo_types import AFO_TYPES
 from utils import constants as const
 from afo.afo import AFO, Driver
@@ -104,7 +104,7 @@ async def process_afo_files(app: 'Application'):
     # _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
     #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
-    app.labels_text["status_project"].set("Creando dinamicas...")
+    app.labels_text["status_project"].set("Ejecutando proceso principal..., esto puede tardar vaya tomese un café")
     with ThreadPoolExecutor(max_workers=4) as executor:
         arguments = [
             [_dt_afo_directa, {"driver": _dt_driver}],
@@ -114,20 +114,15 @@ async def process_afo_files(app: 'Application'):
 
         futures = [loop.run_in_executor(
             executor, 
-            functools.partial(lambda x: x[0].execute_formulas(**x[1]), args)) 
+            functools.partial(lambda x: x[0].process(**x[1]), args)) 
             for args in arguments
             ]
         results = asyncio.gather(*futures)
             
-    app.labels_text["status_project"].set("Obteniendo totales...")
+    app.labels_text["status_project"].set("Obteniendo resultados...")
     
     for result in await results:
         _dt_afo_directa = result
-
-    # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = await results 
-    # agg_directa = _dt_afo_directa.execute_agrupation()
-    # agg_calle = _dt_afo_calle.execute_agrupation()
-    # agg_compra = _dt_afo_compra.execute_agrupation()
 
     _dt_afo_directa.execute_assignment(
         agg_base=_dt_afo_directa.execute_agrupation(),
@@ -137,7 +132,7 @@ async def process_afo_files(app: 'Application'):
     app.labels_text["status_project"].set("Proceso Terminado")
     
 if __name__ == "__main__":
-    # process_afo_files([""])
+    
     async_loop = asyncio.get_event_loop()
 
     App = Application(
@@ -145,12 +140,9 @@ if __name__ == "__main__":
         divisions=[2,2],
         size ="300x400"
     )
-    # process_afo_files(App.get_file())
+
     App.insert_action("button", "btn_insert_file", process_afo_files, event_loop=async_loop)
     App.run()
-
-
-    #get AFO file
     
 
 
