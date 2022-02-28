@@ -466,9 +466,7 @@ class AFO(dfo):
         mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"]))
 
-        temp_dtf = pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
-        temp_dtf = temp_dtf.astype({f"{agg_values[type_sale]['column']}": np.int64})
-        return temp_dtf
+        return pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
 
     @staticmethod
     def get_properties(_type: str) -> None:
