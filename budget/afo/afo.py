@@ -393,8 +393,8 @@ class AFO(dfo):
             general_base.loc[~mask_cero_total, agg_values[type_sale]['cols_res'][0]]  # suma_venta_* / total_venta_*_asignada
 
         # update sum sales
-        general_base[agg_values[type_sale]['column']] = np.round(general_base[agg_values[type_sale]['column']] + \
-            (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]), decimals=5)   # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
+        general_base[agg_values[type_sale]['column']] = general_base[agg_values[type_sale]['column']] + \
+            (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]) # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
  
 
         # mask of only values assigment
