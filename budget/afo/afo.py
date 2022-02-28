@@ -20,6 +20,7 @@ class AFO(dfo):
         super().__init__(*args, **kargs)
         self._type = afo_type
         self.properties = self.get_properties(self._type)
+        self.assigments = []
         self.actual_process = None
         self.properties_process = None
 
@@ -42,29 +43,40 @@ class AFO(dfo):
 
         return self.properties_process
 
+    def load_progress(self, progress: int) -> None:
+        if progress == 0:
+ 
+        elif progress == 1:
+        
+        elif progress == 1:
+        
+        elif progress == 1:
+
     def process(self, driver: 'Driver'):
         
-        if feature_flags.ENVIROMENT == "DEV":
+        if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS < 0:
                 self.save_actual_progress(level=0) #save base loaded
 
-        if "formula" in self.properties["processes"]: 
+        if "formula" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 1: 
             self.execute_formulas(driver)
             if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(level=1)
-        
-        if "assigment" in self.properties["processes"]:  
+
+        if "assigment" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 2:  
             type_sales = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)["agg_values"].keys()
              #get types of sales, see utils/contants
-            assigments = [
+            self.assigments = [
                 self.execute_assignment(
                     agg_base=self.execute_agrupation(), 
                     level=0, 
                     type_sale=_type_sale) for _type_sale in type_sales
                 ]
             if feature_flags.ENVIROMENT == "DEV":
-                for idx,  assigment in enumerate(assigments):
+                for idx,  assigment in enumerate(self.assigments):
                     self.save_actual_progress(data=assigment, level=2, optional_end=f"_{list(type_sales)[idx]}")
 
+        if "consolidation" in self.properties["processes"]:
+            pass
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
 
@@ -345,7 +357,7 @@ class AFO(dfo):
 
         not_assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
         assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
-        assign_negative = agg_base[~(mask_sectors) & mask_assign_negatives] #save assign with negative values
+        assign_negative = agg_base[~(mask_sectors) & mask_assign_negatives] #delete invalid sectors and save assign with negative values
         agg_base = agg_base[~(mask_sectors | mask_assign_negatives)] # delete invalid sectors or assign negatives
         agg_base.reset_index(drop=True, inplace=True)
 

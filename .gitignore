@@ -7,5 +7,6 @@ __pycache__
 
 _dev*
 *.csv
+*.xls*
 *.xlsx
 *.ftr
