@@ -44,13 +44,14 @@ class AFO(dfo):
         return self.properties_process
 
     def load_progress(self, progress: int) -> None:
-        if progress == 0:
+        pass
+        # if progress == 0:
  
-        elif progress == 1:
+        # elif progress == 1:
         
-        elif progress == 1:
+        # elif progress == 1:
         
-        elif progress == 1:
+        # elif progress == 1:
 
     def process(self, driver: 'Driver'):
         
