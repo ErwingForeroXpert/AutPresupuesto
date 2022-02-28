@@ -63,7 +63,7 @@ class AFO(dfo):
                 ]
             if feature_flags.ENVIROMENT == "DEV":
                 for idx,  assigment in enumerate(assigments):
-                    self.save_actual_progress(data=assigment, level=2, optional_end=f"_{type_sales[idx]}")
+                    self.save_actual_progress(data=assigment, level=2, optional_end=f"_{list(type_sales)[idx]}")
 
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
