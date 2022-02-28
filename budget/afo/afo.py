@@ -42,18 +42,18 @@ class AFO(dfo):
 
         return self.properties_process
 
-    def process(self, drivers: 'Driver'):
+    def process(self, driver: 'Driver'):
         
         if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(level=0) #save base loaded
 
         if "formula" in self.properties["processes"]: 
-            self.execute_formulas(drivers)
+            self.execute_formulas(driver)
             if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(level=1)
         
         if "assigment" in self.properties["processes"]:  
-            type_sales = AFO_TYPES[self._type]
+            type_sales = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)["agg_values"].keys()
              #get types of sales, see utils/contants
             assigments = [
                 self.execute_assignment(
