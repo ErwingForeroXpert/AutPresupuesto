@@ -345,7 +345,7 @@ class AFO(dfo):
 
         not_assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
         assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
-        assign_negative = agg_base[mask_assign_negatives] #save assign with negative values
+        assign_negative = agg_base[~(mask_sectors) & mask_assign_negatives] #save assign with negative values
         agg_base = agg_base[~(mask_sectors | mask_assign_negatives)] # delete invalid sectors or assign negatives
         agg_base.reset_index(drop=True, inplace=True)
 
