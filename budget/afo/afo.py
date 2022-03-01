@@ -400,6 +400,8 @@ class AFO(dfo):
             registers_not_merge_assigned = assign_with_no_assign[mask_not_found_not_assigned]
             registers_not_merge_assigned.drop(columns_no_merge, axis = 1, inplace = True)
             registers_not_merge_assigned.reset_index(drop=True, inplace=True)
+            registers_not_merge_assigned = registers_not_merge_assigned.drop_duplicates(temp_columns_level)
+
             # result_diff = general_base_aux.groupby(columns_level, as_index=False).agg(**{
             #     f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
             #     })
@@ -411,7 +413,7 @@ class AFO(dfo):
             mask_diff_by_register = ~pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][1]]) #total_venta_*_sin_asignar
 
             result = self.execute_assignment(
-                agg_base=agg_base[mask_diff_by_register][original_columns],
+                agg_base=base_of_diff[mask_diff_by_register][original_columns],
                 level=level+1,
                 type_sale=type_sale
             ) 
