@@ -382,8 +382,50 @@ class AFO(dfo):
         # 0 for empty values
         general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
                                 agg_values[type_sale]['cols_res'][0]] = 0
-        general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][1]]), 
-                                agg_values[type_sale]['cols_res'][1]] = 0
+        mask_within_assign = pd.isna(general_base[agg_values[type_sale]['cols_res'][1]])
+        general_base.loc[mask_within_assign, agg_values[type_sale]['cols_res'][1]] = 0
+
+        if mask_within_assign.sum() > 0:
+            print( 
+                f"WARNING: los valores totales no son iguales, numero de filas: {mask_within_assign.sum()}, nivel: {level+1}, tipo: {type_sale}, revisar en \n {const.ALERTS_DIR}")
+            
+            if level >= len(_properties["levels"])-1: 
+                exec_desc = f"El ultimo nivel de agrupacion de asignación aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"  
+                self.validate_alert(
+                    mask=mask_within_assign,
+                    description="aun se encuentran diferencias despues de la ultima asignación",
+                    type=self._type,
+                    exception_description=exec_desc,
+                    aux_table=general_base
+                )
+
+            #next columns level
+            columns_level = _properties['levels'][level+1]
+
+            #agroup by news columns level
+            general_base_aux = general_base[mask_within_assign]
+            general_base_aux.reset_index(drop=True, inplace=True)
+            # result_diff = general_base_aux.groupby(columns_level, as_index=False).agg(**{
+            #     f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
+            #     })
+
+            #get the registers of "columns level" with difference in total
+            base_of_diff = agg_base.merge(right=general_base_aux, on=columns_level, how="left")
+
+            #only the registers WITH difference in the total
+            mask_diff_by_register = ~pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][0]])
+
+            result = self.execute_assignment(
+                agg_base=agg_base[mask_diff_by_register][original_columns],
+                level=level+1,
+                type_sale=type_sale
+            ) 
+
+            base_merge = general_base.merge(right=result, on=original_columns, how="left", suffixes=suffixes)
+            mask_no_empty_totals = ~pd.isna(base_merge[total_columns[1]])
+            general_base.loc[mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[1]]
+            general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
+
 
         # omit the cero values in "total_venta_*_asignada"
         mask_cero_total = general_base[agg_values[type_sale]['cols_res'][0]] == 0
@@ -425,44 +467,7 @@ class AFO(dfo):
                             result_diff[total_columns[1]]) > _properties["permissible_diff_totals"])
         
         if mask_diff_results.sum() > 0:
-            print( 
-                f"WARNING: los valores totales no son iguales, numero de filas: {mask_diff_results.sum()}, nivel: {level+1}, tipo: {type_sale}, margen: {_properties['permissible_diff_totals']}, revisar en \n {const.ALERTS_DIR}")
             
-            if level >= len(_properties["levels"])-1: 
-                exec_desc = f"El ultimo nivel de agrupacion de asignación aun posee diferencias \n nivel: {level+1} \n tipo: {type_sale}"  
-                self.validate_alert(
-                    mask=mask_diff_results,
-                    description="aun se encuentran diferencias despues de la ultima asignación",
-                    type=self._type,
-                    exception_description=exec_desc,
-                    aux_table=result_diff
-                )
-
-            #next columns level
-            columns_level = _properties['levels'][level+1]
-
-            #agroup by news columns level
-            result_diff = result_diff[mask_diff_results]
-            result_diff = result_diff.groupby(columns_level, as_index=False).agg(**{
-                f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
-                })
-
-            #get the registers of "columns level" with difference in total
-            base_of_diff = agg_base.merge(right=result_diff, on=columns_level, how="left")
-
-            #only the registers WITH difference in the total
-            mask_diff_by_register = ~pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][0]])
-
-            result = self.execute_assignment(
-                agg_base=agg_base[mask_diff_by_register][original_columns],
-                level=level+1,
-                type_sale=type_sale
-            ) 
-
-            base_merge = general_base.merge(right=result, on=original_columns, how="left", suffixes=suffixes)
-            mask_no_empty_totals = ~pd.isna(base_merge[total_columns[1]])
-            general_base.loc[mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[1]]
-            general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
         
         mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"]))
