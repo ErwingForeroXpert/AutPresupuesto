@@ -375,38 +375,37 @@ class AFO(dfo):
             right=total_sales,
             on=columns_level,
             how="left")
-        mask_not_found_not_assigned =  ~pd.isna(assign_with_no_assign[agg_values[type_sale]['cols_res'][0]])
-        registers_not_merge_assigned = assign_with_no_assign[mask_not_found_not_assigned]
+        mask_not_found_not_assigned =  pd.isna(assign_with_no_assign[agg_values[type_sale]['cols_res'][0]])
 
         if mask_not_found_not_assigned.sum() > 0:
             print( 
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_not_found_not_assigned.sum()}, nivel: {level+1}, tipo: {type_sale}, revisar en \n {const.ALERTS_DIR}")
             
             if level >= len(_properties["levels"])-1: 
-                exec_desc = f"El ultimo nivel de agrupacion de asignación aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"  
+                exec_desc = f"El ultimo nivel de agrupacion aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"  
                 self.validate_alert(
-                    mask=mask_within_assign,
+                    mask=mask_not_found_not_assigned,
                     description="aun se encuentran diferencias despues de la ultima asignación",
                     type=self._type,
                     exception_description=exec_desc,
-                    aux_table=general_base
+                    aux_table=total_sales_not_assign
                 )
-
+            
             #next columns level
-            columns_level = _properties['levels'][level+1]
+            temp_columns_level = _properties['levels'][level+1]
 
             #agroup by news columns level
-            general_base_aux = general_base[mask_within_assign]
-            general_base_aux.reset_index(drop=True, inplace=True)
+            registers_not_merge_assigned = assign_with_no_assign[mask_not_found_not_assigned]
+            registers_not_merge_assigned.reset_index(drop=True, inplace=True)
             # result_diff = general_base_aux.groupby(columns_level, as_index=False).agg(**{
             #     f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
             #     })
 
-            #get the registers of "columns level" with difference in total
-            base_of_diff = agg_base.merge(right=general_base_aux, on=columns_level, how="left")
+            #get the registers of "columns level" with not assignation
+            base_of_diff = agg_base.merge(right=registers_not_merge_assigned, on=temp_columns_level, how="left")
 
-            #only the registers WITH difference in the total
-            mask_diff_by_register = ~pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][0]])
+            #only the registers with not posible distribution 
+            mask_diff_by_register = ~pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][1]]) #total_venta_*_sin_asignar
 
             result = self.execute_assignment(
                 agg_base=agg_base[mask_diff_by_register][original_columns],
@@ -414,14 +413,15 @@ class AFO(dfo):
                 type_sale=type_sale
             ) 
 
-            base_merge = general_base.merge(right=result, on=original_columns, how="left", suffixes=suffixes)
-            mask_no_empty_totals = ~pd.isna(base_merge[total_columns[1]])
-            general_base.loc[mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[1]]
+            base_merge = agg_base.merge(right=result, on=columns_level, how="left", indicator=True)
+            mask_no_empty = ((base_merge["_merge"] == "right_only")|(base_merge["_merge"] == "both"))
+            del base_merge['_merge']
+            base_merge.loc[mask_no_empty] = base_merge.loc[total_columns[1]]
             general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
 
             #remove process values
             total_sales_not_assign = total_sales_not_assign[~mask_not_found_not_assigned]
-            
+
         # insert two columns
         general_base = agg_base.merge(
             right=total_sales,
@@ -449,35 +449,35 @@ class AFO(dfo):
             (general_base[_properties["add_columns"][0]] * general_base[agg_values[type_sale]['cols_res'][1]]) # suma_venta + (porc_participacion * total_venta_*_sin_asignar)
  
 
-        # mask of only values assigment
-        mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
-            pat=_properties["filter_assignment"]["pattern"]))
+        # # mask of only values assigment
+        # mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
+        #     pat=_properties["filter_assignment"]["pattern"]))
         
-        #general base without "sin asignar"
-        all_assign = pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
-        total_sales_now = all_assign.groupby(
-            columns_level, as_index=False).agg(**aggregations[0])
+        # #general base without "sin asignar"
+        # all_assign = pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
+        # total_sales_now = all_assign.groupby(
+        #     columns_level, as_index=False).agg(**aggregations[0])
 
-        #get only "sin asignar" and "asignar positivos"
-        total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
+        # #get only "sin asignar" and "asignar positivos"
+        # total_sales_before = agg_base.groupby(columns_level, as_index=False).agg(**aggregations[0])
 
-        # difference between total sales of "suma venta asignada"
-        suffixes=('_x', '_y')
-        result_diff = total_sales_now.merge(
-            right=total_sales_before,
-            on=columns_level,
-            how="left",
-            suffixes=suffixes
-        )
+        # # difference between total sales of "suma venta asignada"
+        # suffixes=('_x', '_y')
+        # result_diff = total_sales_now.merge(
+        #     right=total_sales_before,
+        #     on=columns_level,
+        #     how="left",
+        #     suffixes=suffixes
+        # )
 
-        total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffix}" for suffix in suffixes]
+        # total_columns = [f"{agg_values[type_sale]['cols_res'][0]}{suffix}" for suffix in suffixes]
 
-        #if there was a difference in total
-        mask_diff_results = (np.absolute(result_diff[total_columns[0]] - \
-                            result_diff[total_columns[1]]) > _properties["permissible_diff_totals"])
+        # #if there was a difference in total
+        # mask_diff_results = (np.absolute(result_diff[total_columns[0]] - \
+        #                     result_diff[total_columns[1]]) > _properties["permissible_diff_totals"])
         
-        if mask_diff_results.sum() > 0:
-            pass
+        # if mask_diff_results.sum() > 0:
+        #     pass
         
         mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"]))
