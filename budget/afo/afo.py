@@ -401,7 +401,7 @@ class AFO(dfo):
         mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"]))
         
-        #general base without "sin asignar" and "asignaciones negativas"
+        #general base without "sin asignar"
         total_sales_now = general_base[mask_assing].groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
