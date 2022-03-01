@@ -356,7 +356,7 @@ class AFO(dfo):
         #mask for assign with negative values
         mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] < 0))
 
-        not_assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
+        not_assign = agg_base[(~mask_sectors) & mask_not_assign]  # delete invalid sectors and not assigment
         assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
         assign_negative = agg_base[~(mask_sectors) & mask_assign_negatives] #delete invalid sectors and save assign with negative values
         agg_base = agg_base[~(mask_sectors | mask_assign_negatives)] # delete invalid sectors or assign negatives
@@ -402,7 +402,8 @@ class AFO(dfo):
             pat=_properties["filter_assignment"]["pattern"]))
         
         #general base without "sin asignar"
-        total_sales_now = general_base[mask_assing].groupby(
+        all_assign = pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
+        total_sales_now = all_assign.groupby(
             columns_level, as_index=False).agg(**aggregations[0])
 
         #get only "sin asignar" and "asignar positivos"
