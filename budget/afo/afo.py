@@ -356,10 +356,10 @@ class AFO(dfo):
         #mask for assign with negative values
         mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] < 0))
 
-        not_assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
-        assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
-        assign_negative = agg_base[~(mask_sectors) & mask_assign_negatives] #delete invalid sectors and save assign with negative values
-        agg_base = agg_base[~(mask_sectors | mask_assign_negatives)] # delete invalid sectors or assign negatives
+        not_assign = agg_base[(~mask_sectors) & mask_not_assign]  # delete invalid sectors or assign negatives and not assigment
+        assign = agg_base[(~mask_sectors) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
+        # assign_negative = agg_base[~(mask_sectors) & mask_assign_negatives] #delete invalid sectors and save assign with negative values
+        agg_base = agg_base[~mask_sectors] # delete invalid sectors or assign negatives
         agg_base.reset_index(drop=True, inplace=True)
 
         # agrupation about "Ventas asignadas positivas"
