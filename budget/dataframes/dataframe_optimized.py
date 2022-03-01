@@ -366,6 +366,17 @@ class DataFrameOptimized():
         return route
 
     @staticmethod
+    def combine_columns(data: 'tuple[pd.DataFrame]', left: str, rigth: str, res_column: 'list|str', by: 'Function' = pd.nan, _type: str="left_merge", mask: list[bool] = None) -> pd.DataFrame:
+        if len(data) != 2:
+            raise ValueError("Invalid size for data")
+
+        if _type == "left_merge":
+            if left == rigth:
+                prefix = ("_x", "_y")
+            _mask = by(data[0][left]) if mask is None else mask
+            return data.loc[_mask, left] = 
+
+    @staticmethod
     def get_table_excel(path: str, sheet: str, header_idx: 'list' = None, skiprows: 'list' = None, converters: 'list' = None, *args, **kargs) -> 'DataFrameOptimized':
         """Returns a DataFrame instance that will be used to parse the table at the given path .
 
