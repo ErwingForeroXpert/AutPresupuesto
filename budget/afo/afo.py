@@ -370,24 +370,17 @@ class AFO(dfo):
         total_sales_not_assign = not_assign.groupby(
             columns_level, as_index=False).agg(**aggregations[1])
 
-        # insert two columns
-        general_base = agg_base.merge(
+        #registers ​​that could not be assigned
+        assign_with_no_assign = total_sales_not_assign.merge(
             right=total_sales,
             on=columns_level,
-            how="left").merge(
-            right=total_sales_not_assign,
-            on=columns_level,
             how="left")
+        mask_not_found_not_assigned =  ~pd.isna(assign_with_no_assign[agg_values[type_sale]['cols_res'][0]])
+        registers_not_merge_assigned = assign_with_no_assign[mask_not_found_not_assigned]
 
-        # 0 for empty values
-        general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
-                                agg_values[type_sale]['cols_res'][0]] = 0
-        mask_within_assign = pd.isna(general_base[agg_values[type_sale]['cols_res'][1]])
-        general_base.loc[mask_within_assign, agg_values[type_sale]['cols_res'][1]] = 0
-
-        if mask_within_assign.sum() > 0:
+        if mask_not_found_not_assigned.sum() > 0:
             print( 
-                f"WARNING: los valores totales no son iguales, numero de filas: {mask_within_assign.sum()}, nivel: {level+1}, tipo: {type_sale}, revisar en \n {const.ALERTS_DIR}")
+                f"WARNING: los valores totales no son iguales, numero de filas: {mask_not_found_not_assigned.sum()}, nivel: {level+1}, tipo: {type_sale}, revisar en \n {const.ALERTS_DIR}")
             
             if level >= len(_properties["levels"])-1: 
                 exec_desc = f"El ultimo nivel de agrupacion de asignación aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"  
@@ -426,6 +419,23 @@ class AFO(dfo):
             general_base.loc[mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[1]]
             general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
 
+            #remove process values
+            total_sales_not_assign = total_sales_not_assign[~mask_not_found_not_assigned]
+            
+        # insert two columns
+        general_base = agg_base.merge(
+            right=total_sales,
+            on=columns_level,
+            how="left").merge(
+            right=total_sales_not_assign,
+            on=columns_level,
+            how="left")
+
+        # 0 for empty values
+        general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
+                                agg_values[type_sale]['cols_res'][0]] = 0
+        mask_within_assign = pd.isna(general_base[agg_values[type_sale]['cols_res'][1]])
+        general_base.loc[mask_within_assign, agg_values[type_sale]['cols_res'][1]] = 0
 
         # omit the cero values in "total_venta_*_asignada"
         mask_cero_total = general_base[agg_values[type_sale]['cols_res'][0]] == 0
@@ -467,7 +477,7 @@ class AFO(dfo):
                             result_diff[total_columns[1]]) > _properties["permissible_diff_totals"])
         
         if mask_diff_results.sum() > 0:
-            
+            pass
         
         mask_assing = (~general_base[_properties["filter_assignment"]["column"]].str.contains(
             pat=_properties["filter_assignment"]["pattern"]))
