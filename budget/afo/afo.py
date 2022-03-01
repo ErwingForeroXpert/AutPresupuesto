@@ -379,7 +379,7 @@ class AFO(dfo):
 
         if mask_not_found_not_assigned.sum() > 0:
             print( 
-                f"WARNING: los valores totales no son iguales, numero de filas: {mask_not_found_not_assigned.sum()}, nivel: {level+1}, tipo: {type_sale}, revisar en \n {const.ALERTS_DIR}")
+                f"WARNING: los valores totales no son iguales, numero de filas: {mask_not_found_not_assigned.sum()}, nivel: {level+1}, tipo: {type_sale}, afo: {self._type}")
             
             if level >= len(_properties["levels"])-1: 
                 exec_desc = f"El ultimo nivel de agrupacion aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"  
@@ -393,14 +393,17 @@ class AFO(dfo):
             
             #next columns level
             temp_columns_level = _properties['levels'][level+1]
+            #delete total assign and no utils columns
+            columns_no_merge = [agg_values[type_sale]['cols_res'][0], *np.setdiff1d(columns_level, temp_columns_level)]
 
             #agroup by news columns level
             registers_not_merge_assigned = assign_with_no_assign[mask_not_found_not_assigned]
+            registers_not_merge_assigned.drop(columns_no_merge, axis = 1, inplace = True)
             registers_not_merge_assigned.reset_index(drop=True, inplace=True)
             # result_diff = general_base_aux.groupby(columns_level, as_index=False).agg(**{
             #     f"{agg_values[type_sale]['cols_res'][0]}": pd.NamedAgg(column=total_columns[1], aggfunc=np.sum) #total_venta_*_y
             #     })
-
+            
             #get the registers of "columns level" with not assignation
             base_of_diff = agg_base.merge(right=registers_not_merge_assigned, on=temp_columns_level, how="left")
 
