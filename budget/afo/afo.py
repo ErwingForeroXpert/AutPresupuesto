@@ -327,7 +327,7 @@ class AFO(dfo):
         result = self.table.groupby(_properties["agg_columns"], as_index=False).agg(**aggregations)
         return result
 
-    def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'str' = "actual"):
+    def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'str' = "actual", initial_base: 'pd.DataFrame'=None):
 
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.ASSIGNMENT.name)
