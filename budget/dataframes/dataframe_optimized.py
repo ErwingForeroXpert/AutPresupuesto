@@ -124,10 +124,11 @@ class DataFrameOptimized():
             exception_description (str, optional): [description]. Defaults to "".
         """
         if mask.sum() > 0:
-            self.insert_alert(
-                alert=self.table[mask],
-                description=description
-            )
+            if aux_table is None:
+                self.insert_alert(
+                    alert=self.table[mask],
+                    description=description
+                )
             if exception:
                 table = self.get_alerts() if aux_table is None else aux_table[mask]
                 table.to_csv(
