@@ -300,6 +300,10 @@ PROCESSES = {
             "levels": [["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector", "mes"],
                        ["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector"],
                        ["oficina_venta", "trans_segmento", "sector"]],
+            "unique_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
+                                "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato",
+                                "sector", "categoria", "sub_categoria", "linea", "marca", 
+                                "mes"]
         },
         "compra": {
             "filter_assignment": {"column": "categoria", "pattern": "(?i)sin asignar"},
@@ -320,6 +324,9 @@ PROCESSES = {
             "levels": [["oficina_venta", "cod_agente", "sector", "mes"],
                        ["oficina_venta", "cod_agente", "sector"],
                        ["oficina_venta", "cod_agente"]],
+            "unique_columns":["oficina_venta", "cod_agente",
+                            "sector", "categoria", "sub_categoria", "linea", "marca", 
+                            "mes"]
         },
     }
 }

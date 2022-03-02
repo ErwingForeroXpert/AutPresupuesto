@@ -391,6 +391,10 @@ class AFO(dfo):
                     aux_table=total_sales_not_assign
                 )
             
+            #for similar "suma venta" columns
+            suffixes = ("_x", "_y")
+            total_columns = [f"{agg_values[type_sale]['column']}{suffix}" for suffix in suffixes]
+
             #next columns level
             temp_columns_level = _properties['levels'][level+1]
             #delete total assign and no utils columns
@@ -418,11 +422,11 @@ class AFO(dfo):
                 type_sale=type_sale
             ) 
 
-            base_merge = agg_base.merge(right=result, on=columns_level, how="left", indicator=True)
+            base_merge = agg_base.merge(right=result, on=_properties["unique_columns"], how="left", indicator=True, suffixes=suffixes)
             mask_no_empty = ((base_merge["_merge"] == "right_only")|(base_merge["_merge"] == "both"))
             del base_merge['_merge']
-            base_merge.loc[mask_no_empty] = base_merge.loc[total_columns[1]]
-            general_base.loc[~mask_no_empty_totals, agg_values[type_sale]['cols_res'][0]] = base_merge[total_columns[0]]
+            agg_base.loc[mask_no_empty, agg_values[type_sale]['column']] = agg_base.loc[mask_no_empty, total_columns[1]]
+            agg_base.loc[~mask_no_empty, agg_values[type_sale]['column']] = agg_base.loc[~mask_no_empty, total_columns[0]]
 
             #remove process values
             total_sales_not_assign = total_sales_not_assign[~mask_not_found_not_assigned]
