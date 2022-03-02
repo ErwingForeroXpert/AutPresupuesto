@@ -428,8 +428,8 @@ class AFO(dfo):
             #replace by new values
             agg_base = pd.concat((result, base_of_diff[mask_not_assign_found][original_columns]), ignore_index=True)
             #recalculate total sales
-            total_sales = result.groupby(
-                columns_level, as_index=False).agg(**aggregations[0])
+            # total_sales = result.groupby(
+            #     columns_level, as_index=False).agg(**aggregations[0])
             #remove process values (not necesary recalculate)
             total_sales_not_assign = assign_with_no_assign[~mask_not_found_not_assigned]
             del total_sales_not_assign[agg_values[type_sale]['cols_res'][0]] 
@@ -453,8 +453,8 @@ class AFO(dfo):
         # 0 for empty values
         general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][0]]), 
                                 agg_values[type_sale]['cols_res'][0]] = 0
-        mask_within_assign = pd.isna(general_base[agg_values[type_sale]['cols_res'][1]])
-        general_base.loc[mask_within_assign, agg_values[type_sale]['cols_res'][1]] = 0
+        general_base.loc[pd.isna(general_base[agg_values[type_sale]['cols_res'][1]]), 
+                                agg_values[type_sale]['cols_res'][1]] = 0
 
         # omit the cero values in "total_venta_*_asignada"
         mask_cero_total = general_base[agg_values[type_sale]['cols_res'][0]] == 0
