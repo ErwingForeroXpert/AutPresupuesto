@@ -1,15 +1,18 @@
 # image
 FROM python:3.9
+LABEL maintainer="erwing.forero@xpertgroup.co"
 
-#limit object
-FROM base AS python-deps 
+# dir
+WORKDIR /budget-app
 
 # Paste all project
-COPY ./ ./
+COPY . ./budget-app
 
-# runtime
-FROM base AS runtime 
 
-# Copy virtual env from python-deps stage
-COPY --from=python-deps /.venv /.venv
-ENV PATH="/.venv/bin:$PATH"
+# sripts
+RUN pip install --upgrade pip && \
+    pip --no-cache-dir install -r requirements.txt && \
+    pipenv install pipenv install $(test "$DJANGO_ENV" == production || echo "--dev") --deploy --system --ignore-pipfile --deploy --system --ignore-pipfile
+
+# execute project
+CMD ["pipenv", "run", "budget/main.py"]

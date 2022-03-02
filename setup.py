@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Learn more: https://github.com/ErwingForeroXpert/Presupuesto
+# Learn more: https://github.com/ErwingForeroXpert/AutPresupuesto
 
 from setuptools import setup, find_packages
 
