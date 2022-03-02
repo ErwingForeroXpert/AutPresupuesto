@@ -102,7 +102,7 @@ class AFO(dfo):
         #save progress in file
         temp_data = self.table if data is None else data
 
-        temp_data.to_csv(route_file, sep=";", index=False, encoding="latin-1")
+        temp_data.to_csv(route_file, sep=",", index=False, encoding="latin-1")
 
         #save progress for test 
         temp_data.to_feather(route_file_test)
@@ -425,14 +425,21 @@ class AFO(dfo):
                 type_sale=type_sale
             ) 
 
-            base_merge = agg_base.merge(right=result, on=_properties["unique_columns"], how="left", indicator=True, suffixes=suffixes)
-            mask_no_empty = ((base_merge["_merge"] == "right_only")|(base_merge["_merge"] == "both"))
-            del base_merge['_merge']
-            agg_base.loc[mask_no_empty, agg_values[type_sale]['column']] = agg_base.loc[mask_no_empty, total_columns[1]]
-            agg_base.loc[~mask_no_empty, agg_values[type_sale]['column']] = agg_base.loc[~mask_no_empty, total_columns[0]]
+            #replace by new values
+            agg_base = pd.concat((result, base_of_diff[mask_not_assign_found][original_columns]), ignore_index=True)
+            #recalculate total sales
+            total_sales = result.groupby(
+                columns_level, as_index=False).agg(**aggregations[0])
+            #remove process values (not necesary recalculate)
+            total_sales_not_assign = assign_with_no_assign[~mask_not_found_not_assigned]
+            del total_sales_not_assign[agg_values[type_sale]['cols_res'][0]] 
 
-            #remove process values
-            total_sales_not_assign = total_sales_not_assign[~mask_not_found_not_assigned]
+            # base_merge = agg_base.merge(right=result, on=_properties["unique_columns"], how="left", indicator=True, suffixes=suffixes)
+            # mask_no_empty = ((base_merge["_merge"] == "right_only")|(base_merge["_merge"] == "both"))
+            # del base_merge['_merge']
+            # agg_base.loc[mask_no_empty, agg_values[type_sale]['column']] = agg_base.loc[mask_no_empty, total_columns[1]]
+            # agg_base.loc[~mask_no_empty, agg_values[type_sale]['column']] = agg_base.loc[~mask_no_empty, total_columns[0]]
+
 
         # insert two columns
         general_base = agg_base.merge(
