@@ -413,7 +413,7 @@ class AFO(dfo):
             #     })
             
             #get the registers of "columns level" with not assignation
-            base_of_diff = agg_base.merge(right=registers_not_merge_assigned, on=temp_columns_level, how="left")
+            base_of_diff = agg_base.merge(right=assign_with_no_assign[mask_not_found_not_assigned], on=columns_level, how="left")
 
             #only the registers with not posible distribution 
             mask_not_assign_found = pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][1]]) & \
@@ -428,8 +428,8 @@ class AFO(dfo):
             #replace by new values
             agg_base = pd.concat((result, base_of_diff[mask_not_assign_found][original_columns]), ignore_index=True)
             #recalculate total sales
-            # total_sales = result.groupby(
-            #     columns_level, as_index=False).agg(**aggregations[0])
+            total_sales = result.groupby(
+                columns_level, as_index=False).agg(**aggregations[0])
             #remove process values (not necesary recalculate)
             total_sales_not_assign = assign_with_no_assign[~mask_not_found_not_assigned]
             del total_sales_not_assign[agg_values[type_sale]['cols_res'][0]] 
