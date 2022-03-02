@@ -1,0 +1,12 @@
+Proceso.txt
+*.xlsb
+.vscode
+
+*.pyc
+__pycache__
+
+_dev*
+*.csv
+*.xls*
+*.xlsx
+*.ftr
