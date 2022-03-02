@@ -376,6 +376,7 @@ class AFO(dfo):
             on=columns_level,
             how="left")
         mask_not_found_not_assigned =  pd.isna(assign_with_no_assign[agg_values[type_sale]['cols_res'][0]])
+        mask_not_found_not_assigned = ass
 
         if mask_not_found_not_assigned.sum() > 0:
             print( 
