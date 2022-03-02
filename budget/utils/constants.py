@@ -299,7 +299,7 @@ PROCESSES = {
             "permissible_diff_totals": 1000,
             "levels": [["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector", "mes"],
                        ["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector"],
-                       ["oficina_venta", "trans_segmento", "sector"]],
+                       ["oficina_venta", "sector"]],
             "unique_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
                                 "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato",
                                 "sector", "categoria", "sub_categoria", "linea", "marca", 

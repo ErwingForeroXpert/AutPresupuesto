@@ -416,11 +416,11 @@ class AFO(dfo):
             base_of_diff = agg_base.merge(right=registers_not_merge_assigned, on=temp_columns_level, how="left")
 
             #only the registers with not posible distribution 
-            mask_diff_by_register = pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][1]]) & \
+            mask_not_assign_found = pd.isna(base_of_diff[agg_values[type_sale]['cols_res'][1]]) & \
                 (base_of_diff[_properties["filter_assignment"]["column"]].str.contains(pat=_properties["filter_assignment"]["pattern"])) #total_venta_*_sin_asignar not found and "sin asignar"
 
             result = self.execute_assignment(
-                agg_base=base_of_diff[~mask_diff_by_register][original_columns],
+                agg_base=base_of_diff[~mask_not_assign_found][original_columns],
                 level=level+1,
                 type_sale=type_sale
             ) 
