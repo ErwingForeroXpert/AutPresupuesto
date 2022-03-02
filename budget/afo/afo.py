@@ -354,7 +354,7 @@ class AFO(dfo):
             pat=_properties["filter_assignment"]["pattern"])
 
         #mask for assign with negative values
-        mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] < 0))
+        mask_assign_negatives = ((~mask_not_assign) & (agg_base[agg_values[type_sale]['column']] <= 0))
 
         not_assign = agg_base[(~mask_sectors) & mask_not_assign]  # delete invalid sectors and not assigment
         assign = agg_base[(~(mask_sectors | mask_assign_negatives)) & (~mask_not_assign)] # delete invalid sectors or assign negatives and assigment
@@ -375,8 +375,8 @@ class AFO(dfo):
             right=total_sales,
             on=columns_level,
             how="left")
-        mask_not_found_not_assigned =  pd.isna(assign_with_no_assign[agg_values[type_sale]['cols_res'][0]])
-        mask_not_found_not_assigned = ass
+        mask_not_found_not_assigned =  pd.isna(assign_with_no_assign[agg_values[type_sale]['cols_res'][0]]) & \
+            (np.absolute(assign_with_no_assign[agg_values[type_sale]['cols_res'][1]]) != 0)
 
         if mask_not_found_not_assigned.sum() > 0:
             print( 
