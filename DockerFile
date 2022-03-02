@@ -12,7 +12,7 @@ COPY . ./budget-app
 # sripts
 RUN pip install --upgrade pip && \
     pip --no-cache-dir install -r requirements.txt && \
-    pipenv install pipenv install $(test "$DJANGO_ENV" == production || echo "--dev") --deploy --system --ignore-pipfile --deploy --system --ignore-pipfile
+    pipenv install --ignore-pipfile
 
 # execute project
 CMD ["pipenv", "run", "budget/main.py"]
