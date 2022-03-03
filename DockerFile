@@ -6,8 +6,7 @@ LABEL maintainer="erwing.forero@xpertgroup.co"
 WORKDIR /budget-app
 
 # Paste all project
-COPY . ./budget-app
-
+COPY . .
 
 # sripts
 RUN pip install --upgrade pip && \
@@ -15,4 +14,4 @@ RUN pip install --upgrade pip && \
     pipenv install --ignore-pipfile
 
 # execute project
-CMD ["pipenv", "run", "budget/main.py"]
+CMD ["pipenv", "run", "./budget/main.py"]
