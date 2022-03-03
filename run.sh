@@ -1,5 +1,4 @@
-docker run -u=$(id -u $USER):$(id -g $USER) \
-           -e DISPLAY \
-           -v /tmp/.X11-unix ubuntu \
-           --rm \
-           budget-gui-app \
+docker run -it \
+           -e DISPLAY=$DISPLAY \
+           -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+           budget-gui-app
