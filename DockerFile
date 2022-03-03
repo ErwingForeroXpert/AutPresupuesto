@@ -14,4 +14,4 @@ RUN pip install --upgrade pip && \
     pipenv install --system --deploy
 
 # execute project
-CMD ["pipenv", "run", "budget/main.py"]
+CMD ["pipenv", "run", "python", "budget/main.py"]
