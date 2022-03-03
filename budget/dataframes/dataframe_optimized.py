@@ -8,7 +8,6 @@ from sre_compile import isstring
 from time import time
 from utils import constants as const
 from afo import afo_types
-from pydantic import ListMinLengthError
 from utils import index as utils
 from typing import Any
 import pandas as pd
@@ -303,7 +302,7 @@ class DataFrameOptimized():
             _temp_table = dataframe_right
         elif isinstance(dataframe_right, (list, tuple)):
             if len(dataframe_right) > 2:
-                raise ListMinLengthError("Invalid size for dataframe_right")
+                raise ValueError("Invalid size for dataframe_right")
 
             _temp_table = [
                     self.table.merge(
