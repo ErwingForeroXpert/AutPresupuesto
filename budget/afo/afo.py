@@ -4,6 +4,7 @@
 #
 
 import os
+import re
 import numpy as np
 import pandas as pd
 from typing import Any
@@ -43,18 +44,45 @@ class AFO(dfo):
 
         return self.properties_process
 
-    def load_progress(self, progress: int) -> None: 
-        pass
-        # if progress == 0:
- 
-        # elif progress == 1:
-        
-        # elif progress == 1:
-        
-        # elif progress == 1:
+    def load_progress(self, level: int) -> None: 
+        """Load the progress information from the previous files.
 
-    def process(self, driver: 'Driver'):
-        
+        Args:
+            level (int): level of actual process to load
+
+        Raises:
+            ValueError: if files not exist
+        """
+        files = os.listdir(os.path.join(const.ROOT_DIR, f"test/files/"))
+        name_regex = f"progress_{level}_{AFO_TYPES[self._type].value}.*"
+        extract_type_regex = fr"(?<=progress_{level}_{AFO_TYPES[self._type].value}).*(?=.ftr)"
+
+        reg = re.compile(name_regex)
+        files_found  = list(filter(reg.match, files))
+
+        if files_found != []:
+            if level <= 1 and "formula" in self.properties["processes"]:
+                self.table = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/{files_found[0]}"))
+            elif level == 2:
+                self.load_progress(level=1)
+
+                if "assigment" in self.properties["processes"]:
+                    names_types_assign = [re.findall(extract_type_regex, filename)[0] for filename in files_found]
+
+                    self.assigments = {
+                        f"{names_types_assign[idx]}": pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/{filename}"))
+                        for idx, filename in enumerate(files_found)
+                    }   
+
+        else:
+            raise ValueError(f"Files not found, name regex: {name_regex}")
+
+
+    def process(self, driver: 'Driver', aux_afo: 'AFO'=None):
+        #load progress
+        if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS > -1:
+            self.load_progress(level=feature_flags.SKIP_AFO_PROCESS)
+
         if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS < 0:
                 self.save_actual_progress(level=0) #save base loaded
 
@@ -66,18 +94,20 @@ class AFO(dfo):
         if "assigment" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 2:  
             type_sales = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)["agg_values"].keys()
              #get types of sales, see utils/contants
-            self.assigments = [
-                self.execute_assignment(
+            self.assigments = {
+                f"{_type_sale}": self.execute_assignment(
                     agg_base=self.execute_agrupation(), 
                     level=0, 
                     type_sale=_type_sale) for _type_sale in type_sales
-                ]
+            }
             if feature_flags.ENVIROMENT == "DEV":
-                for idx,  assigment in enumerate(self.assigments):
-                    self.save_actual_progress(data=assigment, level=2, optional_end=f"_{list(type_sales)[idx]}")
+                type_sales = list(type_sales)
+                for _type,  assigment in self.assigments.items():
+                    self.save_actual_progress(data=assigment, level=2, optional_end=f"_{_type}")
 
         if "consolidation" in self.properties["processes"]:
-            pass
+            result = self.execute_consolidation(aux_afo=aux_afo, driver=driver)
+
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
 
@@ -448,6 +478,28 @@ class AFO(dfo):
             pat=_properties["filter_assignment"]["pattern"]))
 
         return pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
+
+    def execute_consolidation(self, aux_afo: 'AFO' = None, **kargs):
+        _properties = self.get_properties_for_process(
+            AFO_PROCESSES.CONSOLIDATION.name)
+
+        #delete no required columns
+        self.assigments["actual"].drop(_properties["no_required_columns"]["actual"], axis = 1, inplace = True) 
+        self.assigments["anterior"].drop(_properties["no_required_columns"]["anterior"], axis = 1, inplace = True) 
+
+
+        temp_base = self.assigments["actual"].merge(
+            right=self.assigments["anterior"],
+            on=_properties["group_sales_by"],
+            how="left"
+        )
+        mask_nan = dfo.mask_by(temp_base, {"column": _properties["validate_nan"]}, aux_func=pd.isna)[1]
+        temp_base.loc[mask_nan, _properties["validate_nan"]] = 0
+
+        #agrupation?
+
+        aux_afo.process(**kargs)
+        afo_table = aux_afo.table
 
     @staticmethod
     def get_properties(_type: str) -> None:

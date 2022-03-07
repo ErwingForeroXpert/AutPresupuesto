@@ -119,7 +119,7 @@ AFO_TYPES = {
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price,
         },
-        "processes": ["formula", "assigment"]
+        "processes": ["formula", "assigment", "consolidation"]
     },
 }
 
@@ -328,6 +328,31 @@ PROCESSES = {
                             "sector", "categoria", "sub_categoria", "linea", "marca", 
                             "mes"]
         },
+    },
+    "consolidation":{
+        "compra": {
+            "group_sales_by": [ "oficina_venta", "cod_agente", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
+            "no_required_columns":{
+                "actual": ["sum_venta_anterior"],
+                "anterior": ["sum_venta_ppto", "sum_venta_actual"]
+            },
+            "validate_nan": ["sum_venta_anterior"],
+            "filters": [
+                {"column": "ventaact", "more": 0},
+                {"column": "ventaactneg", "equals": 0}, #see dataframe_optimized.mask_by
+            ],
+            "agg_afo_aux": [""],
+            "agg_values": {
+                "actual":{"cols_res": ["total_venta_act_asignada",
+                              "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
+                "anterior": {"cols_res": ["total_venta_ant_asignada", 
+                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"},
+                "presupuesto": {"cols_res": ["total_venta_ppto_asignada", 
+                              "total_venta_ppto_sin_asignar"], "column": "sum_venta_ppto"}
+            },
+            "add_columns": ["porc_participacion"],
+            "permissible_diff_totals": 1000,
+        }
     }
 }
 

@@ -108,7 +108,7 @@ class Application():
         try:
             async_loop.run_until_complete(action())
         finally:
-            async_loop.close()
+            print("event end")
 
     def insert_action(self, _type: str, name: str, cb: 'Function', event_loop=None, **kargs) -> None:
         """Inserts a function to the type selector.

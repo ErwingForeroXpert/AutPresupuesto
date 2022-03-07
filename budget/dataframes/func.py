@@ -94,3 +94,4 @@ def mask_number(value: 'Any') -> str:
             return int64(found)
         except ValueError:
             return NaN
+

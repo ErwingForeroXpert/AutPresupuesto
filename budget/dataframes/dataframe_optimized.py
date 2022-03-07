@@ -4,6 +4,7 @@
 #
 
 import os
+import re
 from sre_compile import isstring
 from time import time
 from utils import constants as const
@@ -364,6 +365,75 @@ class DataFrameOptimized():
         self.table.to_csv(path_or_buf=route, sep=sep, **kargs)
 
         return route
+
+    @staticmethod
+    def mask_by(data: 'pd.DataFrame', filter: 'Any', replace: bool = False, aux_func: 'func' = None) ->'tuple[pd.DataFrame, pd.Series]':
+        """Mask column with a given filter.
+
+        Args:
+            data (pd.DataFrame): [description]
+            filter (Object): {
+                "column": name of column of data to be filter,
+                "<<TYPE>>":"<<VALUE>>"
+                <<TYPE>>, permisible values: "more", "less", "equal", "diff", "contains" 
+                    and valid merge 
+                    "<<TYPE>>_and_<<TYPE>>" or "<<TYPE>>_or_<<TYPE>>", example:
+                        "more_and_equals", "more_or_less"
+                <<Value>>, permisible Any
+                
+                Examples:
+
+                    {"column": "first_col", "equal": 0}
+                    {"column": "first_col", "equal_or_less": 0}
+                    {"column": "first_col", "contains": "(?i)_final"}
+            }
+            replace (bool, optional): replace dataframe by dataframe filtered. Defaults to False.
+            aux_func (Any, optional): Function to filter column. Defaults to None.
+        Raises:
+            ValueError: column is required
+            ValueError: column not found in data
+
+        Returns:
+            pd.DataFrame, pd.Series: dataframe, mask of fil
+        """
+        _keys = filter.keys()
+        if "column" not in _keys:
+            raise ValueError("column is required")
+        
+        if filter["column"] not in data.columns.tolist():
+            raise ValueError("column not found in data")
+
+        column = filter["column"]
+
+        if aux_func is not None:
+            mask = aux_func(data[column])
+        elif (intersec:=re.search(r'_and_|_or_',filter_str)) is not None:
+
+            filter_str, value = _keys[1], filter[_keys[1]]
+
+            _filters = filter_str.split(intersec)
+            for _filter in _filters:
+                if "_and_" == intersec:
+                    mask = DataFrameOptimized.mask_by(data, {"column": column, f"{_filter}": value}) if mask is None  \
+                        else mask & DataFrameOptimized.mask_by(data, {"column": column, f"{_filter}": value})[1]
+                elif "_or_" == intersec:
+                    mask = DataFrameOptimized.mask_by(data, {"column": column, f"{_filter}": value}) if mask is None  \
+                        else mask | DataFrameOptimized.mask_by(data, {"column": column, f"{_filter}": value})[1]
+        else:
+            filter_str, value = _keys[1], filter[_keys[1]]
+
+            if "equal" in filter_str:
+                mask = data[column] == value
+            elif "diff" in filter_str:
+                mask = data[column] != value
+            elif "less" in filter_str:
+                mask = data[column] < value
+            elif "more" in filter_str:
+                mask = data[column] > value
+            elif "contains" in filter_str:
+                mask = data[column].str.contains(value)
+
+        return (data[mask], mask) if replace is True else (data, mask)
 
     @staticmethod
     def combine_columns(data: 'tuple[pd.DataFrame]', key_columns: 'list|str', res_column: 'list|str', by: 'Function' = np.nan, _type: str="left_merge", mask: list[bool] = None) -> pd.DataFrame:

@@ -11,6 +11,7 @@ from utils.constants import PROCESSES
 class AFO_PROCESSES(Enum):
     FORMULA = "formula"
     ASSIGNMENT = "assignment"
+    CONSOLIDATION = "consolidation"
     
     @classmethod
     def exist(cls, key):
