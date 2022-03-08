@@ -3,6 +3,7 @@
 #    @author: ErwingForero
 #
 
+from functools import reduce
 import os
 import re
 from sre_compile import isstring
@@ -367,7 +368,7 @@ class DataFrameOptimized():
         return route
 
     @staticmethod
-    def mask_by(data: 'pd.DataFrame', filter: 'Any', replace: bool = False, aux_func: 'func' = None) ->'tuple[pd.DataFrame, pd.Series]':
+    def mask_by(data: 'pd.DataFrame', filter: 'object', replace: bool = False, aux_func: 'func' = None) ->'tuple[pd.DataFrame, pd.Series]':
         """Mask column with a given filter.
 
         Args:
@@ -396,18 +397,22 @@ class DataFrameOptimized():
         Returns:
             pd.DataFrame, pd.Series: dataframe, mask of fil
         """
-        _keys = filter.keys()
+        _keys = list(filter.keys())
         if "column" not in _keys:
             raise ValueError("column is required")
         
-        if filter["column"] not in data.columns.tolist():
-            raise ValueError("column not found in data")
-
-        column = filter["column"]
+        if isinstance(filter["column"], (tuple, list)) and len(filter["column"]) > 1:
+            if reduce(lambda a,b: (a not in data.columns.tolist()) & (b not in data.columns.tolist()), filter["column"]): #reduce list 
+                raise ValueError("column not found in data")
+            column = filter["column"]
+        else:
+            column = filter["column"][0] if isinstance(filter["column"], (tuple, list)) else filter["column"]
+            if column not in data.columns.tolist():
+                raise ValueError("column not found in data")
 
         if aux_func is not None:
             mask = aux_func(data[column])
-        elif (intersec:=re.search(r'_and_|_or_',filter_str)) is not None:
+        elif (intersec:=re.search(r'_and_|_or_', _keys[1])) is not None:
 
             filter_str, value = _keys[1], filter[_keys[1]]
 
@@ -436,16 +441,39 @@ class DataFrameOptimized():
         return (data[mask], mask) if replace is True else (data, mask)
 
     @staticmethod
-    def combine_columns(data: 'tuple[pd.DataFrame]', key_columns: 'list|str', res_column: 'list|str', by: 'Function' = np.nan, _type: str="left_merge", mask: list[bool] = None) -> pd.DataFrame:
-        # if len(data) != 2:
-        #     raise ValueError("Invalid size for data")
+    def combine_columns(data: 'tuple[pd.DataFrame]', suffixes: 'tuple(str)', on: 'str' = None, left_on: 'str' = None, right_on: 'str' = None, how: 'str'= None, **kargs) -> pd.DataFrame:
 
-        # if _type == "left_merge":
-        #     if res_column in key_columns:
-        #         prefix = ("_x", "_y")
-        #     _mask = by(data[0][left]) if mask is None else mask
-        #     return data.loc[_mask, left] = 
-        pass
+        if len(data) != 2:
+            raise ValueError("Invalid size for data")
+
+        _temp_table = data[0].merge(
+                right=data[1],
+                on=on,
+                left_on=left_on,
+                right_on=right_on,
+                how=how,
+                suffixes= suffixes,
+                indicator=True,
+                **kargs
+            )
+
+        columns_with_suffixes = filter(lambda column: reduce(lambda a,b: (a in column) | (b in column), suffixes), _temp_table.columns.tolist())
+
+        for idx, left_column in enumerate(columns_with_suffixes[::2]):
+            right_column = columns_with_suffixes[idx+1]
+            mask = pd.isna(left_column)
+            column_without_suffixes = columns_with_suffixes[0]
+            #delete suffixes
+            for suffix in suffixes:
+                column_without_suffixes.replace(suffix, "")
+
+            _temp_table.loc[~mask, column_without_suffixes] =  _temp_table[left_column]
+            _temp_table.loc[mask, column_without_suffixes] =  _temp_table[right_column]
+            
+
+        _temp_table.drop([*columns_with_suffixes, "_merge"], axis = 1, inplace = True)
+
+        return _temp_table
 
     @staticmethod
     def get_table_excel(path: str, sheet: str, header_idx: 'list' = None, skiprows: 'list' = None, converters: 'list' = None, *args, **kargs) -> 'DataFrameOptimized':

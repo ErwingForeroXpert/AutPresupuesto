@@ -82,7 +82,7 @@ AFO_TYPES = {
         "processes": ["formula"]
     },
     "compra": {
-        "sheet": "AFO -  Directa",
+        "sheet": "AFO -  Compra",
         "regex_name": r".*compra.*",
         "skiprows": [2, None],
         "delimiter": ";",
@@ -336,21 +336,50 @@ PROCESSES = {
                 "actual": ["sum_venta_anterior"],
                 "anterior": ["sum_venta_ppto", "sum_venta_actual"]
             },
-            "validate_nan": ["sum_venta_anterior"],
-            "filters": [
-                {"column": "ventaact", "more": 0},
-                {"column": "ventaactneg", "equals": 0}, #see dataframe_optimized.mask_by
-            ],
-            "agg_afo_aux": [""],
-            "agg_values": {
-                "actual":{"cols_res": ["total_venta_act_asignada",
-                              "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
-                "anterior": {"cols_res": ["total_venta_ant_asignada", 
-                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"},
-                "presupuesto": {"cols_res": ["total_venta_ppto_asignada", 
-                              "total_venta_ppto_sin_asignar"], "column": "sum_venta_ppto"}
+            "validate_nan": "sum_venta_anterior",
+            "agg_afo_aux": {
+                "actual": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                "anterior": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                "presupuesto": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
             },
-            "add_columns": ["porc_participacion"],
+            "agg_afo_values": {
+                "actual":{"col_res": "sum_venta_actual", "column": "venta_nta_acum_anio_actual"},
+                "anterior": {"col_res": "sum_venta_anterior", "column": "venta_nta_acum_anio_anterior"},
+                "presupuesto": {"col_res": "sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"}
+            },
+            "agg_afo_aux_2": {
+                "actual": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                "anterior": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                "presupuesto": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+            },
+            "agg_afo_values_2": {
+                "actual":{"col_res": "sum_segmento_actual", "column": "sum_venta_actual"},
+                "anterior": {"col_res": "sum_segmento_anterior", "column": "sum_venta_anterior"},
+                "presupuesto": {"col_res": "sum_segmento_ppto", "column": "sum_venta_ppto"}
+            },
+            "merge_total":{
+                "left": ['oficina_venta', 'cod_agente', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'], #compra columns
+                "right": ['oficina_venta', 'cod_agente_comercial', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'] #aux afo(calle) columns
+            },
+            "merge_values":{
+                "left": ['oficina_venta', 'cod_agente', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'], #compra columns
+                "right": ['oficina_venta', 'cod_agente_comercial', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'] #aux afo(calle) columns
+            },
+            "filters_merge": {
+                "actual":[
+                    {"column": "sum_venta_actual", "more": 0},
+                    {"column": "sum_venta_anterior", "equal": 0},
+                ],
+                "anterior":[
+                    {"column": "sum_venta_ppto", "more": 0},
+                    {"column": "suma_venta_ant", "equal": 0},
+                ],
+                "presupuesto":[
+                    {"column": "ventaact", "more": 0},
+                    {"column": "ventaactneg", "equal": 0},
+                ]
+            },
+            "add_column": "ventas_a_calle",
             "permissible_diff_totals": 1000,
         }
     }

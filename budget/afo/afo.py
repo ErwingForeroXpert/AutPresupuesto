@@ -53,17 +53,19 @@ class AFO(dfo):
         Raises:
             ValueError: if files not exist
         """
+        _max_level = min(len(self.properties["processes"]), level)
+
         files = os.listdir(os.path.join(const.ROOT_DIR, f"test/files/"))
-        name_regex = f"progress_{level}_{AFO_TYPES[self._type].value}.*"
-        extract_type_regex = fr"(?<=progress_{level}_{AFO_TYPES[self._type].value}).*(?=.ftr)"
+        name_regex = f"progress_{_max_level}_{AFO_TYPES[self._type].value}.*"
+        extract_type_regex = fr"(?<=progress_{_max_level}_{AFO_TYPES[self._type].value}_).*(?=.ftr)"
 
         reg = re.compile(name_regex)
         files_found  = list(filter(reg.match, files))
 
         if files_found != []:
-            if level <= 1 and "formula" in self.properties["processes"]:
+            if _max_level <= 1 and "formula" in self.properties["processes"]:
                 self.table = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/{files_found[0]}"))
-            elif level == 2:
+            elif _max_level == 2:
                 self.load_progress(level=1)
 
                 if "assigment" in self.properties["processes"]:
@@ -479,7 +481,7 @@ class AFO(dfo):
 
         return pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
 
-    def execute_consolidation(self, aux_afo: 'AFO' = None, **kargs):
+    def execute_consolidation(self, aux_afo: 'AFO' = None, type_sale: 'str' = "actual", **kargs):
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.CONSOLIDATION.name)
 
@@ -488,18 +490,68 @@ class AFO(dfo):
         self.assigments["anterior"].drop(_properties["no_required_columns"]["anterior"], axis = 1, inplace = True) 
 
 
-        temp_base = self.assigments["actual"].merge(
+        base_principal = self.assigments["actual"].merge(
             right=self.assigments["anterior"],
             on=_properties["group_sales_by"],
             how="left"
         )
-        mask_nan = dfo.mask_by(temp_base, {"column": _properties["validate_nan"]}, aux_func=pd.isna)[1]
-        temp_base.loc[mask_nan, _properties["validate_nan"]] = 0
+        mask_nan = self.mask_by(base_principal, {"column": _properties["validate_nan"]}, aux_func=pd.isna)[1]
+        base_principal.loc[mask_nan, _properties["validate_nan"]] = 0
 
-        #agrupation?
+        #agrupation by (tipologia)
+        agg_values = [_properties["agg_afo_values"][type_sale], _properties["agg_afo_values_2"][type_sale]]
+        agg_columns = [_properties["agg_afo_aux"][type_sale], _properties["agg_afo_aux_2"][type_sale]]
+        merge_columns = _properties["merge_by"]
+        _filters = _properties["filters_afo"][type_sale]
 
+        #agg of sales
+        aggregations = []
+        for agg_value in agg_values:
+            aggregations.append({
+                    f"{agg_value['col_res']}": pd.NamedAgg(
+                    column=agg_value['column'], aggfunc=np.sum)
+                    })
+
+        #get aux afo table (calle)
         aux_afo.process(**kargs)
         afo_table = aux_afo.table
+
+        #replace negatives by 0
+        group_table = afo_table.groupby(agg_columns[0], as_index=False).agg(**aggregations[0])
+        mask_negatives = self.mask_by(group_table, {"column": agg_values[0]['col_res'], "less": 0})[1]
+        group_table.loc[mask_negatives, agg_values[0]['col_res']] = 0
+
+        group_table_total = group_table.groupby(agg_columns[1], as_index=False).agg(**aggregations[1])
+
+        base_merge_final = base_principal.merge(
+            right=group_table_total,
+            left_on=merge_columns["left"],
+            right_on=merge_columns["right"],
+            how="left"
+        )
+
+        base_merge_final = base_merge_final.merge(
+            right=group_table_total,
+            left_on=merge_columns["left"],
+            right_on=merge_columns["right"],
+            how="left"
+        )
+
+        #make zero values in "tipologia" nof found
+        mask_not_found = self.mask_by(base_merge_final, {"column": agg_values[1]['col_res']}, aux_func=pd.isna)[1]
+        base_merge_final.loc[mask_not_found, agg_values[1]['col_res']] = 0
+
+        #positive sales and negative equals to zero
+        mask_postive_without_sales = None
+        for _filter in _filters:
+            mask_postive_without_sales = self.mask_by(base_merge_final, _filter)[1] \
+                if mask_postive_without_sales is None else mask_postive_without_sales & self.mask_by(base_merge_final, _filter)[1]
+
+
+        base_merge_final.loc[~mask_postive_without_sales, _properties['add_column']] = (base_merge_final.loc[~mask_postive_without_sales, agg_values[0]['col_res']]* \
+            base_merge_final.loc[~mask_postive_without_sales, "columna_valores"])/base_merge_final.loc[~mask_postive_without_sales, agg_values[0]['col_res']]
+         
+        base_merge_final.loc[mask_postive_without_sales, _properties['add_column']] = "tienda mixta process"
 
     @staticmethod
     def get_properties(_type: str) -> None:
