@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from typing import Any
 from dataframes.dataframe_optimized import DataFrameOptimized as dfo
-from utils import constants as const, feature_flags
+from utils import index as utils, constants as const, feature_flags
 from afo.afo_types import AFO_TYPES
 from afo.afo_processes import AFO_PROCESSES
 from afo.driver import Driver
@@ -307,8 +307,6 @@ class AFO(dfo):
                 how="left"
             )
 
-
-
             #add other columns
             for idx, _column in enumerate(_properties["add_columns"]):
                 new_column_name = f"{_properties['add_columns_dif']}{_column}"
@@ -498,11 +496,12 @@ class AFO(dfo):
         mask_nan = self.mask_by(base_principal, {"column": _properties["validate_nan"]}, aux_func=pd.isna)[1]
         base_principal.loc[mask_nan, _properties["validate_nan"]] = 0
 
-        #agrupation by (tipologia)
-        agg_values = [_properties["agg_afo_values"][type_sale], _properties["agg_afo_values_2"][type_sale]]
-        agg_columns = [_properties["agg_afo_aux"][type_sale], _properties["agg_afo_aux_2"][type_sale]]
-        merge_columns = _properties["merge_by"]
-        _filters = _properties["filters_afo"][type_sale]
+        #properties
+        properties_of_sale = _properties[type_sale]
+        agg_values = properties_of_sale["agg_values"]
+        agg_columns = properties_of_sale["agg_columns"]
+        merge_filters = properties_of_sale["merge_filters"]
+        merge_columns = _properties["merge"]
 
         #agg of sales
         aggregations = []
@@ -514,7 +513,7 @@ class AFO(dfo):
 
         #get aux afo table (calle)
         aux_afo.process(**kargs)
-        afo_table = aux_afo.table
+        afo_table = aux_afo.execute_agrupation()
 
         #replace negatives by 0
         group_table = afo_table.groupby(agg_columns[0], as_index=False).agg(**aggregations[0])
@@ -523,14 +522,16 @@ class AFO(dfo):
 
         group_table_total = group_table.groupby(agg_columns[1], as_index=False).agg(**aggregations[1])
 
-        base_merge_final = base_principal.merge(
-            right=group_table_total,
+        base_merge_final = base_principal.merge( #merge values
+            right=group_table,
             left_on=merge_columns["left"],
             right_on=merge_columns["right"],
             how="left"
         )
+        #delete different columns in group_table
+        base_merge_final.drop(utils.get_diff_list((merge_columns["left"], merge_columns["right"]), _type="right"), axis = 1, inplace = True)
 
-        base_merge_final = base_merge_final.merge(
+        base_merge_final = base_merge_final.merge( #merge totals
             right=group_table_total,
             left_on=merge_columns["left"],
             right_on=merge_columns["right"],
@@ -543,15 +544,19 @@ class AFO(dfo):
 
         #positive sales and negative equals to zero
         mask_postive_without_sales = None
-        for _filter in _filters:
+        for _filter in merge_filters:
             mask_postive_without_sales = self.mask_by(base_merge_final, _filter)[1] \
                 if mask_postive_without_sales is None else mask_postive_without_sales & self.mask_by(base_merge_final, _filter)[1]
 
-
+        #(sales*value)/sum_value
         base_merge_final.loc[~mask_postive_without_sales, _properties['add_column']] = (base_merge_final.loc[~mask_postive_without_sales, agg_values[0]['col_res']]* \
-            base_merge_final.loc[~mask_postive_without_sales, "columna_valores"])/base_merge_final.loc[~mask_postive_without_sales, agg_values[0]['col_res']]
-         
-        base_merge_final.loc[mask_postive_without_sales, _properties['add_column']] = "tienda mixta process"
+            base_merge_final.loc[~mask_postive_without_sales, "columna_valores"])/base_merge_final.loc[~mask_postive_without_sales, agg_values[1]['col_res']]
+        
+        #asign sales to "tienda mixta"
+        unsold = base_merge_final[mask_postive_without_sales].groupby(agg_columns[0], as_index=False).agg(**aggregations[0])
+        unsold[_properties["unsold"]["column"]] = _properties["unsold"]["value"]
+
+        base_merge_final.loc[mask_postive_without_sales] = base_merge_final.loc[mask_postive_without_sales]
 
     @staticmethod
     def get_properties(_type: str) -> None:

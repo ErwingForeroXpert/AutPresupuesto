@@ -337,49 +337,57 @@ PROCESSES = {
                 "anterior": ["sum_venta_ppto", "sum_venta_actual"]
             },
             "validate_nan": "sum_venta_anterior",
-            "agg_afo_aux": {
-                "actual": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
-                "anterior": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
-                "presupuesto": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
-            },
-            "agg_afo_values": {
-                "actual":{"col_res": "sum_venta_actual", "column": "venta_nta_acum_anio_actual"},
-                "anterior": {"col_res": "sum_venta_anterior", "column": "venta_nta_acum_anio_anterior"},
-                "presupuesto": {"col_res": "sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"}
-            },
-            "agg_afo_aux_2": {
-                "actual": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-                "anterior": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-                "presupuesto": ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
-            },
-            "agg_afo_values_2": {
-                "actual":{"col_res": "sum_segmento_actual", "column": "sum_venta_actual"},
-                "anterior": {"col_res": "sum_segmento_anterior", "column": "sum_venta_anterior"},
-                "presupuesto": {"col_res": "sum_segmento_ppto", "column": "sum_venta_ppto"}
-            },
-            "merge_total":{
-                "left": ['oficina_venta', 'cod_agente', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'], #compra columns
-                "right": ['oficina_venta', 'cod_agente_comercial', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'] #aux afo(calle) columns
-            },
-            "merge_values":{
-                "left": ['oficina_venta', 'cod_agente', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'], #compra columns
-                "right": ['oficina_venta', 'cod_agente_comercial', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'] #aux afo(calle) columns
-            },
-            "filters_merge": {
-                "actual":[
+            "actual": {
+                "agg_columns":[ 
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca']
+                ],
+                "agg_values": [
+                    {"col_res": "total_venta_actual", "column": "sum_venta_actual"},
+                    {"col_res": "sum_segmento_actual", "column": "total_venta_actual"}
+                ],
+                "merge_filters":[
                     {"column": "sum_venta_actual", "more": 0},
                     {"column": "sum_venta_anterior", "equal": 0},
                 ],
-                "anterior":[
+            },
+            "anterior": {
+                "agg_columns":[ 
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca']
+                ],
+                "agg_values": [
+                    {"col_res": "total_venta_anterior", "column": "sum_venta_anterior"},
+                    {"col_res": "sum_segmento_anterior", "column": "total_venta_anterior"}
+                ],
+                "merge_filters":[
                     {"column": "sum_venta_ppto", "more": 0},
                     {"column": "suma_venta_ant", "equal": 0},
                 ],
-                "presupuesto":[
+            },
+            "presupuesto": {
+                "agg_columns":[ 
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca']
+                ],
+                "agg_values": [
+                    {"col_res": "total_venta_ppto", "column": "sum_venta_ppto"},
+                    {"col_res": "sum_segmento_ppto", "column": "total_venta_ppto"}
+                ],
+                "merge_filters":[
                     {"column": "ventaact", "more": 0},
                     {"column": "ventaactneg", "equal": 0},
-                ]
+                ],
+            },
+            "merge":{
+                "left": ['oficina_venta', 'cod_agente', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'], #compra columns
+                "right": ['oficina_venta', 'cod_agente_comercial', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'] #aux afo(calle) columns
             },
             "add_column": "ventas_a_calle",
+            "unsold": {
+                "column": "tipologia",
+                "value": "Tienda Mixta"
+            },
             "permissible_diff_totals": 1000,
         }
     }
