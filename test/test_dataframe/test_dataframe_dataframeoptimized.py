@@ -3,8 +3,8 @@ import gc
 from faker import Faker
 import numpy as np
 from test.test_fixtures import FakeTable
-from budget.dataframes import DataFrameOptimized
-from budget.dataframes import func
+from src.dataframes import DataFrameOptimized
+from src.dataframes import func
 
 def criteriaDeleteRows(dataframe, limit=None):
     validator = {

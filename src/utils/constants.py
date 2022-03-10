@@ -337,46 +337,42 @@ PROCESSES = {
                 "anterior": ["sum_venta_ppto", "sum_venta_actual"]
             },
             "validate_nan": "sum_venta_anterior",
+            "type_sales": ["actual", "anterior", "presupuesto"],
             "actual": {
                 "agg_columns":[ 
                     ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
-                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca']
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                    ["oficina_venta", "cod_agente", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'mes', 'tipologia'],
                 ],
                 "agg_values": [
-                    {"col_res": "total_venta_actual", "column": "sum_venta_actual"},
-                    {"col_res": "sum_segmento_actual", "column": "total_venta_actual"}
+                    {"col_res": "sum_segmento_actual", "column": "sum_venta_actual"},
+                    {"col_res": "total_segmento_actual", "column": "sum_segmento_actual"},
+                    {"col_res": "ventas", "column": "ventas_a_calle"}
                 ],
-                "merge_filters":[
-                    {"column": "sum_venta_actual", "more": 0},
-                    {"column": "sum_venta_anterior", "equal": 0},
-                ],
+            
             },
             "anterior": {
                 "agg_columns":[ 
                     ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
-                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca']
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                    ["oficina_venta", "cod_agente", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'mes', 'tipologia'],
                 ],
                 "agg_values": [
-                    {"col_res": "total_venta_anterior", "column": "sum_venta_anterior"},
-                    {"col_res": "sum_segmento_anterior", "column": "total_venta_anterior"}
-                ],
-                "merge_filters":[
-                    {"column": "sum_venta_ppto", "more": 0},
-                    {"column": "suma_venta_ant", "equal": 0},
+                    {"col_res": "sum_segmento_anterior", "column": "sum_venta_anterior"},
+                    {"col_res": "total_segmento_anterior", "column": "sum_segmento_anterior"},
+                    {"col_res": "ventas", "column": "ventas_a_calle"}
                 ],
             },
             "presupuesto": {
                 "agg_columns":[ 
                     ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
-                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca']
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                    ["oficina_venta", "cod_agente", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'mes', 'tipologia'],
                 ],
                 "agg_values": [
-                    {"col_res": "total_venta_ppto", "column": "sum_venta_ppto"},
-                    {"col_res": "sum_segmento_ppto", "column": "total_venta_ppto"}
-                ],
-                "merge_filters":[
-                    {"column": "ventaact", "more": 0},
-                    {"column": "ventaactneg", "equal": 0},
+                    {"col_res": "sum_segmento_ppto", "column": "sum_venta_ppto"},
+                    {"col_res": "total_segmento_ppto", "column": "sum_segmento_ppto"},
+                    {"col_res": "ventas", "column": "ventas_a_calle"}
                 ],
             },
             "merge":{

@@ -132,12 +132,12 @@ def all_is_empty(iterable: 'Any') -> bool:
     
     return empties == size
 
-def get_diff_list(lists: 'tuple(list)',   type: 'str' = 'all') -> list:
+def get_diff_list(lists: 'tuple(list)',   _type: 'str' = 'all') -> list:
     """Get difference between two list
 
     Args:
         lists (tuple): two list to be compared
-        type (str, optional): type of get diff:
+        _type (str, optional): _type of get diff:
 
         all - get all list values different
         left - get only left different values
@@ -147,7 +147,7 @@ def get_diff_list(lists: 'tuple(list)',   type: 'str' = 'all') -> list:
 
     Raises:
         ValueError: Invalid size of lists, expected: __len__ 2
-        ValueError: Invalid type of lists
+        ValueError: Invalid _type of lists
 
     Returns:
         list: difference
@@ -156,17 +156,17 @@ def get_diff_list(lists: 'tuple(list)',   type: 'str' = 'all') -> list:
         raise ValueError("Invalid size of lists, expected: __len__ 2")
 
     if not is_iterable(lists[0]) or not is_iterable(lists[1]):
-        raise ValueError("Invalid type of lists")
+        raise ValueError("Invalid _type of lists")
 
     diff = list(set(lists[0]) ^ set(lists[1]))
 
-    if type == "left":
+    if _type == "left":
         diff = [column for column in diff if column in lists[0]]
     
-    elif type == "right":
+    elif _type == "right":
         diff = [column for column in diff if column in lists[1]]
 
-    elif type == "left":
+    elif _type == "left":
         pass
     
     return diff

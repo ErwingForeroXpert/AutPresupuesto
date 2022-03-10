@@ -1,4 +1,7 @@
 from utils.constants import ROOT_DIR, LOG_NAME
+from  datetime import datetime
+import logging
+import os 
 
 def exceptionHandler(func):
     """Manage Exceptions
@@ -25,7 +28,7 @@ def insertInLog(message, name, path: str = None, type="debug"):
     if not os.path.exists(path):
         raise ValueError("Invalid route of path")
         
-    _path = os.path.normpath(os.path.join(ROOT_DIR if path is None else path, f'{name}.log'))
+    _path = os.path.normpath(os.path.join(ROOT_DIR if path is None else path, f'{LOG_NAME}.log' if name is None else name))
     logging.basicConfig(filename=_path, encoding='utf-8', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
     loger = {
         "debug": logging.debug,

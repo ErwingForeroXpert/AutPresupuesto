@@ -1,5 +1,5 @@
 import os
-from budget.utils import constants as const
+from src.utils import constants as const
 
 
 TEST_FILES_ROUTE = os.path.normpath(os.path.join(const.ROOT_DIR, 'test/files'))

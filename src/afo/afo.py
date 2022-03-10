@@ -108,8 +108,12 @@ class AFO(dfo):
                     self.save_actual_progress(data=assigment, level=2, optional_end=f"_{_type}")
 
         if "consolidation" in self.properties["processes"]:
-            result = self.execute_consolidation(aux_afo=aux_afo, driver=driver)
-
+            type_sales = self.get_properties_for_process(AFO_PROCESSES.CONSOLIDATION.name)["type_sales"]
+            result = self.execute_consolidation(aux_afo=aux_afo, type_sales=type_sales, driver=driver)
+            if feature_flags.ENVIROMENT == "DEV":
+                for type_sale, sale in zip(type_sales, result):
+                    self.save_actual_progress(data=sale, level=3, optional_end=f"_{type_sale}")
+        
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
 
@@ -479,7 +483,7 @@ class AFO(dfo):
 
         return pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
 
-    def execute_consolidation(self, aux_afo: 'AFO' = None, type_sale: 'str' = "actual", **kargs):
+    def execute_consolidation(self, aux_afo: 'AFO' = None, type_sales: 'list' = None, **kargs) -> 'list[pd.DataFrame]':
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.CONSOLIDATION.name)
 
@@ -496,67 +500,70 @@ class AFO(dfo):
         mask_nan = self.mask_by(base_principal, {"column": _properties["validate_nan"]}, aux_func=pd.isna)[1]
         base_principal.loc[mask_nan, _properties["validate_nan"]] = 0
 
-        #properties
-        properties_of_sale = _properties[type_sale]
-        agg_values = properties_of_sale["agg_values"]
-        agg_columns = properties_of_sale["agg_columns"]
-        merge_filters = properties_of_sale["merge_filters"]
-        merge_columns = _properties["merge"]
-
-        #agg of sales
-        aggregations = []
-        for agg_value in agg_values:
-            aggregations.append({
-                    f"{agg_value['col_res']}": pd.NamedAgg(
-                    column=agg_value['column'], aggfunc=np.sum)
-                    })
-
         #get aux afo table (calle)
         aux_afo.process(**kargs)
         afo_table = aux_afo.execute_agrupation()
 
-        #replace negatives by 0
-        group_table = afo_table.groupby(agg_columns[0], as_index=False).agg(**aggregations[0])
-        mask_negatives = self.mask_by(group_table, {"column": agg_values[0]['col_res'], "less": 0})[1]
-        group_table.loc[mask_negatives, agg_values[0]['col_res']] = 0
+        result = []
 
-        group_table_total = group_table.groupby(agg_columns[1], as_index=False).agg(**aggregations[1])
+        for type_sale in type_sales:
+            #properties
+            properties_of_sale = _properties[type_sale]
+            agg_values = properties_of_sale["agg_values"]
+            agg_columns = properties_of_sale["agg_columns"]
+            merge_columns = _properties["merge"]
 
-        base_merge_final = base_principal.merge( #merge values
-            right=group_table,
-            left_on=merge_columns["left"],
-            right_on=merge_columns["right"],
-            how="left"
-        )
-        #delete different columns in group_table
-        base_merge_final.drop(utils.get_diff_list((merge_columns["left"], merge_columns["right"]), _type="right"), axis = 1, inplace = True)
+            #agg of sales
+            aggregations = []
+            for agg_value in agg_values:
+                aggregations.append({
+                        f"{agg_value['col_res']}": pd.NamedAgg(
+                        column=agg_value['column'], aggfunc=np.sum)
+                        })
 
-        base_merge_final = base_merge_final.merge( #merge totals
-            right=group_table_total,
-            left_on=merge_columns["left"],
-            right_on=merge_columns["right"],
-            how="left"
-        )
+            #replace negatives by 0
+            group_table = afo_table.groupby(agg_columns[0], as_index=False).agg(**aggregations[0])
+            mask_negatives = self.mask_by(group_table, {"column": agg_values[0]['col_res'], "less": 0})[1]
+            group_table.loc[mask_negatives, agg_values[0]['col_res']] = 0
 
-        #make zero values in "tipologia" nof found
-        mask_not_found = self.mask_by(base_merge_final, {"column": agg_values[1]['col_res']}, aux_func=pd.isna)[1]
-        base_merge_final.loc[mask_not_found, agg_values[1]['col_res']] = 0
+            group_table_total = group_table.groupby(agg_columns[1], as_index=False).agg(**aggregations[1])
 
-        #positive sales and negative equals to zero
-        mask_postive_without_sales = None
-        for _filter in merge_filters:
-            mask_postive_without_sales = self.mask_by(base_merge_final, _filter)[1] \
-                if mask_postive_without_sales is None else mask_postive_without_sales & self.mask_by(base_merge_final, _filter)[1]
+            base_merge_final = base_principal.merge( #merge values
+                right=group_table,
+                left_on=merge_columns["left"],
+                right_on=merge_columns["right"],
+                how="left"
+            )
+            #delete different columns in base_merge_final
+            base_merge_final.drop(utils.get_diff_list((merge_columns["left"], merge_columns["right"]), _type="right"), axis = 1, inplace = True)
 
-        #(sales*value)/sum_value
-        base_merge_final.loc[~mask_postive_without_sales, _properties['add_column']] = (base_merge_final.loc[~mask_postive_without_sales, agg_values[0]['col_res']]* \
-            base_merge_final.loc[~mask_postive_without_sales, "columna_valores"])/base_merge_final.loc[~mask_postive_without_sales, agg_values[1]['col_res']]
-        
-        #asign sales to "tienda mixta"
-        unsold = base_merge_final[mask_postive_without_sales].groupby(agg_columns[0], as_index=False).agg(**aggregations[0])
-        unsold[_properties["unsold"]["column"]] = _properties["unsold"]["value"]
+            base_merge_final = base_merge_final.merge( #merge totals
+                right=group_table_total,
+                left_on=merge_columns["left"],
+                right_on=merge_columns["right"],
+                how="left"
+            )
 
-        base_merge_final.loc[mask_postive_without_sales] = base_merge_final.loc[mask_postive_without_sales]
+            #delete different columns in base_merge_final
+            base_merge_final.drop(utils.get_diff_list((merge_columns["left"], merge_columns["right"]), _type="right"), axis = 1, inplace = True)
+
+            #mask for "tipologia" not found not found
+            mask_not_found = self.mask_by(base_merge_final, {"column": agg_values[0]['col_res']}, aux_func=pd.isna)[1]
+
+            #(sales*value)/sum_value
+            base_merge_final.loc[~mask_not_found, _properties['add_column']] = (base_merge_final.loc[~mask_not_found, agg_values[0]['column']]* \
+                base_merge_final.loc[~mask_not_found, agg_values[0]['col_res']])/base_merge_final.loc[~mask_not_found, agg_values[1]['col_res']]
+            
+            #asign sales to "tienda mixta"
+            base_merge_final.loc[mask_not_found, _properties["unsold"]["column"]] = _properties["unsold"]["value"]
+            base_merge_final.loc[mask_not_found, _properties['add_column']] = base_merge_final.loc[mask_not_found, agg_values[0]["column"]]
+
+            base_merge_final = base_merge_final.groupby(agg_columns[2], as_index=False).agg(**aggregations[2])
+            result.append(
+                base_merge_final[self.mask_by(base_merge_final, {"column": agg_values[2]['col_res'], "diff": 0})[1]]
+            )
+
+        return result
 
     @staticmethod
     def get_properties(_type: str) -> None:

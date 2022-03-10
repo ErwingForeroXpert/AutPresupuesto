@@ -1,7 +1,7 @@
 import unittest
 import os
 import gc
-from budget.utils import index
+from src.utils import index
 from test.test_fixtures import TEST_FILES_ROUTE
 
 class TestUtilsMethods(unittest.TestCase):

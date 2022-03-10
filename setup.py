@@ -12,7 +12,7 @@ with open('LICENSE') as f:
 
 setup(
     name='Presupuesto',
-    version='0.1.0',
+    version='1.0.0',
     description='Project for manage budget',
     long_description=readme,
     author='Erwing Forero',

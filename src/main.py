@@ -122,8 +122,6 @@ async def process_afo_files(app: 'Application'):
             
     app.labels_text["status_project"].set("Obteniendo resultados...")
     
-    for result in await results:
-        _dt_afo_compra = result
 
     print("hi")
     app.labels_text["status_project"].set("Proceso Terminado")
