@@ -122,9 +122,7 @@ async def process_afo_files(app: 'Application'):
             
     app.labels_text["status_project"].set("Obteniendo resultados...")
     
-
-    print("hi")
-    app.labels_text["status_project"].set("Proceso Terminado")
+    
     
 if __name__ == "__main__":
     

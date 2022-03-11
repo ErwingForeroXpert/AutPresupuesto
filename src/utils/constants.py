@@ -291,9 +291,7 @@ PROCESSES = {
                 "actual":{"cols_res": ["total_venta_act_asignada",
                               "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
                 "anterior": {"cols_res": ["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], 
-                            "column": "sum_venta_anterior"},
-                "presupuesto": {"cols_res": ["total_venta_ppto_asignada", "total_venta_ppto_sin_asignar"], 
-                            "column": "sum_venta_ppto"}
+                            "column": "sum_venta_anterior"}
             },
             "add_columns": ["porc_participacion"],
             "permissible_diff_totals": 1000,
@@ -315,9 +313,7 @@ PROCESSES = {
                 "actual":{"cols_res": ["total_venta_act_asignada",
                               "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
                 "anterior": {"cols_res": ["total_venta_ant_asignada", 
-                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"},
-                "presupuesto": {"cols_res": ["total_venta_ppto_asignada", 
-                              "total_venta_ppto_sin_asignar"], "column": "sum_venta_ppto"}
+                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"}
             },
             "add_columns": ["porc_participacion"],
             "permissible_diff_totals": 1000,
@@ -360,7 +356,7 @@ PROCESSES = {
                 "agg_values": [
                     {"col_res": "sum_segmento_anterior", "column": "sum_venta_anterior"},
                     {"col_res": "total_segmento_anterior", "column": "sum_segmento_anterior"},
-                    {"col_res": "ventas", "column": "ventas_a_calle"}
+                    {"col_res": "ventas_anterior", "column": "ventas_a_calle"}
                 ],
             },
             "presupuesto": {
@@ -372,7 +368,7 @@ PROCESSES = {
                 "agg_values": [
                     {"col_res": "sum_segmento_ppto", "column": "sum_venta_ppto"},
                     {"col_res": "total_segmento_ppto", "column": "sum_segmento_ppto"},
-                    {"col_res": "ventas", "column": "ventas_a_calle"}
+                    {"col_res": "ppto", "column": "ventas_a_calle"}
                 ],
             },
             "merge":{
@@ -384,7 +380,11 @@ PROCESSES = {
                 "column": "tipologia",
                 "value": "Tienda Mixta"
             },
-            "permissible_diff_totals": 1000,
+            "merge_final":{
+                "found_columns": ["canal", "sub_canal", "trans_canal", "trans_sub_canal", "trans_segmento"],
+                "found_by": "tipologia"
+            },
+            "permissible_diff_porc": 0.01,
         }
     }
 }

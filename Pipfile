@@ -21,6 +21,7 @@ test = "python -m unittest discover --pattern=test*.py"
 
 [dev-packages]
 autopep8 = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.9"

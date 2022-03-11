@@ -79,20 +79,6 @@ def is_iterable(posibleList):
     except Exception as e:
         return False
 
-def ifErrorFalse(cb, *args, **kargs):
-    """if generate error return false
-
-    Args:
-        cb (function): function
-
-    Returns:
-        Any: function return or False
-    """
-    try:
-        return cb(*args, **kargs)
-    except Exception as e:
-        return False
-
 def if_error_false(cb, *args, **kargs):
     """if generate error return false
 
@@ -170,6 +156,29 @@ def get_diff_list(lists: 'tuple(list)',   _type: 'str' = 'all') -> list:
         pass
     
     return diff
+
+def get_same_list(lists: 'tuple(list)') -> list:
+    """Get same values between two list
+
+    Args:
+        lists (tuple): two list to be compared
+
+    Raises:
+        ValueError: Invalid size of lists, expected: __len__ 2
+        ValueError: Invalid _type of lists
+
+    Returns:
+        list: same values
+    """
+    if len(lists) != 2:
+        raise ValueError("Invalid size of lists, expected: __len__ 2")
+
+    if not is_iterable(lists[0]) or not is_iterable(lists[1]):
+        raise ValueError("Invalid _type of lists")
+
+    same = [item for item in lists[0] if item in lists[1]]
+
+    return same
 
 def convert_row(row: 'np.array', converter: 'list') -> 'np.array':
     
