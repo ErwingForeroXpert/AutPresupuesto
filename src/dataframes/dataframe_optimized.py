@@ -8,6 +8,7 @@ import os
 import re
 from sre_compile import isstring
 from time import time
+from utils import feature_flags
 from utils import constants as const
 from afo import afo_types
 from utils import index as utils
@@ -137,7 +138,8 @@ class DataFrameOptimized():
                     index=False, 
                     encoding="latin-1", 
                     sep=";")
-                # raise Exception(exception_description)
+                if feature_flags == "PROD":
+                    raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .

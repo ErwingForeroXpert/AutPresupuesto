@@ -2,6 +2,8 @@
 FROM python:3.9-slim
 LABEL maintainer="erwing.forero@xpertgroup.co"
 
+ENV TYPE_USE "CLI"
+
 # dir
 WORKDIR /budget-app
 

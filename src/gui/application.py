@@ -87,16 +87,9 @@ class Application():
         self.labels_text[label_text].set(text)
         self.labels[label]["textvariable"] = self.labels_text[label_text]
 
-    # def app_action(self):
-    #     def parent_wrapper(func):
-    #         def function_wrapper(*args, **kargs):
-    #             func(self, *args, **kargs)
-    #         return function_wrapper
-        
-    #     return parent_wrapper
 
     def do_task(self, async_loop, action):
-        """AI is creating summary for do_task
+        """async loop manager
 
         Args:
             async_loop (event): actual event_loop
@@ -170,6 +163,9 @@ class Application():
                 if len(re.findall(patterns, _file)) > 0:
                     self.files.append(path.normpath(path.join(_path, _file)))
 
+        self.update_label(label="lbl_status", label_text="status_project", text="Procesando...")
+        self.buttons["btn_insert_file"]["state"]=tk.DISABLED
+        self.root.update()
         return self.files
     
     def search_for_file_path (self, required: bool = False, types: 'tuple|str' = "*")-> 'str|None':

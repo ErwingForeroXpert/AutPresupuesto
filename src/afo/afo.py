@@ -13,7 +13,6 @@ from utils import index as utils, constants as const, feature_flags
 from afo.afo_types import AFO_TYPES
 from afo.afo_processes import AFO_PROCESSES
 from afo.driver import Driver
-from alive_progress import alive_bar
 
 class AFO(dfo):
 
@@ -82,49 +81,45 @@ class AFO(dfo):
             raise ValueError(f"Files not found, name regex: {name_regex}")
 
     def process(self, driver: 'Driver', aux_afo: 'AFO'=None):
+        
+        #load progress
+        if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS > -1:
+            self.load_progress(level=feature_flags.SKIP_AFO_PROCESS)
+        
+        if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS < 0:
+            self.save_actual_progress(level=0) #save base loaded
 
-        with alive_bar(3, bar="filling", title=f"process - {AFO_TYPES[self._type].value}") as bar:
-            #load progress
-            if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS > -1:
-                self.load_progress(level=feature_flags.SKIP_AFO_PROCESS)
-            
-            if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS < 0:
-                self.save_actual_progress(level=0) #save base loaded
+        if "formula" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 1: 
+            self.execute_formulas(driver)
+            if feature_flags.ENVIROMENT == "DEV":
+                self.save_actual_progress(level=1)
+            if "formula" == self.properties["processes"][-1]:
+                self.save_final(self.execute_agrupation())
 
-            bar.text('ejecutando formulas')
-            if "formula" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 1: 
-                self.execute_formulas(driver)
-                if feature_flags.ENVIROMENT == "DEV":
-                    self.save_actual_progress(level=1)
-                if "formula" == self.properties["processes"][-1]:
-                    self.save_final(self.execute_agrupation())
+        if "assigment" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 2: 
+            type_sales = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)["agg_values"].keys()
+            #get types of sales, see utils/contants
+            self.assigments = {
+                f"{_type_sale}": self.execute_assignment(
+                    agg_base=self.execute_agrupation(), 
+                    level=0, 
+                    type_sale=_type_sale) for _type_sale in type_sales
+            }
+            if feature_flags.ENVIROMENT == "DEV":
+                type_sales = list(type_sales)
+                for _type,  assigment in self.assigments.items():
+                    self.save_actual_progress(data=assigment, level=2, optional_end=f"_{_type}")
 
-            bar.text('ejecutando asignación')
-            if "assigment" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 2: 
-                type_sales = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)["agg_values"].keys()
-                #get types of sales, see utils/contants
-                self.assigments = {
-                    f"{_type_sale}": self.execute_assignment(
-                        agg_base=self.execute_agrupation(), 
-                        level=0, 
-                        type_sale=_type_sale) for _type_sale in type_sales
-                }
-                if feature_flags.ENVIROMENT == "DEV":
-                    type_sales = list(type_sales)
-                    for _type,  assigment in self.assigments.items():
-                        self.save_actual_progress(data=assigment, level=2, optional_end=f"_{_type}")
+            if "assigment" == self.properties["processes"][-1]:
+                self.save_final(self.merge_assignment())
 
-                if "assigment" == self.properties["processes"][-1]:
-                    self.save_final(self.merge_assignment())
+        if "consolidation" in self.properties["processes"]:
+            type_sales = self.get_properties_for_process(AFO_PROCESSES.CONSOLIDATION.name)["type_sales"]
+            self.execute_consolidation(aux_afo=aux_afo, type_sales=type_sales, driver=driver)
+            if feature_flags.ENVIROMENT == "DEV":
+                self.save_actual_progress(data=self.base_consolidation, level=3)
 
-            bar.text('ejecutando consolidación')
-            if "consolidation" in self.properties["processes"]:
-                type_sales = self.get_properties_for_process(AFO_PROCESSES.CONSOLIDATION.name)["type_sales"]
-                self.execute_consolidation(aux_afo=aux_afo, type_sales=type_sales, driver=driver)
-                if feature_flags.ENVIROMENT == "DEV":
-                    self.save_actual_progress(data=self.base_consolidation, level=3)
-
-                self.save_final(self.base_consolidation)
+            self.save_final(self.base_consolidation)
                
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
@@ -150,7 +145,7 @@ class AFO(dfo):
             data (pd.Dataframe, optional): data to be saved if is None will be use the table, Defaults to None
         """
 
-        route_file = os.path.join(const.ROOT_DIR, f"files/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.csv")
+        route_file = os.path.join(const.ROOT_DIR, f"files/temp/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.csv")
         route_file_test = os.path.join(const.ROOT_DIR, f"test/files/progress/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.ftr")
         route_file_alerts = os.path.join(const.ALERTS_DIR, f"{AFO_TYPES[self._type].value}_alerts.csv")
         
@@ -512,9 +507,9 @@ class AFO(dfo):
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)
         for key, assign in self.assigments.items():
             if result is None:
-                result = assign[[*_properties["unique_columns"], _properties["agg_values"][key]]]
+                result = assign[[*_properties["unique_columns"], _properties["agg_values"][key]["column"]]]
             else:
-                result = result.merge(right=assign[[*_properties["unique_columns"], _properties["agg_values"][key]]], on=_properties["unique_columns"], how="left")
+                result = result.merge(right=assign[[*_properties["unique_columns"], _properties["agg_values"][key]["column"]]], on=_properties["unique_columns"], how="left")
 
         return result
 
@@ -600,15 +595,21 @@ class AFO(dfo):
 
         #merge bases
         for base in result:
-            validate_column = utils.get_diff_list((self.base_consolidation, base), _type="right")[0]
-            self.base_consolidation = base if self.base_consolidation is None else self.base_consolidation.merge(base, on=_properties["merge_final"]["columns"], how="left")
-            mask_nan = self.mask_by(self.base_consolidation, {"column": validate_column, "diff": 0})
-            self.base_consolidation.loc[mask_nan, validate_column] = 0
+            validate_column = None if self.base_consolidation is None else \
+                utils.get_diff_list((self.base_consolidation.columns.tolist(), base.columns.tolist()), _type="right")
+            self.base_consolidation = base if self.base_consolidation is None else \
+                self.base_consolidation.merge(base, on=utils.get_diff_list((validate_column , base.columns.tolist()), _type="right"), how="left")
+            if utils.is_iterable(validate_column):
+                validate_column = validate_column[0]
+                mask_zero = self.mask_by(self.base_consolidation, {"column": validate_column, "diff": 0})[1]
+                self.base_consolidation.loc[mask_zero, validate_column] = 0
 
         only_diff = utils.get_diff_list((self.base_consolidation.columns.tolist(), _properties["merge_final"]["found_columns"]), _type="right")
-
+        base_to_merge = aux_afo.table.drop_duplicates(subset=_properties["merge_final"]["found_by"], ignore_index=True)
+        
+        #use afo_aux with driver
         self.base_consolidation = self.base_consolidation.merge(
-            right=self.table[[*_properties["merge_final"]["found_by"], *only_diff]],
+            right=base_to_merge[[_properties["merge_final"]["found_by"], *only_diff]],
             on=_properties["merge_final"]["found_by"],
             how="left"
         )

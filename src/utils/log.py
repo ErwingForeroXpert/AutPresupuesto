@@ -18,17 +18,15 @@ def exceptionHandler(func):
             raise Exception(_message)
     return inner_function
 
-def insertInLog(message, name, path: str = None, type="debug"):
+def insertInLog(message, name: str = None, path: str = None, type="debug"):
     """Insert new line in file log
 
     Args:
         message (String): message
         type (str, optional): type of log. Defaults to "debug".
     """
-    if not os.path.exists(path):
-        raise ValueError("Invalid route of path")
-        
     _path = os.path.normpath(os.path.join(ROOT_DIR if path is None else path, f'{LOG_NAME}.log' if name is None else name))
+        
     logging.basicConfig(filename=_path, encoding='utf-8', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
     loger = {
         "debug": logging.debug,
