@@ -56,7 +56,7 @@ class AFO(dfo):
         """
         _max_level = min(len(self.properties["processes"]), level)
 
-        files = os.listdir(os.path.join(const.ROOT_DIR, f"test/files/"))
+        files = os.listdir(os.path.join(const.ROOT_DIR, f"test/files/progress/"))
         name_regex = f"progress_{_max_level}_{AFO_TYPES[self._type].value}.*"
         extract_type_regex = fr"(?<=progress_{_max_level}_{AFO_TYPES[self._type].value}_).*(?=.ftr)"
 
@@ -65,7 +65,7 @@ class AFO(dfo):
 
         if files_found != []:
             if _max_level <= 1 and "formula" in self.properties["processes"]:
-                self.table = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/{files_found[0]}"))
+                self.table = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/progress/{files_found[0]}"))
             elif _max_level == 2:
                 self.load_progress(level=1)
 
@@ -73,13 +73,13 @@ class AFO(dfo):
                     names_types_assign = [re.findall(extract_type_regex, filename)[0] for filename in files_found]
 
                     self.assigments = {
-                        f"{names_types_assign[idx]}": pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/{filename}"))
+                        f"{names_types_assign[idx]}": pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/progress/{filename}"))
                         for idx, filename in enumerate(files_found)
                     }   
-
+            elif _max_level == 3 and "consolidation" in self.properties["processes"]:
+                self.base_consolidation = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/progress/{files_found[0]}"))
         else:
             raise ValueError(f"Files not found, name regex: {name_regex}")
-
 
     def process(self, driver: 'Driver', aux_afo: 'AFO'=None):
 
@@ -115,8 +115,7 @@ class AFO(dfo):
                         self.save_actual_progress(data=assigment, level=2, optional_end=f"_{_type}")
 
                 if "assigment" == self.properties["processes"][-1]:
-                    self.as
-                    self.save_final(self.assigments)
+                    self.save_final(self.merge_assignment())
 
             bar.text('ejecutando consolidación')
             if "consolidation" in self.properties["processes"]:
@@ -125,6 +124,7 @@ class AFO(dfo):
                 if feature_flags.ENVIROMENT == "DEV":
                     self.save_actual_progress(data=self.base_consolidation, level=3)
 
+                self.save_final(self.base_consolidation)
                
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
@@ -151,7 +151,7 @@ class AFO(dfo):
         """
 
         route_file = os.path.join(const.ROOT_DIR, f"files/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.csv")
-        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.ftr")
+        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/progress/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.ftr")
         route_file_alerts = os.path.join(const.ALERTS_DIR, f"{AFO_TYPES[self._type].value}_alerts.csv")
         
         #save progress in file
@@ -502,20 +502,22 @@ class AFO(dfo):
 
         return pd.concat((assign_negative[original_columns], general_base[mask_assing][original_columns]), ignore_index=True)
     
-    def merge_assignment(self, columns: 'list'):
+    def merge_assignment(self) -> 'pd.DataFrame':
+        """Merge list of tables in assignment process
+
+        Returns:
+            pd.DataFrame: merge table
+        """
         result = None
+        _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)
         for key, assign in self.assigments.items():
             if result is None:
-                result = assign
+                result = assign[[*_properties["unique_columns"], _properties["agg_values"][key]]]
             else:
-                diff_right = utils.get_diff_list((result.columns.tolist(), assign.columns.tolist()), _type="right")
-                same_values = utils.get_same_list((result.columns.tolist(), assign.columns.tolist()))
-                
-        self.base_consolidation = self.base_consolidation.merge(
-            right=self.table[[*_properties["merge_final"]["found_by"], *only_diff]],
-            on=_properties["merge_final"]["found_by"],
-            how="left"
-        )
+                result = result.merge(right=assign[[*_properties["unique_columns"], _properties["agg_values"][key]]], on=_properties["unique_columns"], how="left")
+
+        return result
+
     def execute_consolidation(self, aux_afo: 'AFO' = None, type_sales: 'list' = None, **kargs) -> 'pd.DataFrame':
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.CONSOLIDATION.name)

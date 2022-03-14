@@ -78,38 +78,37 @@ async def process_afo_files(app: 'Application'):
 
         with ThreadPoolExecutor(max_workers=4) as executor:
             arguments = [
-                        # {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
-                        # {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
-                        # {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+                        {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
+                        {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
+                        {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
                     ]
 
-            # futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, **args)) for args in arguments]
+            futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, **args)) for args in arguments]
             future_driver = loop.run_in_executor(executor, functools.partial(Driver.from_csv, path=_file_driver))
-            results = asyncio.gather(future_driver)
+            results = asyncio.gather(*futures, future_driver)
         
-        _dt_driver = await results
-        _dt_afo_calle, _dt_afo_compra =AFO(afo_type=AFO_TYPES.CALLE.name), AFO(afo_type=AFO_TYPES.COMPRA.name)
+        _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = await results
         # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
         # for result in await results:
         #     _dt_afo_directa = result
 
     app.labels_text["status_project"].set("Eliminando ceros de los totales...")
  
-    # DIRECTA
-    # _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
-    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
-    # # CALLE
-    # _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
-    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
-    # # COMPRA
-    # _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
-    #          "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    #DIRECTA
+    _dt_afo_directa.drop_if_all_cero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # CALLE
+    _dt_afo_calle.drop_if_all_cero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
+    # COMPRA
+    _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
+             "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
     app.labels_text["status_project"].set("Ejecutando proceso principal..., esto puede tardar vaya tomese un café")
     with ThreadPoolExecutor(max_workers=4) as executor:
         arguments = [
-            # [_dt_afo_directa, {"driver": _dt_driver}],
-            # [_dt_afo_calle, {"driver": _dt_driver}],
+            [_dt_afo_directa, {"driver": _dt_driver}],
+            [_dt_afo_calle, {"driver": _dt_driver}],
             [_dt_afo_compra, {"driver": _dt_driver, "aux_afo": _dt_afo_calle}]
         ]
 
@@ -121,7 +120,6 @@ async def process_afo_files(app: 'Application'):
         results = asyncio.gather(*futures)
             
     app.labels_text["status_project"].set("Obteniendo resultados...")
-    
     
     
 if __name__ == "__main__":

@@ -94,4 +94,3 @@ class TestDataFrameOptimized(unittest.TestCase):
         #clear data
         del cls.table
         del cls.fake
-        gc.collect()

@@ -47,7 +47,7 @@ class Driver(dfo):
                     insert = True
 
             if insert:
-                _drivers.append(super().from_tuple(
+                _drivers.append(self.from_tuple(
                     values=table[actual_columns].to_numpy(), 
                     columns=actual_columns))
                 _drivers[-1].table = _drivers[-1].table[
