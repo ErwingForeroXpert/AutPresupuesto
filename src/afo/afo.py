@@ -510,6 +510,8 @@ class AFO(dfo):
                 result = assign[[*_properties["unique_columns"], _properties["agg_values"][key]["column"]]]
             else:
                 result = result.merge(right=assign[[*_properties["unique_columns"], _properties["agg_values"][key]["column"]]], on=_properties["unique_columns"], how="left")
+            mask_nan = self.mask_by(result, {"column": _properties["agg_values"][key]["column"]}, aux_func=pd.isna)[1]
+            result.loc[mask_nan, _properties["agg_values"][key]["column"]] = 0
 
         return result
 

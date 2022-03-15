@@ -4,7 +4,7 @@
 #
 
 from os import getcwd, path
-from utils.feature_flags import ENVIROMENT
+from .feature_flags import ENVIROMENT 
 from dataframes import func
 
 # Project constants

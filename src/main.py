@@ -93,9 +93,7 @@ async def process_afo_files(app: 'Application'):
                 results = asyncio.gather(*futures, future_driver)
             
             _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = await results
-            # _dt_afo_directa, _dt_afo_calle, _dt_afo_compra = results 
-            # for result in await results:
-            #     _dt_afo_directa = result
+
 
         app.labels_text["status_project"].set("Eliminando ceros de los totales...")
         bar.text("Eliminando ceros de los totales...")
@@ -141,7 +139,7 @@ if __name__ == "__main__":
     App = Application(
         title=const.PROCESS_NAME,
         divisions=[2,2],
-        size ="300x400"
+        size ="300x200"
     )
 
     App.insert_action("button", "btn_insert_file", process_afo_files, event_loop=async_loop)

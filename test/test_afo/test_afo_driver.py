@@ -1,9 +1,9 @@
-import re
 import unittest
 
 import pandas as pd
-from src.utils import index as utils
-from src.afo.driver import Driver
+
+from utils import index as utils
+from afo.driver import Driver
 from test.test_fixtures_funcs import generate_list_str, get_test_file
 
 class TestDriverClass(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestDriverClass(unittest.TestCase):
         cls.wrong_process = generate_list_str((1,5), size=5)
     
     def test_driver_load_from_csv(self) -> None:
-        self.driver = Driver.from_csv(get_test_file("driver.csv"))
+        self.driver = Driver.from_csv(get_test_file("drivers.csv"))
         self.assertIsInstance(self.driver, Driver)
         self.assertDictEqual(self.driver.properties, Driver.get_properties())
     
