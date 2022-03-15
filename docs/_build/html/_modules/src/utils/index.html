@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2D2D2D" />
+  
+  <title>Presupuesto :: src.utils.index</title>
+  
+
+  <link rel="icon" type="image/png" sizes="32x32" href="../../../_static/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../../../_static/img/favicon-16x16.png">
+  <link rel="index" title="Índice" href="../../../genindex.html"/>
+
+  <link rel="stylesheet" href="../../../_static/css/insegel.css"/>
+  <link rel="stylesheet" href="../../../_static/css/custom.css"/>
+
+  <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/translations.js"></script>
+  
+
+  <script src="https://email.tl.fortawesome.com/c/eJxNjUEOgyAQAF8jR7Kw6wIHDh7sP1Cw2mgxgmn6-3JsMqc5zEQfE8dkxOY1KKMUOI3ACFKRJpSW2AAp7ontYIaxI6i7XPJVwyeVfCQ550Os3jLrGSNOLgbdAy6s0PBk2TFNjEbsfq31LB0OnX407pJa5v2faRadwSW63mn5KuLyR9j2tgx3zecanl-55R_-jjPs"></script> 
+</head>
+
+<body>
+  <div id="insegel-container">
+    <header>
+      <div id="logo-container">
+          
+          <h1>Presupuesto</h1>
+          
+      </div>
+      <div id="project-container">
+        
+        <h1>Documentation</h1>
+        
+      </div>
+    </header>
+
+    <div id="content-container">
+
+      <div id="main-content-container">
+        <div id="main-content" role="main">
+          
+  <h1>Código fuente para src.utils.index</h1><div class="highlight"><pre>
+<span></span><span class="c1">#  -*- coding: utf-8 -*-</span>
+<span class="c1">#    Created on 07/01/2022 15:51:23</span>
+<span class="c1">#    @author: ErwingForero </span>
+<span class="c1"># </span>
+
+<span class="kn">import</span> <span class="nn">tkinter</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pymsgbox</span> 
+<span class="kn">import</span> <span class="nn">pyxlsb</span> <span class="k">as</span> <span class="nn">pyx</span>
+<span class="kn">import</span> <span class="nn">xlwings</span> <span class="k">as</span> <span class="nn">xw</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">filedialog</span>
+
+
+<div class="viewcode-block" id="search_for_file_path"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.search_for_file_path">[documentos]</a><span class="k">def</span> <span class="nf">search_for_file_path</span> <span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">types</span><span class="p">:</span> <span class="s1">&#39;tuple|str&#39;</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span><span class="o">-&gt;</span> <span class="s1">&#39;str|None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Search for a file path.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        message (str):  the title of the window</span>
+<span class="sd">        required (bool, optional): if file is required. Defaults to be False.</span>
+<span class="sd">        types (tuple|str, optional): a sequence of (label, pattern) tuples, Defaults to be ‘*’ wildcard is allowed</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str|None: path of file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">tkinter</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">withdraw</span><span class="p">()</span> <span class="c1">#use to hide tkinter window</span>
+
+    <span class="n">file_found</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">file_found</span><span class="p">:</span>
+        <span class="n">currdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">tempdir</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askopenfilename</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">initialdir</span><span class="o">=</span><span class="n">currdir</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">filetypes</span><span class="o">=</span><span class="n">types</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tempdir</span><span class="p">):</span>
+            <span class="n">file_found</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">required</span><span class="p">:</span>
+            <span class="n">pymsgbox</span><span class="o">.</span><span class="n">alert</span><span class="p">(</span><span class="s2">&quot;Se requiere el archivo, por favor intentelo de nuevo&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_found</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="n">tempdir</span></div>
+
+<div class="viewcode-block" id="wait_book_disable"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.wait_book_disable">[documentos]</a><span class="k">def</span> <span class="nf">wait_book_disable</span><span class="p">(</span><span class="n">mybook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wait until the book is closed</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mybook (String): path of the excel book</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">xw</span><span class="o">.</span><span class="n">books</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">book</span> <span class="ow">in</span> <span class="n">xw</span><span class="o">.</span><span class="n">books</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">book</span><span class="o">.</span><span class="n">fullname</span> <span class="o">==</span> <span class="n">mybook</span><span class="p">:</span>
+                <span class="n">book</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">book</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="validate_or_create_folder"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.validate_or_create_folder">[documentos]</a><span class="k">def</span> <span class="nf">validate_or_create_folder</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="is_iterable"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.is_iterable">[documentos]</a><span class="k">def</span> <span class="nf">is_iterable</span><span class="p">(</span><span class="n">posibleList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate if element is iterable</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        posibleList (Any): posible iterable element</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: if element is iterable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">posibleList</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">posibleList</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">posibleList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="if_error_false"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.if_error_false">[documentos]</a><span class="k">def</span> <span class="nf">if_error_false</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;if generate error return false</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cb (function): function</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Any: function return or False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cb</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="is_empty"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.is_empty">[documentos]</a><span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">if_error_false</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="fm">__len__</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">if_error_false</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">if_error_false</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="all_is_empty"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.all_is_empty">[documentos]</a><span class="k">def</span> <span class="nf">all_is_empty</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;all_is_empty - invalid type of iterable&quot;</span><span class="p">)</span>
+
+    <span class="n">empties</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_empty</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="n">empties</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">size</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="n">empties</span> <span class="o">==</span> <span class="n">size</span></div>
+
+<div class="viewcode-block" id="get_diff_list"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.get_diff_list">[documentos]</a><span class="k">def</span> <span class="nf">get_diff_list</span><span class="p">(</span><span class="n">lists</span><span class="p">:</span> <span class="s1">&#39;tuple(list)&#39;</span><span class="p">,</span>   <span class="n">_type</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get difference between two list</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lists (tuple): two list to be compared</span>
+<span class="sd">        _type (str, optional): _type of get diff:</span>
+
+<span class="sd">        all - get all list values different</span>
+<span class="sd">        left - get only left different values</span>
+<span class="sd">        right - get only right different values</span>
+<span class="sd">        </span>
+<span class="sd">        Defaults to &#39;all&#39;.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Invalid size of lists, expected: __len__ 2</span>
+<span class="sd">        ValueError: Invalid _type of lists</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: difference</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid size of lists, expected: __len__ 2&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid _type of lists&quot;</span><span class="p">)</span>
+
+    <span class="n">diff</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">diff</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    
+    <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">diff</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    
+    <span class="k">return</span> <span class="n">diff</span></div>
+
+<div class="viewcode-block" id="get_same_list"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.get_same_list">[documentos]</a><span class="k">def</span> <span class="nf">get_same_list</span><span class="p">(</span><span class="n">lists</span><span class="p">:</span> <span class="s1">&#39;tuple(list)&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get same values between two list</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lists (tuple): two list to be compared</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Invalid size of lists, expected: __len__ 2</span>
+<span class="sd">        ValueError: Invalid _type of lists</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: same values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid size of lists, expected: __len__ 2&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid _type of lists&quot;</span><span class="p">)</span>
+
+    <span class="n">same</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="n">same</span></div>
+
+<div class="viewcode-block" id="convert_row"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.convert_row">[documentos]</a><span class="k">def</span> <span class="nf">convert_row</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="s1">&#39;np.array&#39;</span><span class="p">,</span> <span class="n">converter</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.array&#39;</span><span class="p">:</span>
+    
+    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">converter</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;convert_row - invalid size of converter array length </span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">converter</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">row</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">converter</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">row</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="c1">#2D Array [:, 1,2,3...] all axis 0, but get axis 1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">converter</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1">#1D Array</span>
+    <span class="k">return</span> <span class="n">row</span></div>
+
+<div class="viewcode-block" id="get_data_of_excel_sheet"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.get_data_of_excel_sheet">[documentos]</a><span class="k">def</span> <span class="nf">get_data_of_excel_sheet</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sheet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">header_idx</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skiprows</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">row_converter</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.array&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get data of sheet in Excel File</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Any: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">pyx</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">wb</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">wb</span><span class="o">.</span><span class="n">get_sheet</span><span class="p">(</span><span class="n">sheet</span><span class="p">)</span> <span class="k">as</span> <span class="n">_sheet</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">_sheet</span><span class="p">))[:,:,</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">header_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">header_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">header_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">row_converter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">convert_row</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">row_converter</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">skiprows</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">skiprows</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">skiprows</span><span class="p">[</span><span class="mi">1</span><span class="p">],:]</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;get_data_of_excel_sheet - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_data_of_csv"><a class="viewcode-back" href="../../../src.utils.html#src.utils.index.get_data_of_csv">[documentos]</a><span class="k">def</span> <span class="nf">get_data_of_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">header_idx</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">index_idx</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">row_converter</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.array&#39;</span><span class="p">:</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">header_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">header_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">header_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">row_converter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">convert_row</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">row_converter</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">index_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">index_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">index_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">],:]</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+    
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;get_data_of_csv - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+        </div>
+      </div>
+
+      <div id="side-menu-container">
+
+        <div id="search" role="search">
+        <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+            <input type="text" name="q" placeholder="Search..." />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+        </form>
+</div>
+
+        <div id="side-menu" role="navigation">
+
+          
+  
+    
+  
+  
+    <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../src.html">src package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#module-src.main">src.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  
+
+
+        </div>
+
+        
+
+      </div>
+
+    </div>
+
+<footer>
+    <div id="footer-info">
+        <ul id="build-details">
+            
+
+            
+
+            
+        </ul>
+
+        
+            <div id="copyright">
+                &copy; 2022, erwing_forero
+            </div>
+        
+
+        <div id="credit">
+            created with <a href="http://sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/Autophagy/insegel">Insegel</a>
+
+        </div>
+    </div>
+
+    <a id="menu-toggle" class="fa fa-bars" aria-hidden="true"></a>
+
+    <script type="text/javascript">
+      $("#menu-toggle").click(function() {
+        $("#menu-toggle").toggleClass("toggled");
+        $("#side-menu-container").slideToggle(300);
+      });
+    </script>
+
+</footer> 
+
+</div>
+
+</body>
+</html>

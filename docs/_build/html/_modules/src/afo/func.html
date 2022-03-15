@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2D2D2D" />
+  
+  <title>Presupuesto :: src.afo.func</title>
+  
+
+  <link rel="icon" type="image/png" sizes="32x32" href="../../../_static/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../../../_static/img/favicon-16x16.png">
+  <link rel="index" title="Índice" href="../../../genindex.html"/>
+
+  <link rel="stylesheet" href="../../../_static/css/insegel.css"/>
+  <link rel="stylesheet" href="../../../_static/css/custom.css"/>
+
+  <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/translations.js"></script>
+  
+
+  <script src="https://email.tl.fortawesome.com/c/eJxNjUEOgyAQAF8jR7Kw6wIHDh7sP1Cw2mgxgmn6-3JsMqc5zEQfE8dkxOY1KKMUOI3ACFKRJpSW2AAp7ontYIaxI6i7XPJVwyeVfCQ550Os3jLrGSNOLgbdAy6s0PBk2TFNjEbsfq31LB0OnX407pJa5v2faRadwSW63mn5KuLyR9j2tgx3zecanl-55R_-jjPs"></script> 
+</head>
+
+<body>
+  <div id="insegel-container">
+    <header>
+      <div id="logo-container">
+          
+          <h1>Presupuesto</h1>
+          
+      </div>
+      <div id="project-container">
+        
+        <h1>Documentation</h1>
+        
+      </div>
+    </header>
+
+    <div id="content-container">
+
+      <div id="main-content-container">
+        <div id="main-content" role="main">
+          
+  <h1>Código fuente para src.afo.func</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">afo.afo</span> <span class="kn">import</span> <span class="n">AFO</span>
+
+<div class="viewcode-block" id="after_process_formulas_directa"><a class="viewcode-back" href="../../../src.afo.html#src.afo.func.after_process_formulas_directa">[documentos]</a><span class="k">def</span> <span class="nf">after_process_formulas_directa</span><span class="p">(</span>
+    <span class="nb">type</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">actual_afo</span><span class="p">:</span> <span class="s1">&#39;AFO&#39;</span><span class="p">,</span> 
+    <span class="n">drivers</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> 
+    <span class="n">cols_drivers</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> 
+    <span class="n">properties</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+    <span class="n">table2</span><span class="p">:</span> <span class="s1">&#39;pd.DataFrame&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Individual process of afo files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        type (str): type of afo</span>
+<span class="sd">        table (pd.DataFrame): table of afo type</span>
+<span class="sd">        drivers (list): drivers see afo/driver</span>
+<span class="sd">        cols_drivers (list): columns of drivers</span>
+<span class="sd">        properties (object): properties of afo type</span>
+<span class="sd">        table2 (pd.DataFrame, optional): util table used for &quot;directa&quot; and &quot;calle&quot; afo type. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: table before process afo</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">actual_afo</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">actual_afo</span><span class="o">.</span><span class="n">table</span>
+
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;directa&quot;</span><span class="p">:</span>
+        <span class="c1"># driver 3 merge with table by formato</span>
+        <span class="c1"># formato is included in columns</span>
+        <span class="n">table3</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">right</span><span class="o">=</span><span class="n">drivers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> 
+            <span class="n">on</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="c1">#formato</span>
+            <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+
+        <span class="c1"># change values</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">columns</span><span class="p">[</span><span class="mi">9</span><span class="p">]]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pat</span><span class="o">=</span><span class="s1">&#39;(?i)sin asignar&#39;</span><span class="p">)</span>  <span class="c1"># for format whitout be assigned</span>
+        
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;add_columns&quot;</span><span class="p">]):</span>
+            
+            <span class="n">new_column_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;add_columns_dif&#39;</span><span class="p">]</span><span class="si">}{</span><span class="n">_column</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">new_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1">#empty column</span>
+
+            <span class="c1">#asigned or not asigned</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span><span class="n">new_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">table2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> 
+                                        <span class="n">cols_drivers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">]]</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">new_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">table3</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span>
+                                        <span class="n">cols_drivers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">idx</span><span class="p">]]</span>
+
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;calle&quot;</span><span class="p">:</span>
+        <span class="c1"># replace if found &quot;Sin asignar&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;filter_replace_columns&quot;</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pat</span><span class="o">=</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;filter_replace_columns&quot;</span><span class="p">][</span><span class="s2">&quot;pattern&quot;</span><span class="p">])</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span><span class="nb">list</span><span class="p">(</span><span class="n">lista_mia</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mi">6</span><span class="p">),</span>
+            <span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Tradicional&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;TD&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Tiendas&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;TG&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Tienda Mixta&quot;</span><span class="p">])</span>
+
+        <span class="c1">#replace cod_agente_comercial by actual_codigo_ac</span>
+        <span class="n">actual_afo</span><span class="o">.</span><span class="n">replace_by</span><span class="p">(</span>
+            <span class="n">dataframe_right</span><span class="o">=</span><span class="n">drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+            <span class="n">type_replace</span><span class="o">=</span><span class="s2">&quot;not_nan&quot;</span><span class="p">,</span>
+            <span class="n">left_on</span><span class="o">=</span><span class="s1">&#39;cod_agente_comercial&#39;</span><span class="p">,</span>
+            <span class="n">right_on</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">right_replacer</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span>  
+
+        <span class="c1">#replace cod_agente_comercial by cod cliente</span>
+        <span class="n">actual_afo</span><span class="o">.</span><span class="n">replace_by</span><span class="p">(</span>
+            <span class="n">dataframe_right</span><span class="o">=</span><span class="n">drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
+            <span class="n">type_replace</span><span class="o">=</span><span class="s2">&quot;not_nan&quot;</span><span class="p">,</span>
+            <span class="n">left_on</span><span class="o">=</span><span class="s1">&#39;cod_agente_comercial&#39;</span><span class="p">,</span>
+            <span class="n">right_on</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="c1">#codigo_cliente</span>
+            <span class="n">left_replace</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;nombre_ac&#39;</span><span class="p">,</span> <span class="s1">&#39;oficina_venta&#39;</span><span class="p">],</span>
+            <span class="n">right_replacer</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="c1">#[nombre_cliente, oficina_ventas_ecom]</span>
+            <span class="n">create_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span>
+        
+        <span class="c1">#add other columns</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;add_columns&quot;</span><span class="p">]):</span>
+            <span class="n">new_column_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;add_columns_dif&#39;</span><span class="p">]</span><span class="si">}{</span><span class="n">_column</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">new_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">table2</span><span class="p">[</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">]]</span>
+
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;compra&quot;</span><span class="p">:</span>
+
+        <span class="c1">#replace table by cod_agente_comercial</span>
+        <span class="n">actual_afo</span><span class="o">.</span><span class="n">replace_by</span><span class="p">(</span>
+            <span class="n">dataframe_right</span><span class="o">=</span><span class="n">drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+            <span class="n">type_replace</span><span class="o">=</span><span class="s2">&quot;not_nan&quot;</span><span class="p">,</span>
+            <span class="n">left_on</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">right_on</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">right_replacer</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># replace table by cod cliente</span>
+        <span class="n">actual_afo</span><span class="o">.</span><span class="n">replace_by</span><span class="p">(</span>
+            <span class="n">dataframe_right</span><span class="o">=</span><span class="n">drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
+            <span class="n">type_replace</span><span class="o">=</span><span class="s2">&quot;not_nan&quot;</span><span class="p">,</span>
+            <span class="n">left_on</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">right_on</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">left_replace</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">right_replacer</span><span class="o">=</span><span class="n">cols_drivers</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span>
+
+        
+    <span class="k">return</span> <span class="n">table</span></div>
+</pre></div>
+
+        </div>
+      </div>
+
+      <div id="side-menu-container">
+
+        <div id="search" role="search">
+        <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+            <input type="text" name="q" placeholder="Search..." />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+        </form>
+</div>
+
+        <div id="side-menu" role="navigation">
+
+          
+  
+    
+  
+  
+    <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../src.html">src package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#module-src.main">src.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  
+
+
+        </div>
+
+        
+
+      </div>
+
+    </div>
+
+<footer>
+    <div id="footer-info">
+        <ul id="build-details">
+            
+
+            
+
+            
+        </ul>
+
+        
+            <div id="copyright">
+                &copy; 2022, erwing_forero
+            </div>
+        
+
+        <div id="credit">
+            created with <a href="http://sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/Autophagy/insegel">Insegel</a>
+
+        </div>
+    </div>
+
+    <a id="menu-toggle" class="fa fa-bars" aria-hidden="true"></a>
+
+    <script type="text/javascript">
+      $("#menu-toggle").click(function() {
+        $("#menu-toggle").toggleClass("toggled");
+        $("#side-menu-container").slideToggle(300);
+      });
+    </script>
+
+</footer> 
+
+</div>
+
+</body>
+</html>

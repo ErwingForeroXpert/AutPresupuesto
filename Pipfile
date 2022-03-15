@@ -20,6 +20,10 @@ build = "pyinstaller --clean --onefile  ./src/main.py"
 autopep8 = "*"
 pyinstaller = "*"
 faker = "*"
+sphinx = "*"
+insegel = "*"
+sphinx-rtd-theme = "*"
+pydata-sphinx-theme = "*"
 
 [requires]
 python_version = "3.9"
