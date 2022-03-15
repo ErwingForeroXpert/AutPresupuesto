@@ -1,9 +1,9 @@
 import faker 
 import os
 import pandas as pd
-from random import random
+import random
 from src.utils import index as utils
-from test_fixtures_const import TEST_FILES_PROGRESS_ROUTE, TEST_FILES_RAW_ROUTE
+from .test_fixtures_const import TEST_FILES_PROGRESS_ROUTE, TEST_FILES_RAW_ROUTE
 
 faker.Faker.seed(random.randint(0,100))
 fackerclass = faker.Faker()

@@ -1,11 +1,11 @@
 import re
 import unittest
-import os
-from src.afo.afo_processes import AFO_PROCESSES
-from src.afo.afo_types import AFO_TYPES
-from src.afo.afo import AFO
-from src.afo.driver import Driver
-from test_fixtures import generate_list_str, compare_tables, get_test_file
+
+from afo.afo_processes import AFO_PROCESSES
+from afo.afo_types import AFO_TYPES
+from afo.afo import AFO
+from afo.driver import Driver
+from test.test_fixtures import generate_list_str, compare_tables, get_test_file
 
 class TestAFOClass(unittest.TestCase):
 
@@ -14,17 +14,17 @@ class TestAFOClass(unittest.TestCase):
         """Initialize the class .
         """
 
-        cls.afo_types = [e.value for e in AFO_TYPES]
+        cls.afo_types = [e.name for e in AFO_TYPES]
         cls.afo_files = ["afo_calle.csv", "afo_compra.csv", "afo_directa.csv"]
         cls.wrong_afo_types = generate_list_str((1,5), size=5)
         cls.wrong_afo_process = generate_list_str((1,5), size=5)
-        cls.driver = Driver.from_csv(get_test_file('driver.csv'))
+        cls.driver = Driver.from_csv(get_test_file('drivers.csv'))
         cls.instances = []
         cls.afos = []
 
     def test_afo_load_files_csv(self) -> None:
         for file in self.afo_files:
-            _type = re.findall(r"(?>=afo_).*(?=.csv)", file)[0]
+            _type = re.findall(r"(?>=afo_).*(?=.csv)", file)[0].upper()
             afo = AFO.get_table_csv(get_test_file(file), afo_type=_type)
             self.assertIsInstance(afo, AFO)
             self.afos.append(afo)
