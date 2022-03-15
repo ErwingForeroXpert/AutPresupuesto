@@ -13,13 +13,19 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.append(os.path.abspath(
+    os.path.join(__file__, "../../src")
+))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Presupuesto'
-copyright = '2022, erwing-forero'
-author = 'erwing-forero'
+copyright = '2022, erwing_forero'
+author = 'erwing_forero'
+
+# The full version, including alpha/beta/rc tags
+release = '2022'
 
 
 # -- General configuration ---------------------------------------------------
@@ -28,7 +34,7 @@ author = 'erwing-forero'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon'
+    'sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode', 
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -39,7 +45,7 @@ templates_path = ['_templates']
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'python'
+language = 'es'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -52,7 +58,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'insegel'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

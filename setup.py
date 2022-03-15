@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Learn more: https://github.com/ErwingForeroXpert/Presupuesto
+# Learn more: https://github.com/ErwingForeroXpert/AutPresupuesto
 
 from setuptools import setup, find_packages
 
@@ -12,7 +12,7 @@ with open('LICENSE') as f:
 
 setup(
     name='Presupuesto',
-    version='0.1.0',
+    version='1.0.0',
     description='Project for manage budget',
     long_description=readme,
     author='Erwing Forero',

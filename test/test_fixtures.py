@@ -1,9 +1,7 @@
 import os
-from budget.utils import constants as const
-
-
-TEST_FILES_ROUTE = os.path.normpath(os.path.join(const.ROOT_DIR, 'test/files'))
-
+from src.utils import constants as const
+from .test_fixtures_funcs import *
+from .test_fixtures_const import *
 
 class FakeTable():
 

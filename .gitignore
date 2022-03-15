@@ -1,6 +1,15 @@
 Proceso.txt
+autocommit.sh
 *.xlsb
 .vscode
-___pycache__*
+
+*.pyc
+__pycache__
+
 _dev*
 *.csv
+*.xls*
+*.xlsx
+*.ftr
+*.exe
+*.zip

@@ -1,15 +1,15 @@
 import unittest
 import os
 import gc
-from budget.utils import index
-from test.test_fixtures import TEST_FILES_ROUTE
+from src.utils import index
+from test.test_fixtures import TEST_FILES_PROGRESS_ROUTE
 
 class TestUtilsMethods(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        cls.without_macros_book_route = os.path.join(TEST_FILES_ROUTE, 'book_without_macros.xlsm')
-        cls.good_book_route = os.path.join(TEST_FILES_ROUTE, 'good_book.xlsm')
+        cls.without_macros_book_route = os.path.join(TEST_FILES_PROGRESS_ROUTE, 'book_without_macros.xlsm')
+        cls.good_book_route = os.path.join(TEST_FILES_PROGRESS_ROUTE, 'good_book.xlsm')
 
     def test_run_macro_inexistent(self) -> None:
         try:

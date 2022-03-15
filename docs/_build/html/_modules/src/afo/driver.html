@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2D2D2D" />
+  
+  <title>Presupuesto :: src.afo.driver</title>
+  
+
+  <link rel="icon" type="image/png" sizes="32x32" href="../../../_static/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../../../_static/img/favicon-16x16.png">
+  <link rel="index" title="Índice" href="../../../genindex.html"/>
+
+  <link rel="stylesheet" href="../../../_static/css/insegel.css"/>
+  <link rel="stylesheet" href="../../../_static/css/custom.css"/>
+
+  <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/translations.js"></script>
+  
+
+  <script src="https://email.tl.fortawesome.com/c/eJxNjUEOgyAQAF8jR7Kw6wIHDh7sP1Cw2mgxgmn6-3JsMqc5zEQfE8dkxOY1KKMUOI3ACFKRJpSW2AAp7ontYIaxI6i7XPJVwyeVfCQ550Os3jLrGSNOLgbdAy6s0PBk2TFNjEbsfq31LB0OnX407pJa5v2faRadwSW63mn5KuLyR9j2tgx3zecanl-55R_-jjPs"></script> 
+</head>
+
+<body>
+  <div id="insegel-container">
+    <header>
+      <div id="logo-container">
+          
+          <h1>Presupuesto</h1>
+          
+      </div>
+      <div id="project-container">
+        
+        <h1>Documentation</h1>
+        
+      </div>
+    </header>
+
+    <div id="content-container">
+
+      <div id="main-content-container">
+        <div id="main-content" role="main">
+          
+  <h1>Código fuente para src.afo.driver</h1><div class="highlight"><pre>
+<span></span><span class="c1">#  -*- coding: utf-8 -*-</span>
+<span class="c1">#    Created on 07/01/2022 15:51:23</span>
+<span class="c1">#    @author: ErwingForero</span>
+<span class="c1">#</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">afo.afo_processes</span> <span class="kn">import</span> <span class="n">AFO_PROCESSES</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">isna</span>
+<span class="kn">from</span> <span class="nn">dataframes.dataframe_optimized</span> <span class="kn">import</span> <span class="n">DataFrameOptimized</span> <span class="k">as</span> <span class="n">dfo</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">const</span>
+
+
+<div class="viewcode-block" id="Driver"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver">[documentos]</a><span class="k">class</span> <span class="nc">Driver</span><span class="p">(</span><span class="n">dfo</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_drivers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="s2">&quot;driver&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sep_drivers</span> <span class="o">=</span> <span class="s2">&quot;sep&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actual_process</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_drivers_process</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Driver.process_subdrivers"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver.process_subdrivers">[documentos]</a>    <span class="k">def</span> <span class="nf">process_subdrivers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[super()]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Processes driver and split it</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            driver (dfo): principal driver of values in driver sheet afo</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dfo]: list of subdrivers found see utils/constants</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;table not found&quot;</span><span class="p">)</span>
+
+        <span class="n">_headers</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+        <span class="n">_drivers</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">actual_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_head</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_headers</span><span class="p">):</span>
+            <span class="n">insert</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sep_drivers</span> <span class="ow">in</span> <span class="n">_head</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">actual_columns</span> <span class="o">!=</span> <span class="p">[]:</span>
+                    <span class="n">insert</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">actual_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_head</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">_headers</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">insert</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">insert</span><span class="p">:</span>
+                <span class="n">_drivers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_tuple</span><span class="p">(</span>
+                    <span class="n">values</span><span class="o">=</span><span class="n">table</span><span class="p">[</span><span class="n">actual_columns</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> 
+                    <span class="n">columns</span><span class="o">=</span><span class="n">actual_columns</span><span class="p">))</span>
+                <span class="n">_drivers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">_drivers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="p">[</span>
+                    <span class="o">~</span><span class="n">isna</span><span class="p">(</span><span class="n">_drivers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="n">_drivers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">actual_columns</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_drivers</span> <span class="o">=</span> <span class="n">_drivers</span></div>
+
+<div class="viewcode-block" id="Driver.get_properties_for_process"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver.get_properties_for_process">[documentos]</a>    <span class="k">def</span> <span class="nf">get_properties_for_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get properties for Driver process</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            process[str]: Actual process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: properties of driver actual process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">AFO_PROCESSES</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="n">process</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Process </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s2"> not found in AFO_PROCESSES&quot;</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_process</span> <span class="o">!=</span> <span class="n">process</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actual_process</span> <span class="o">=</span> <span class="n">process</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">properties_process</span> <span class="o">=</span> <span class="n">AFO_PROCESSES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">actual_process</span><span class="p">]</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">]</span> <span class="c1"># afo properties for this process</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_process</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sub_drivers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[super()]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;List of subdrivers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dfo]: list of subdrivers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drivers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_subdrivers</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drivers</span>
+
+<div class="viewcode-block" id="Driver.get_sub_drivers_for_process"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver.get_sub_drivers_for_process">[documentos]</a>    <span class="k">def</span> <span class="nf">get_sub_drivers_for_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;super()&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a list of all sub - drivers for the process that are required for the process .</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            process[str]: Actual process</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: invalid process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[tuple[dfo, list[str]]]: get tuple of subdrivers and head columns</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">_sub_drivers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_drivers</span> 
+
+        <span class="n">_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_properties_for_process</span><span class="p">(</span><span class="n">process</span><span class="p">)</span> <span class="c1"># driver properties for this process</span>
+
+        <span class="n">index_sub_drivers</span> <span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;index_sub_drivers&quot;</span><span class="p">]</span> <span class="c1">#index of each subdriver</span>
+        <span class="n">cols_required_sub_drivers</span> <span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;cols_required_sub_drivers&quot;</span><span class="p">]</span> <span class="c1">#cols of each subdriver</span>
+        <span class="n">subset_index_columns</span> <span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;subset_index_columns&quot;</span><span class="p">]</span> <span class="c1">#key for delete duplicates in each subdriver</span>
+        <span class="n">drop_duplicates</span> <span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;drop_duplicates&quot;</span><span class="p">]</span> <span class="c1">#delete duplicates?</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx_pos</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_sub_drivers</span><span class="p">):</span> <span class="c1">#iterate index and position to other properties see constanst PROCESSES</span>
+            <span class="k">if</span> <span class="n">drop_duplicates</span><span class="p">[</span><span class="n">idx_pos</span><span class="p">]:</span>
+                <span class="n">_sub_drivers</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> <span class="n">res_columns</span> <span class="o">=</span> <span class="n">dfo</span><span class="o">.</span><span class="n">get_header_names_of</span><span class="p">(</span><span class="n">_sub_drivers</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> <span class="n">cols_required_sub_drivers</span><span class="p">[</span><span class="n">idx_pos</span><span class="p">],</span>
+                                                                <span class="n">drop_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="n">subset_index_columns</span><span class="p">[</span><span class="n">idx_pos</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                 <span class="n">_</span><span class="p">,</span> <span class="n">res_columns</span> <span class="o">=</span> <span class="n">dfo</span><span class="o">.</span><span class="n">get_header_names_of</span><span class="p">(</span><span class="n">_sub_drivers</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> <span class="n">cols_required_sub_drivers</span><span class="p">[</span><span class="n">idx_pos</span><span class="p">])</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">_sub_drivers</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> <span class="n">res_columns</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_drivers_process</span> <span class="o">=</span> <span class="n">result</span> <span class="c1">#save actual sub_drivers</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_drivers_process</span></div>
+    
+<div class="viewcode-block" id="Driver.get_properties"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver.get_properties">[documentos]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_properties</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the driver properties, see constants for more.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: properties defined of the driver</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">const</span><span class="o">.</span><span class="n">DRIVER</span></div>
+
+<div class="viewcode-block" id="Driver.from_excel"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver.from_excel">[documentos]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_excel</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Driver&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new driver from an Excel file .</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): file route</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Driver: instance of driver</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_properties</span> <span class="o">=</span> <span class="n">Driver</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()</span>
+
+        <span class="n">dto_instance</span> <span class="o">=</span> <span class="n">dfo</span><span class="o">.</span><span class="n">get_table_excel</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> 
+            <span class="n">sheet</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;sheet&quot;</span><span class="p">],</span> 
+            <span class="n">skiprows</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;skiprows&quot;</span><span class="p">],</span> 
+            <span class="n">columns</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">],</span> 
+            <span class="n">converters</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;converters&quot;</span><span class="p">],</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">],</span> 
+            <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>    <span class="c1">#permisible https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html </span>
+                        <span class="c1">#arguments or overwrite previous parameters see utils/constants </span>
+        <span class="k">return</span> <span class="n">Driver</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="n">dto_instance</span><span class="o">.</span><span class="n">table</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Driver.from_csv"><a class="viewcode-back" href="../../../src.afo.html#src.afo.driver.Driver.from_csv">[documentos]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_csv</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new driver from an Csv file .</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): file route</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Driver: instance of driver</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_properties</span> <span class="o">=</span> <span class="n">Driver</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()</span>
+
+        <span class="n">dto_instance</span> <span class="o">=</span> <span class="n">dfo</span><span class="o">.</span><span class="n">get_table_csv</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> 
+            <span class="n">delimiter</span><span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;delimiter&quot;</span><span class="p">],</span> 
+            <span class="n">skiprows</span><span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;skiprows&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> 
+            <span class="n">names</span><span class="o">=</span> <span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">],</span> 
+            <span class="n">converters</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;converters&quot;</span><span class="p">],</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="n">_properties</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">],</span>
+            <span class="n">header</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>    <span class="c1">#permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html</span>
+                        <span class="c1">#arguments or overwrite previous arguments see utils/constants  </span>
+        <span class="k">return</span> <span class="n">Driver</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="n">dto_instance</span><span class="o">.</span><span class="n">table</span><span class="p">)</span></div></div>
+</pre></div>
+
+        </div>
+      </div>
+
+      <div id="side-menu-container">
+
+        <div id="search" role="search">
+        <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+            <input type="text" name="q" placeholder="Search..." />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+        </form>
+</div>
+
+        <div id="side-menu" role="navigation">
+
+          
+  
+    
+  
+  
+    <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../src.html">src package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#module-src.main">src.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../src.html#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  
+
+
+        </div>
+
+        
+
+      </div>
+
+    </div>
+
+<footer>
+    <div id="footer-info">
+        <ul id="build-details">
+            
+
+            
+
+            
+        </ul>
+
+        
+            <div id="copyright">
+                &copy; 2022, erwing_forero
+            </div>
+        
+
+        <div id="credit">
+            created with <a href="http://sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/Autophagy/insegel">Insegel</a>
+
+        </div>
+    </div>
+
+    <a id="menu-toggle" class="fa fa-bars" aria-hidden="true"></a>
+
+    <script type="text/javascript">
+      $("#menu-toggle").click(function() {
+        $("#menu-toggle").toggleClass("toggled");
+        $("#side-menu-container").slideToggle(300);
+      });
+    </script>
+
+</footer> 
+
+</div>
+
+</body>
+</html>
