@@ -13,19 +13,13 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.append(os.path.abspath(
-    os.path.join(__file__, "../../src")
-))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Presupuesto'
-copyright = '2022, erwing_forero'
-author = 'erwing_forero'
-
-# The full version, including alpha/beta/rc tags
-release = '2022'
+copyright = '2022, erwing-forero'
+author = 'erwing-forero'
 
 
 # -- General configuration ---------------------------------------------------
