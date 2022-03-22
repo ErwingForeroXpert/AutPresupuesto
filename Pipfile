@@ -14,17 +14,7 @@ pyxlsb = "*"
 
 [scripts]
 test = "python -m unittest discover --pattern=test_*.py"
-build = """pyinstaller --exclude-module autopep8
-        --exclude-module pyinstaller
-        --exclude-module faker
-        --exclude-module sphinx
-        --exclude-module insegel
-        --exclude-module sphinx-rtd-theme
-        --exclude-module pydata-sphinx-theme
-        --clean --onefile --windowed --icon=./files/img/icon.ico
-        --collect-data grapheme
-        --paths=./src 
-        ./src/main.py"""
+build = "pyinstaller --clean --onefile  ./src/main.py"
 
 [dev-packages]
 autopep8 = "*"

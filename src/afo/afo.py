@@ -132,7 +132,7 @@ class AFO(dfo):
         self.table.reset_index(drop=True, inplace=True)
 
     def save_final(self, data: 'pd.DataFrame'=None):
-        route_file = os.path.join(const.ROOT_DIR, f"resultado/{AFO_TYPES[self._type].value}.csv")
+        route_file = os.path.join(const.ROOT_DIR, f"{AFO_TYPES[self._type].value}.csv")
         #save progress in file
         temp_data = self.table if data is None else data
 

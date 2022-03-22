@@ -1,7 +1,5 @@
-import time
 import tkinter as tk
 import numpy as np
-import threading
 import re
 from os import getcwd,path, listdir
 from utils.constants import ROOT_DIR, ICON_IMAGE
@@ -30,18 +28,15 @@ class Application():
             "type_route": tk.StringVar(),
             "type_selector": tk.StringVar(),
             "status_project": tk.StringVar(),
-            "progress_time": tk.StringVar()
         }
 
-        self.execution_seconds = 0
         self.extensions = [
             ("Excel files", ".xlsx .xls .xlsb"),
             ("Csv Files", ".csv .txt")
         ]
         _path = path.normpath(path.join(ROOT_DIR, "files/img"))
         validate_or_create_folder(_path)
-        if path.exists(path.join(_path, ICON_IMAGE)):
-            self.root.iconbitmap(path.join(_path, ICON_IMAGE))
+        self.root.iconbitmap(path.join(_path, ICON_IMAGE))
 
         if hide:
             self.root.withdraw()
@@ -87,22 +82,11 @@ class Application():
         self.labels_text["status_project"].set("Sin archivos")
         self.labels["lbl_status"] = tk.Label(self.root, textvariable=self.labels_text["status_project"], )
         self.labels["lbl_status"].grid(row=2, column=0)
-
-        self.labels_text["progress_time"].set("00:00:00")
-        self.labels["lbl_prog_time"] = tk.Label(self.root, textvariable=self.labels_text["progress_time"],)
-        self.labels["lbl_prog_time"].grid(row=3, column=0)
-
+    
     def update_label(self, label: str, label_text: str, text: str):
         self.labels_text[label_text].set(text)
         self.labels[label]["textvariable"] = self.labels_text[label_text]
 
-    def update_progress(self) -> None:
-        if self.labels_text["status_project"].get() != "Sin archivos":
-            self.execution_seconds = self.execution_seconds + 1
-            self.update_label("lbl_prog_time", "progress_time", time.strftime("%H:%M:%S", time.gmtime(self.execution_seconds)))
-        else: 
-            self.execution_seconds = 0
-        self.root.after(1000, self.update_progress)
 
     def do_task(self, async_loop, action):
         """async loop manager
@@ -115,9 +99,8 @@ class Application():
             action (function): async function to be executed
         """
         try:
-            threading.Thread(target=lambda: async_loop.run_until_complete(action())).start()
+            async_loop.run_until_complete(action())
         finally:
-            self.buttons["btn_insert_file"]['state'] = tk.NORMAL
             print("event end")
 
     def insert_action(self, _type: str, name: str, cb: 'Function', event_loop=None, **kargs) -> None:
@@ -180,11 +163,9 @@ class Application():
                 if len(re.findall(patterns, _file)) > 0:
                     self.files.append(path.normpath(path.join(_path, _file)))
 
-        self.execution_seconds = 0
         self.update_label(label="lbl_status", label_text="status_project", text="Procesando...")
         self.buttons["btn_insert_file"]["state"]=tk.DISABLED
-        self.update_progress()
-
+        self.root.update()
         return self.files
     
     def search_for_file_path (self, required: bool = False, types: 'tuple|str' = "*")-> 'str|None':

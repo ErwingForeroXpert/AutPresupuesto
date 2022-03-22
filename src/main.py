@@ -3,7 +3,6 @@
 #    @author: ErwingForero 
 # 
 
-import os
 import tkinter as tk
 import re
 import asyncio
@@ -17,8 +16,7 @@ from utils import constants as const
 from afo.afo import AFO, Driver
 from gui.application import Application
 from gui.func import decorator_exception_message
-from utils import constants as const, index as utils
-
+from utils import constants as const
 
 @decorator_exception_message(title=const.PROCESS_NAME)
 async def process_afo_files(app: 'Application'):
@@ -131,14 +129,11 @@ async def process_afo_files(app: 'Application'):
         app.labels_text["status_project"].set("Sin archivos")
         bar.text("Proceso terminado")
         bar()
-        tk.messagebox.showinfo(app.root.title(), f"Proceso terminado revise resultados en la ruta: \n {os.path.join(const.ROOT_DIR, 'resultado')}")
+        tk.messagebox.showinfo(app.root.title(), f"Proceso terminado revise resultados en la ruta: \n {const.ROOT_DIR}")
     
     
 if __name__ == "__main__":
     
-    utils.create_necesary_folders(const.ROOT_DIR, ["files", "resultado"])
-    utils.create_necesary_folders(os.path.join(const.ROOT_DIR, "files"), ["temp", "alerts"])
-
     async_loop = asyncio.get_event_loop()
 
     App = Application(

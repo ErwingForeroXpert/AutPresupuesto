@@ -59,16 +59,6 @@ def validate_or_create_folder(path: str) -> bool:
         os.mkdir(path)
     return False
 
-def create_necesary_folders(path: str, folders: list[str]) -> None:
-    """Create folders
-
-    Args:
-        path (String): Folder parent
-        folders (List[str]): Folder childrens
-    """
-    for folder in folders:
-        validate_or_create_folder(os.path.join(path, folder))
-
 def is_iterable(posibleList):
     """Validate if element is iterable
 
