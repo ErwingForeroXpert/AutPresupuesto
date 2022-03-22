@@ -1,0 +1,18 @@
+# image
+FROM python:3.9-slim
+LABEL maintainer="erwing.forero@xpertgroup.co"
+
+ENV TYPE_USE "CLI"
+
+# dir
+WORKDIR /budget-app
+
+# Paste all project
+COPY . .
+
+# sripts
+RUN pip install --upgrade pip && \
+    pip --no-cache-dir install -r requirements.txt
+
+# execute project
+CMD ["python", "budget/main.py"]
