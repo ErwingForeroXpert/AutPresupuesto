@@ -2,12 +2,12 @@ Proceso.txt
 autocommit.sh
 *.xlsb
 .vscode
-dist/
-build/
 
 *.pyc
 __pycache__
 
+build/
+dist/
 _dev*
 *.csv
 *.xls*
