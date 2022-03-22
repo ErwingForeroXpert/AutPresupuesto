@@ -1,5 +1,7 @@
 Proceso.txt
 autocommit.sh
+dist/
+build/
 *.xlsb
 .vscode
 
