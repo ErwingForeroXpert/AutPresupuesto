@@ -5,12 +5,21 @@
 
 Welcome to Presupuesto's documentation!
 =======================================
+.. _INTRODUCTION:
+.. toctree::
+   :maxdepth: 2
+   :caption: Intro:
+
+   introduction
 
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
    
    modules
+
+.. autosummary::
+   :toctree: ./src
 
 Indices and tables
 ==================

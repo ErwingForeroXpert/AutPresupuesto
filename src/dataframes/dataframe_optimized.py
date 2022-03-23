@@ -609,7 +609,6 @@ class DataFrameOptimized():
 
         array([False, False, True, False, True, True])
 
-        -------
         dataframe = DataFrameOptimized({
             "column":["first", "second", "estr", "car", "ert", "eft"]
             })
@@ -619,7 +618,6 @@ class DataFrameOptimized():
 
         array([False, False, True, False, True, False])
 
-        --------
         dataframe = DataFrameOptimized({
             "column1":["first", None, "estr", "car", "ert", "eft"]
             "column2":[1,2,3,4,5,None]

@@ -21,6 +21,7 @@ build = """pyinstaller --exclude-module autopep8
         --exclude-module insegel
         --exclude-module sphinx-rtd-theme
         --exclude-module pydata-sphinx-theme
+        --exclude-module sphinx-docxbuilder
         --clean --onefile --windowed --icon=./files/img/icon.ico
         --collect-data grapheme
         --paths=./src 
@@ -34,6 +35,7 @@ sphinx = "*"
 insegel = "*"
 sphinx-rtd-theme = "*"
 pydata-sphinx-theme = "*"
+sphinx-docxbuilder = "*"
 
 [requires]
 python_version = "3.9"
