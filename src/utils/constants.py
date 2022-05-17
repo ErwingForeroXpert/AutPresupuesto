@@ -12,7 +12,7 @@ LOG_NAME = "aut_ppto"
 PROCESS_NAME = "Proceso Automatización Presupuesto"
 ICON_IMAGE = "icon.ico"
 
-AFO_TYPES = {
+AFO_TYPES = { 
     "directa": {
         "sheet": "AFO -  Directa",
         "regex_name": r".*directa.*",
@@ -38,13 +38,19 @@ AFO_TYPES = {
             "mes",
             "venta_nta_acum_anio_actual",
             "ppto_nta_acum_anio_actual",
-            "venta_nta_acum_anio_anterior"
+            "venta_nta_acum_anio_anterior",
+            "venta_nta_acum_anio_actual_kg",
+            "ppto_nta_acum_anio_actual_kg",
+            "venta_nta_acum_anio_anterior_kg"
         ],
         "converters": {
             "cod_oficina": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
-            "venta_nta_acum_anio_anterior": func.mask_price
+            "venta_nta_acum_anio_anterior": func.mask_price,
+            "venta_nta_acum_anio_actual_kg": func.mask_float,
+            "ppto_nta_acum_anio_actual_kg": func.mask_float,
+            "venta_nta_acum_anio_anterior_kg": func.mask_float
         },
         "processes": ["formula", "assigment"]
     },
@@ -53,7 +59,7 @@ AFO_TYPES = {
         "regex_name": r".*calle.*",
         "skiprows": [2, None],
         "delimiter": ";",
-        "encoding": "utf-8",
+        "encoding": "latin-1",
         "columns": [
             "cod_canal",
             "canal",
@@ -70,14 +76,20 @@ AFO_TYPES = {
             "mes",
             "venta_nta_acum_anio_actual",
             "ppto_nta_acum_anio_actual",
-            "venta_nta_acum_anio_anterior"
+            "venta_nta_acum_anio_anterior",
+            "venta_nta_acum_anio_actual_kg",
+            "ppto_nta_acum_anio_actual_kg",
+            "venta_nta_acum_anio_anterior_kg"
         ],
         "converters": {
             "cod_agente_comercial": func.mask_number,
             "mes": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
-            "venta_nta_acum_anio_anterior": func.mask_price
+            "venta_nta_acum_anio_anterior": func.mask_price,
+            "venta_nta_acum_anio_actual_kg": func.mask_float,
+            "ppto_nta_acum_anio_actual_kg": func.mask_float,
+            "venta_nta_acum_anio_anterior_kg": func.mask_float
         },
         "processes": ["formula"]
     },
@@ -86,7 +98,7 @@ AFO_TYPES = {
         "regex_name": r".*compra.*",
         "skiprows": [2, None],
         "delimiter": ";",
-        "encoding": "utf-8",
+        "encoding": "latin-1",
         "columns": [
             "cod_oficina",
             "oficina_venta",
@@ -110,7 +122,10 @@ AFO_TYPES = {
             "mes",
             "venta_nta_acum_anio_actual",
             "ppto_nta_acum_anio_actual",
-            "venta_nta_acum_anio_anterior"
+            "venta_nta_acum_anio_anterior",
+            "venta_nta_acum_anio_actual_kg",
+            "ppto_nta_acum_anio_actual_kg",
+            "venta_nta_acum_anio_anterior_kg"
         ],
         "converters": {
             "cod_oficina": func.mask_number,
@@ -118,6 +133,9 @@ AFO_TYPES = {
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
             "venta_nta_acum_anio_anterior": func.mask_price,
+            "venta_nta_acum_anio_actual_kg": func.mask_float,
+            "ppto_nta_acum_anio_actual_kg": func.mask_float,
+            "venta_nta_acum_anio_anterior_kg": func.mask_float,
         },
         "processes": ["formula", "assigment", "consolidation"]
     },
@@ -128,7 +146,7 @@ DRIVER = {
     "regex_name": r".*drive.*",
     "skiprows": [1, None],
     "delimiter": ";",
-    "encoding": "utf-8",
+    "encoding": "latin-1",
     "columns": [
         # driver 0
         "clave",
@@ -204,7 +222,7 @@ DRIVER = {
         "codigo_cliente": func.mask_number
     }
 }
-
+ 
 PROCESSES = {
     "formula": {
         "directa": {
@@ -226,9 +244,16 @@ PROCESSES = {
             "agg_values": [
                 {"col_res": "sum_venta_actual",
                     "column": "venta_nta_acum_anio_actual"},
-                {"col_res": "sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
+                {"col_res": "sum_venta_ppto", 
+                    "column": "ppto_nta_acum_anio_actual"},
                 {"col_res": "sum_venta_anterior",
-                    "column": "venta_nta_acum_anio_anterior"}
+                    "column": "venta_nta_acum_anio_anterior"},
+                {"col_res": "sum_venta_actual_kg",
+                    "column": "venta_nta_acum_anio_actual_kg"},
+                {"col_res": "sum_venta_ppto_kg",
+                    "column": "ppto_nta_acum_anio_actual_kg"},
+                {"col_res": "sum_venta_anterior_kg",
+                    "column": "venta_nta_acum_anio_anterior_kg"}
             ]
         },
         "calle": {
@@ -251,9 +276,16 @@ PROCESSES = {
             "agg_values": [
                 {"col_res": "sum_venta_actual",
                     "column": "venta_nta_acum_anio_actual"},
-                {"col_res": "sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
+                {"col_res": "sum_venta_ppto", 
+                    "column": "ppto_nta_acum_anio_actual"},
                 {"col_res": "sum_venta_anterior",
-                    "column": "venta_nta_acum_anio_anterior"}
+                    "column": "venta_nta_acum_anio_anterior"},
+                {"col_res": "sum_venta_actual_kg",
+                    "column": "venta_nta_acum_anio_actual_kg"},
+                {"col_res": "sum_venta_ppto_kg",
+                    "column": "ppto_nta_acum_anio_actual_kg"},
+                {"col_res": "sum_venta_anterior_kg",
+                    "column": "venta_nta_acum_anio_anterior_kg"}
             ]
         },
         "compra": {
@@ -267,9 +299,16 @@ PROCESSES = {
             "agg_values": [
                 {"col_res": "sum_venta_actual",
                     "column": "venta_nta_acum_anio_actual"},
-                {"col_res": "sum_venta_ppto", "column": "ppto_nta_acum_anio_actual"},
+                {"col_res": "sum_venta_ppto", 
+                    "column": "ppto_nta_acum_anio_actual"},
                 {"col_res": "sum_venta_anterior",
-                    "column": "venta_nta_acum_anio_anterior"}
+                    "column": "venta_nta_acum_anio_anterior"},
+                {"col_res": "sum_venta_actual_kg",
+                    "column": "venta_nta_acum_anio_actual_kg"},
+                {"col_res": "sum_venta_ppto_kg",
+                    "column": "ppto_nta_acum_anio_actual_kg"},
+                {"col_res": "sum_venta_anterior_kg",
+                    "column": "venta_nta_acum_anio_anterior_kg"}
             ]
         },
         "driver": {
@@ -291,7 +330,11 @@ PROCESSES = {
                 "actual":{"cols_res": ["total_venta_act_asignada",
                               "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
                 "anterior": {"cols_res": ["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], 
-                            "column": "sum_venta_anterior"}
+                            "column": "sum_venta_anterior"},
+                "actual_kg":{"cols_res": ["total_venta_act_asignada_kg",
+                              "total_venta_act_sin_asignar_kg"], "column": "sum_venta_actual_kg"},
+                "anterior_kg": {"cols_res": ["total_venta_ant_asignada_kg", "total_venta_ant_sin_asignar_kg"], 
+                            "column": "sum_venta_anterior_kg"}
             },
             "add_columns": ["porc_participacion"],
             "permissible_diff_totals": 1000,
@@ -313,7 +356,11 @@ PROCESSES = {
                 "actual":{"cols_res": ["total_venta_act_asignada",
                               "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
                 "anterior": {"cols_res": ["total_venta_ant_asignada", 
-                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"}
+                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"},
+                "actual_kg":{"cols_res": ["total_venta_act_asignada_kg",
+                              "total_venta_act_sin_asignar_kg"], "column": "sum_venta_actual_kg"},
+                "anterior_kg": {"cols_res": ["total_venta_ant_asignada_kg", 
+                              "total_venta_ant_sin_asignar_kg"], "column": "sum_venta_anterior_kg"}
             },
             "add_columns": ["porc_participacion"],
             "permissible_diff_totals": 1000,
@@ -329,11 +376,13 @@ PROCESSES = {
         "compra": {
             "group_sales_by": [ "oficina_venta", "cod_agente", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "no_required_columns":{
-                "actual": ["sum_venta_anterior"],
-                "anterior": ["sum_venta_ppto", "sum_venta_actual"]
+                "actual": ["sum_venta_anterior", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
+                "anterior": ["sum_venta_ppto", "sum_venta_actual", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
+                "actual_kg": ["sum_venta_anterior_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"],
+                "anterior_kg": ["sum_venta_ppto_kg", "sum_venta_actual_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"]
             },
-            "validate_nan": "sum_venta_anterior",
-            "type_sales": ["actual", "anterior", "presupuesto"],
+            "validate_nan": ["sum_venta_anterior", "sum_venta_anterior_kg"],
+            "type_sales": ["actual", "anterior", "presupuesto", "actual_kg", "anterior_kg", "presupuesto_kg"],
             "actual": {
                 "agg_columns":[ 
                     ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
@@ -345,7 +394,7 @@ PROCESSES = {
                     {"col_res": "total_segmento_actual", "column": "sum_segmento_actual"},
                     {"col_res": "ventas", "column": "ventas_a_calle"}
                 ],
-            
+                "add_column": "ventas_a_calle"
             },
             "anterior": {
                 "agg_columns":[ 
@@ -358,6 +407,7 @@ PROCESSES = {
                     {"col_res": "total_segmento_anterior", "column": "sum_segmento_anterior"},
                     {"col_res": "ventas_anterior", "column": "ventas_a_calle"}
                 ],
+                "add_column": "ventas_a_calle"
             },
             "presupuesto": {
                 "agg_columns":[ 
@@ -370,12 +420,51 @@ PROCESSES = {
                     {"col_res": "total_segmento_ppto", "column": "sum_segmento_ppto"},
                     {"col_res": "ppto", "column": "ventas_a_calle"}
                 ],
+                "add_column": "ventas_a_calle"
+            },
+            "actual_kg": {
+                "agg_columns":[ 
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                    ["oficina_venta", "cod_agente", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'mes', 'tipologia'],
+                ],
+                "agg_values": [
+                    {"col_res": "sum_segmento_actual_kg", "column": "sum_venta_actual_kg"},
+                    {"col_res": "total_segmento_actual_kg", "column": "sum_segmento_actual_kg"},
+                    {"col_res": "ventas_kg", "column": "ventas_a_calle_kg"}
+                ],
+                "add_column": "ventas_a_calle_kg"
+            },
+            "anterior_kg": {
+                "agg_columns":[ 
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                    ["oficina_venta", "cod_agente", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'mes', 'tipologia'],
+                ],
+                "agg_values": [
+                    {"col_res": "sum_segmento_anterior_kg", "column": "sum_venta_anterior_kg"},
+                    {"col_res": "total_segmento_anterior_kg", "column": "sum_segmento_anterior_kg"},
+                    {"col_res": "ventas_anterior_kg", "column": "ventas_a_calle_kg"}
+                ],
+                "add_column": "ventas_a_calle_kg"
+            },
+            "presupuesto_kg": {
+                "agg_columns":[ 
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'tipologia'],
+                    ["oficina_venta", "cod_agente_comercial", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'],
+                    ["oficina_venta", "cod_agente", 'sector', 'categoria', 'sub_categoria', 'linea', 'marca', 'mes', 'tipologia'],
+                ],
+                "agg_values": [
+                    {"col_res": "sum_segmento_ppto_kg", "column": "sum_venta_ppto_kg"},
+                    {"col_res": "total_segmento_ppto_kg", "column": "sum_segmento_ppto_kg"},
+                    {"col_res": "ppto_kg", "column": "ventas_a_calle_kg"}
+                ],
+                "add_column": "ventas_a_calle_kg"
             },
             "merge":{
                 "left": ['oficina_venta', 'cod_agente', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'], #compra columns
                 "right": ['oficina_venta', 'cod_agente_comercial', 'sector', 'categoria', 'sub_categoria', 'linea', 'marca'] #aux afo(calle) columns
             },
-            "add_column": "ventas_a_calle",
             "unsold": {
                 "column": "tipologia",
                 "value": "Tienda Mixta"

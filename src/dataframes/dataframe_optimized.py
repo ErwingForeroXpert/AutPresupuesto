@@ -88,20 +88,17 @@ class DataFrameOptimized():
         else:
             raise Exception("Required table of DataFrameOptimized")
 
-    def insert_alert(self, alert: 'Any', description: str) -> None:
+    def insert_alert(self, alert: 'pd.DataFrame') -> None:
         """Inserts an alert into the alert list .
 
         Args:
-            alert ([Any]): Register with alert
-            description (str): description of alert
+            alert ([DataFrame]): Dataframe of alerts
             
         Raises:
             Exception: Generic Exception 
         """
 
         try:
-
-            alert["description"] = description
             _alerts_columns = self.table.columns.tolist()
             # get only the columns that exist in the alerts
             _required_of_alert = alert[[*_alerts_columns, "description"]]
@@ -109,37 +106,36 @@ class DataFrameOptimized():
             self.__alerts = pd.concat(
                 [self.__alerts, _required_of_alert], ignore_index=True)
 
-            
         except Exception as e:
             raise Exception(f"insert_alert {e}")
 
     def get_alerts(self):
         return self.__alerts
 
-    def validate_alert(self, mask: bool, description: str, type: str, exception: bool=False, exception_description: str = "", aux_table: 'pd.DataFrame'=None):
+    def validate_alert(self, type: str, exception: bool=False, exception_description: str = "", alert: 'pd.DataFrame'=None):
         """Validate an alert .
 
         Args:
-            mask (bool): [description]
-            description (str): [description]
-            exception (bool, optional): [description]. Defaults to False.
-            exception_description (str, optional): [description]. Defaults to "".
+            exception (bool, optional): if exception exist. Defaults to False.
+            exception_description (str, optional): description of exception. Defaults to "".
+            alert (DataFrame): alerts if it exist. 
         """
-        if mask.sum() > 0:
-            if aux_table is None:
+
+        if alert is not None:
+            if alert.size > 0:
                 self.insert_alert(
-                    alert=self.table[mask],
-                    description=description
+                    alert=alert,
                 )
-            if exception:
-                table = self.get_alerts() if aux_table is None else aux_table[mask]
-                table.to_csv(
-                    os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts.csv")), 
-                    index=False, 
-                    encoding="latin-1", 
-                    sep=";")
-                if feature_flags == "PROD":
-                    raise Exception(exception_description)
+
+        if exception and (table := self.get_alerts()).size > 0:
+            
+            table.to_csv(
+                os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts.csv")), 
+                index=False, 
+                encoding="latin-1", 
+                sep=";")
+            if feature_flags.ENVIROMENT == "PROD":
+                raise Exception(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .

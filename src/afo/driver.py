@@ -2,7 +2,7 @@
 #    Created on 07/01/2022 15:51:23
 #    @author: ErwingForero
 #
-from functools import lru_cache
+import pandas as pd
 from afo.afo_processes import AFO_PROCESSES
 from pandas import isna
 from dataframes.dataframe_optimized import DataFrameOptimized as dfo
@@ -157,25 +157,32 @@ class Driver(dfo):
         return Driver(table=dto_instance.table)
     
     @staticmethod
-    def from_csv(path: str, **kargs):
+    def from_csv(paths: list, **kargs):
         """Create a new driver from an Csv file .
 
         Args:
-            path (str): file route
+            paths (list): route of files
 
         Returns:
             Driver: instance of driver
         """
         _properties = Driver.get_properties()
+        table = None
+        
+        for path in paths:
+            dto_instance = dfo.get_table_csv(
+                path=path, 
+                delimiter= _properties["delimiter"], 
+                skiprows= _properties["skiprows"][0], 
+                names= _properties["columns"], 
+                converters=_properties["converters"],
+                encoding=_properties["encoding"],
+                header= None,
+                **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
+                            #arguments or overwrite previous arguments see utils/constants  
+            if table is None:
+                table = dto_instance.table
+            else:
+                table = pd.concat((table, dto_instance.table), ignore_index=True)
 
-        dto_instance = dfo.get_table_csv(
-            path=path, 
-            delimiter= _properties["delimiter"], 
-            skiprows= _properties["skiprows"][0], 
-            names= _properties["columns"], 
-            converters=_properties["converters"],
-            encoding=_properties["encoding"],
-            header= None,
-            **kargs)    #permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
-                        #arguments or overwrite previous arguments see utils/constants  
-        return Driver(table=dto_instance.table)
+        return Driver(table=table)

@@ -14,7 +14,7 @@ def decorator_exception_message(title: str):
                 await func(*args, **kargs)
             except Exception as e:
                 log.insertInLog(message=e, type="error")
-                messagebox.showerror(message=f"Ha ocurrido un error en el proceso, intentelo de nuevo \n si el error persiste contacte a soporte.", title=title)
+                messagebox.showerror(message=f"Ha ocurrido un error en el proceso, intentelo de nuevo \n si el error persiste contacte a soporte. \n revise el archivo aut_ppto.log", title=title)
         return function_wrapper
         
     return parent_wrapper

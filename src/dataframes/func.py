@@ -1,6 +1,6 @@
 import re
 from typing import Any
-from numpy import number, isnan, __name__, array, int64, NaN
+from numpy import float64, isnan, __name__, array, int64, NaN
 from pandas import isnull, isna
 from utils.index import is_iterable
 
@@ -95,3 +95,15 @@ def mask_number(value: 'Any') -> str:
         except ValueError:
             return NaN
 
+def mask_float(value: 'Any') -> int64:
+    if isnull(value) or str(value) == "":
+        return float64(0)
+    else:
+        try:
+            if (res:=re.search(r'\-*\d+(\,*|\.*)\d+',str(value))) is not None:
+                found = res.group(0).replace(",", ".")
+            else:
+                found = 0
+            return float64(found)
+        except ValueError:
+            return NaN

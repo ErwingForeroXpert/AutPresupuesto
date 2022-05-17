@@ -191,15 +191,18 @@ class AFO(dfo):
         ) 
 
         # only for the sub_categoria to begin with "amarr"
-        self.validate_alert(
-            mask = (
+        mask = (
             pd.isna(self.table[_properties["columns_change"]]).all(axis=1) &
             self.table['sub_categoria'].str.contains(pat='(?i)amarr') # amarres filter
-            ),
-            description="Para la sub_categoria Amarre* no se encontraron reemplazos en el driver",
+        )
+        alert = self.table[mask]
+        alert["description"] = "Para la sub_categoria Amarre* no se encontraron reemplazos en el driver"
+
+        self.validate_alert(
             type = self._type,
             exception=True,
-            exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
+            exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}",
+            alert=alert
         )
 
         # delete columns unnecessary
@@ -214,13 +217,19 @@ class AFO(dfo):
 
         # insert in alerts if found nan in any column ...
         columns_to_validate = self.table if _properties["validate_nan_columns"] == "all" else self.table[_properties["validate_nan_columns"]]
-        self.validate_alert(
-            mask= pd.isna(columns_to_validate).any(axis=1),
-            description=f"No se encontraron valores en el driver, en alguna de las columnas \n {' '.join(columns_to_validate.columns.tolist())}",
-            type = self._type,
-            exception=True,
-            exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
-        ) 
+        mask = pd.isna(columns_to_validate).any(axis=1)
+        alert = columns_to_validate[mask]
+
+        if alert.size > 0:
+            alert["description"] = np.apply_along_axis(lambda row: f"No se encontraron valores en el driver, en alguna de las columnas \n {' '.join(alert.columns[pd.isna(row) == True].tolist())}", \
+                1, alert.values)
+
+            self.validate_alert(
+                type = self._type,
+                exception=True,
+                exception_description=f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}",
+                alert=alert
+            ) 
 
     def sub_process_formula(
         self,
@@ -519,18 +528,24 @@ class AFO(dfo):
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.CONSOLIDATION.name)
 
-        #delete no required columns
-        self.assigments["actual"].drop(_properties["no_required_columns"]["actual"], axis = 1, inplace = True) 
-        self.assigments["anterior"].drop(_properties["no_required_columns"]["anterior"], axis = 1, inplace = True) 
+        base_principal = None
+        #delete no required columns and merge columns
+        for assigment, cols  in _properties["no_required_columns"].items():
 
+            self.assigments[assigment].drop(cols, axis = 1, inplace = True)
 
-        base_principal = self.assigments["actual"].merge(
-            right=self.assigments["anterior"],
-            on=_properties["group_sales_by"],
-            how="left"
-        )
-        mask_nan = self.mask_by(base_principal, {"column": _properties["validate_nan"]}, aux_func=pd.isna)[1]
-        base_principal.loc[mask_nan, _properties["validate_nan"]] = 0
+            if base_principal is None:
+                base_principal = self.assigments[assigment]
+            else:
+                base_principal = base_principal.merge(
+                    right=self.assigments[assigment],
+                    on=_properties["group_sales_by"],
+                    how="left"
+                )
+
+        for col_valid in _properties["validate_nan"]:
+            mask_nan = self.mask_by(base_principal, {"column": col_valid}, aux_func=pd.isna)[1]
+            base_principal.loc[mask_nan, col_valid] = 0
 
         #get aux afo table (calle)
         aux_afo.process(**kargs)
@@ -566,6 +581,7 @@ class AFO(dfo):
                 right_on=merge_columns["right"],
                 how="left"
             )
+
             #delete different columns in base_merge_final
             base_merge_final.drop(utils.get_diff_list((merge_columns["left"], merge_columns["right"]), _type="right"), axis = 1, inplace = True)
 
@@ -583,12 +599,12 @@ class AFO(dfo):
             mask_not_found = self.mask_by(base_merge_final, {"column": agg_values[0]['col_res']}, aux_func=pd.isna)[1]
 
             #(sales*value)/sum_value
-            base_merge_final.loc[~mask_not_found, _properties['add_column']] = (base_merge_final.loc[~mask_not_found, agg_values[0]['column']]* \
+            base_merge_final.loc[~mask_not_found, properties_of_sale['add_column']] = (base_merge_final.loc[~mask_not_found, agg_values[0]['column']]* \
                 base_merge_final.loc[~mask_not_found, agg_values[0]['col_res']])/base_merge_final.loc[~mask_not_found, agg_values[1]['col_res']]
             
             #asign sales to "tienda mixta"
             base_merge_final.loc[mask_not_found, _properties["unsold"]["column"]] = _properties["unsold"]["value"]
-            base_merge_final.loc[mask_not_found, _properties['add_column']] = base_merge_final.loc[mask_not_found, agg_values[0]["column"]]
+            base_merge_final.loc[mask_not_found, properties_of_sale['add_column']] = base_merge_final.loc[mask_not_found, agg_values[0]["column"]]
 
             base_merge_final = base_merge_final.groupby(agg_columns[2], as_index=False).agg(**aggregations[2])
             result.append(
@@ -597,10 +613,13 @@ class AFO(dfo):
 
         #merge bases
         for base in result:
+
             validate_column = None if self.base_consolidation is None else \
                 utils.get_diff_list((self.base_consolidation.columns.tolist(), base.columns.tolist()), _type="right")
+
             self.base_consolidation = base if self.base_consolidation is None else \
                 self.base_consolidation.merge(base, on=utils.get_diff_list((validate_column , base.columns.tolist()), _type="right"), how="left")
+
             if utils.is_iterable(validate_column):
                 validate_column = validate_column[0]
                 mask_zero = self.mask_by(self.base_consolidation, {"column": validate_column, "diff": 0})[1]
@@ -651,25 +670,31 @@ class AFO(dfo):
         return AFO(afo_type=afo_type, table=dto_instance.table)
 
     @staticmethod
-    def from_csv(path: str, afo_type: str, **kargs):
+    def from_csv(paths: list, afo_type: str, **kargs):
         """Create a afo from an Csv file .
 
         Args:
-            path (str): file route
+            path (list): file route
 
         Returns:
             AFO: instance of AFO
         """
         _properties = AFO.get_properties(afo_type)
-        dto_instance = dto_instance = dfo.get_table_csv(
-            path=path,
-            delimiter=_properties["delimiter"],
-            skiprows=_properties["skiprows"][0],
-            header=None,
-            names=_properties["columns"],
-            converters=_properties["converters"],
-            encoding=_properties["encoding"],
-            **kargs)  # permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
-        # arguments or overwrite previous arguments see utils/constants
+        table = None
+        for path in paths:
+            dto_instance = dto_instance = dfo.get_table_csv(
+                path=path,
+                delimiter=_properties["delimiter"],
+                skiprows=_properties["skiprows"][0],
+                header=None,
+                names=_properties["columns"],
+                converters=_properties["converters"],
+                encoding=_properties["encoding"],
+                **kargs)  # permisible https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
+            # arguments or overwrite previous arguments see utils/constants
+            if table is None:
+                table = dto_instance.table
+            else:
+                table = pd.concat((table, dto_instance.table), ignore_index=True)
 
-        return AFO(afo_type=afo_type, table=dto_instance.table)
+        return AFO(afo_type=afo_type, table=table)

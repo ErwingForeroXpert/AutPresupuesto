@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from alive_progress import alive_bar
 from afo.afo_types import AFO_TYPES
 from utils import constants as const
-from afo.afo import AFO, Driver
+from afo.afo import AFO, Driver 
 from gui.application import Application
 from gui.func import decorator_exception_message
 from utils import constants as const, index as utils
@@ -59,39 +59,39 @@ async def process_afo_files(app: 'Application'):
                 tk.messagebox.showerror(
                     const.PROCESS_NAME, "No se encontraron los archivos necesarios en la carpeta")
 
-            _file_directa = [
-                _path for _path in _only_csv if re.match(AFO_TYPES.DIRECTA.get_properties()["regex_name"], _path.strip())][0]
-            _file_calle = [
-                _path for _path in _only_csv if re.match(AFO_TYPES.CALLE.get_properties()["regex_name"], _path.strip())][0]
-            _file_compra = [
-                _path for _path in _only_csv if re.match(AFO_TYPES.COMPRA.get_properties()["regex_name"], _path.strip())][0]
-            _file_driver = [
-                _path for _path in _only_csv if re.match(Driver.get_properties()["regex_name"], _path.strip())][0]
+            files_directa = [
+                _path for _path in _only_csv if re.match(AFO_TYPES.DIRECTA.get_properties()["regex_name"], _path.strip())]
+            files_calle = [
+                _path for _path in _only_csv if re.match(AFO_TYPES.CALLE.get_properties()["regex_name"], _path.strip())]
+            files_compra = [
+                _path for _path in _only_csv if re.match(AFO_TYPES.COMPRA.get_properties()["regex_name"], _path.strip())]
+            files_driver = [
+                _path for _path in _only_csv if re.match(Driver.get_properties()["regex_name"], _path.strip())]
 
-            if _file_directa is None:
+            if len(files_directa) == 0:
                 tk.messagebox.showerror(
-                    const.PROCESS_NAME, "No se encontro el archivo directa en la carpeta")
-            if _file_calle is None:
+                    const.PROCESS_NAME, "No se encontraron archivos de la directa en la carpeta")
+            if len(files_calle) == 0:
                 tk.messagebox.showerror(
-                    const.PROCESS_NAME, "No se encontro el archivo calle en la carpeta")
-            if _file_compra is None:
+                    const.PROCESS_NAME, "No se encontraron archivos de la calle en la carpeta")
+            if len(files_compra) == 0:
                 tk.messagebox.showerror(
-                    const.PROCESS_NAME, "No se encontro el archivo compra en la carpeta")
-            if _file_driver is None:
+                    const.PROCESS_NAME, "No se encontraron archivos de la compra en la carpeta")
+            if len(files_driver) == 0:
                 tk.messagebox.showerror(
-                    const.PROCESS_NAME, "No se encontro el archivo driver en la carpeta")
+                    const.PROCESS_NAME, "No se encontraron archivos de la driver en la carpeta")
 
             app.update_label(label="lbl_status", label_text="status_project", text="Convirtiendo archivos...")
 
             with ThreadPoolExecutor(max_workers=4) as executor:
                 arguments = [
-                            {"path": _file_directa, "afo_type": AFO_TYPES.DIRECTA.name},
-                            {"path": _file_calle, "afo_type": AFO_TYPES.CALLE.name},
-                            {"path": _file_compra, "afo_type": AFO_TYPES.COMPRA.name}
+                            {"paths": files_directa, "afo_type": AFO_TYPES.DIRECTA.name},
+                            {"paths": files_calle, "afo_type": AFO_TYPES.CALLE.name},
+                            {"paths": files_compra, "afo_type": AFO_TYPES.COMPRA.name}
                         ]
 
                 futures = [loop.run_in_executor(executor, functools.partial(AFO.from_csv, **args)) for args in arguments]
-                future_driver = loop.run_in_executor(executor, functools.partial(Driver.from_csv, path=_file_driver))
+                future_driver = loop.run_in_executor(executor, functools.partial(Driver.from_csv, paths=files_driver))
                 results = asyncio.gather(*futures, future_driver)
             
             _dt_afo_directa, _dt_afo_calle, _dt_afo_compra, _dt_driver = await results
@@ -114,6 +114,7 @@ async def process_afo_files(app: 'Application'):
         app.labels_text["status_project"].set("Ejecutando proceso principal...\n esto puede tardar vaya tomese un café")
         bar.text("Ejecutando proceso principal...")
         bar()
+        
         with ThreadPoolExecutor(max_workers=4) as executor:
             arguments = [
                 [_dt_afo_directa, {"driver": _dt_driver}],
