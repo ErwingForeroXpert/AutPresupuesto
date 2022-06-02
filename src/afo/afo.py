@@ -136,6 +136,14 @@ class AFO(dfo):
         #save progress in file
         temp_data = self.table if data is None else data
 
+        #delete
+        if self._type == AFO_TYPES.DIRECTA.name:
+            mask_date = temp_data["mes"] >= 6
+            cols_without_month = [col for col in temp_data.columns if col != "mes"]
+            temp_data2 = temp_data[~mask_date].groupby(cols_without_month[:14], as_index=False)[cols_without_month[14:]].sum()
+            temp_data2["mes"] = 5
+            temp_data = pd.concat((temp_data2, temp_data[mask_date]), ignore_index=True)
+        #end delete 
         temp_data.to_csv(route_file, sep=",", index=False, encoding="latin-1")
 
     def save_actual_progress(self, data: 'pd.DataFrame'=None, level=0, optional_end= ""):
@@ -152,10 +160,10 @@ class AFO(dfo):
         #save progress in file
         temp_data = self.table if data is None else data
 
-        temp_data.to_csv(route_file, sep=",", index=False, encoding="latin-1")
+        temp_data.reset_index(drop=True).to_csv(route_file, sep=",", index=False, encoding="latin-1")
 
         #save progress for test 
-        temp_data.to_feather(route_file_test)
+        temp_data.reset_index(drop=True).to_feather(route_file_test)
         
         #delete alerts
         if os.path.exists(route_file_alerts):
@@ -218,6 +226,8 @@ class AFO(dfo):
         # insert in alerts if found nan in any column ...
         columns_to_validate = self.table if _properties["validate_nan_columns"] == "all" else self.table[_properties["validate_nan_columns"]]
         mask = pd.isna(columns_to_validate).any(axis=1)
+        #delete
+        self.table = self.table[~mask].reset_index(drop=True)
         alert = columns_to_validate[mask]
 
         if alert.size > 0:
@@ -385,7 +395,12 @@ class AFO(dfo):
         return result
 
     def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'str' = "actual") -> 'pd.DataFrame':
-
+        
+        #delete
+        if "trans_segmento" in agg_base.columns and "trans_formato" in agg_base.columns:
+            agg_base.drop(agg_base[(agg_base["trans_segmento"] == 'Hard Discount') & (agg_base["trans_formato"] == 'Mercaderia')].index, inplace=True)
+            agg_base.drop(agg_base[(agg_base["trans_segmento"] == 'Hipermercado') & (agg_base["trans_formato"] == 'La 14')].index, inplace=True)
+            
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.ASSIGNMENT.name)
 
@@ -441,16 +456,16 @@ class AFO(dfo):
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_not_found_not_assigned.sum()}, nivel: {level+1}, tipo: {type_sale}, afo: {self._type}")
             
             if level >= len(_properties["levels"])-1: 
-                exec_desc = f"El ultimo nivel de agrupacion aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"  
-                self.validate_alert(
-                    mask=mask_not_found_not_assigned,
-                    description="aun se encuentran diferencias despues de la ultima asignación",
-                    type=self._type,
-                    exception_description=exec_desc,
-                    aux_table=total_sales_not_assign
-                )
+                exception = f"El ultimo nivel de agrupacion aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"
+                alert = total_sales_not_assign[mask_not_found_not_assigned]
+                alert["description"] = "aun se encuentran diferencias despues de la ultima asignación"
 
-         
+                # self.validate_alert(
+                #     type=self._type,
+                #     exception_description=exception,
+                #     alert=alert
+                # )
+
             #get the registers of "columns level" with not assignation
             base_of_diff = agg_base.merge(right=assign_with_no_assign[mask_not_found_not_assigned], on=columns_level, how="left")
 
@@ -512,15 +527,24 @@ class AFO(dfo):
         Returns:
             pd.DataFrame: merge table
         """
-        result = None
         _properties = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)
+        result = self.execute_agrupation()[_properties["unique_columns"]]
+        diff_cols = []
+        
         for key, assign in self.assigments.items():
-            if result is None:
-                result = assign[[*_properties["unique_columns"], _properties["agg_values"][key]["column"]]]
+            if len(diff_cols) > 0:
+                assign[diff_cols] = 0 #default value
+                required_cols = [*_properties["unique_columns"], *diff_cols, _properties["agg_values"][key]["column"]]
             else:
-                result = result.merge(right=assign[[*_properties["unique_columns"], _properties["agg_values"][key]["column"]]], on=_properties["unique_columns"], how="left")
-            mask_nan = self.mask_by(result, {"column": _properties["agg_values"][key]["column"]}, aux_func=pd.isna)[1]
-            result.loc[mask_nan, _properties["agg_values"][key]["column"]] = 0
+                required_cols = [*_properties["unique_columns"], _properties["agg_values"][key]["column"]]
+                
+            result[_properties["agg_values"][key]["column"]] = 0 #default value
+            result = pd.concat((result, assign[required_cols]), ignore_index=True)
+            diff_cols.append(_properties["agg_values"][key]["column"])
+        
+        result = result.groupby(_properties["unique_columns"], as_index=False)[diff_cols].sum()
+        result.drop_duplicates(inplace=True)
+        result.fillna(0, inplace=True)
 
         return result
 
@@ -528,24 +552,24 @@ class AFO(dfo):
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.CONSOLIDATION.name)
 
-        base_principal = None
-        #delete no required columns and merge columns
-        for assigment, cols  in _properties["no_required_columns"].items():
+        base_principal = self.merge_assignment()
 
-            self.assigments[assigment].drop(cols, axis = 1, inplace = True)
+        #delete
+        # for assigment, cols  in _properties["no_required_columns"].items():
 
-            if base_principal is None:
-                base_principal = self.assigments[assigment]
-            else:
-                base_principal = base_principal.merge(
-                    right=self.assigments[assigment],
-                    on=_properties["group_sales_by"],
-                    how="left"
-                )
+        #     self.assigments[assigment].drop(cols, axis = 1, inplace = True)
 
-        for col_valid in _properties["validate_nan"]:
-            mask_nan = self.mask_by(base_principal, {"column": col_valid}, aux_func=pd.isna)[1]
-            base_principal.loc[mask_nan, col_valid] = 0
+        #     if base_principal is None:
+        #         base_principal = self.assigments[assigment]
+        #     else:
+        #         base_principal = base_principal.merge(
+        #             right=self.assigments[assigment],
+        #             on=_properties["group_sales_by"],
+        #             how="left"
+        #         )
+
+        # for col_valid in _properties["validate_nan"]:
+        #     base_principal[col_valid].fillna(0, inplace=True)
 
         #get aux afo table (calle)
         aux_afo.process(**kargs)
@@ -612,18 +636,30 @@ class AFO(dfo):
             )
 
         #merge bases
-        for base in result:
+        unique_cols = utils.get_same_list((result[0].columns.tolist(), result[1].columns.tolist()))
+        temp_base = pd.concat(result, ignore_index=True)
+        temp_base.fillna(0, inplace=True)
 
-            validate_column = None if self.base_consolidation is None else \
-                utils.get_diff_list((self.base_consolidation.columns.tolist(), base.columns.tolist()), _type="right")
+        values_cols = utils.get_diff_list((unique_cols, temp_base.columns.tolist()), _type="right")
+        self.base_consolidation = temp_base.groupby(unique_cols, as_index=False)[values_cols].sum()
+        self.base_consolidation.drop_duplicates(inplace=True)
 
-            self.base_consolidation = base if self.base_consolidation is None else \
-                self.base_consolidation.merge(base, on=utils.get_diff_list((validate_column , base.columns.tolist()), _type="right"), how="left")
+        #delete 
+        # self.base_consolidation = temp_base
+        # for base in result:
 
-            if utils.is_iterable(validate_column):
-                validate_column = validate_column[0]
-                mask_zero = self.mask_by(self.base_consolidation, {"column": validate_column, "diff": 0})[1]
-                self.base_consolidation.loc[mask_zero, validate_column] = 0
+        #     validate_column = None if self.base_consolidation is None else \
+        #         utils.get_diff_list((self.base_consolidation.columns.tolist(), base.columns.tolist()), _type="right")
+
+        #     self.base_consolidation = base if self.base_consolidation is None else \
+        #         self.base_consolidation.merge(base, on=utils.get_diff_list((validate_column , base.columns.tolist()), _type="right"), how="left")
+
+
+        #     if utils.is_iterable(validate_column):
+        #         validate_column = validate_column[0]
+        #         diff_cols.append(validate_column)
+        #         self.base_consolidation[validate_column].fillna(0, inplace=True)
+        #end delete
 
         only_diff = utils.get_diff_list((self.base_consolidation.columns.tolist(), _properties["merge_final"]["found_columns"]), _type="right")
         base_to_merge = aux_afo.table.drop_duplicates(subset=_properties["merge_final"]["found_by"], ignore_index=True)

@@ -128,7 +128,6 @@ class DataFrameOptimized():
                 )
 
         if exception and (table := self.get_alerts()).size > 0:
-            
             table.to_csv(
                 os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts.csv")), 
                 index=False, 

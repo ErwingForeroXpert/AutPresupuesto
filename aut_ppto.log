@@ -1,3 +1,2 @@
-root - ERROR - 17/05/2022 14:00:37 se generaron alertas para AFO - DIRECTA, revisar en 
- C:\Work\Nutresa\Terminadas\Presupuesto\files\alerts 
+root - ERROR - 23/05/2022 14:57:25 Missing optional dependency 'pyarrow'.  Use pip or conda to install pyarrow. 
 

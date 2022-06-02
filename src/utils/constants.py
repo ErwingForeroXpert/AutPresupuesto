@@ -44,6 +44,7 @@ AFO_TYPES = {
             "venta_nta_acum_anio_anterior_kg"
         ],
         "converters": {
+            "mes": func.mask_number,
             "cod_oficina": func.mask_number,
             "venta_nta_acum_anio_actual": func.mask_price,
             "ppto_nta_acum_anio_actual": func.mask_price,
@@ -340,11 +341,11 @@ PROCESSES = {
             "permissible_diff_totals": 1000,
             "levels": [["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector", "mes"],
                        ["oficina_venta", "trans_segmento", "trans_agrupacion", "trans_formato", "sector"],
-                       ["oficina_venta", "sector"]],
+                       ["trans_segmento", "trans_formato"]],
             "unique_columns": ["cod_oficina", "oficina_venta", "canal", "sub_canal", "tipologia",
                                 "trans_canal", "trans_sub_canal", "trans_segmento", "trans_agrupacion", "trans_formato",
                                 "sector", "categoria", "sub_categoria", "linea", "marca", 
-                                "mes"]
+                                "mes", "sum_venta_ppto", "sum_venta_ppto_kg"]
         },
         "compra": {
             "filter_assignment": {"column": "categoria", "pattern": "(?i)sin asignar"},
@@ -353,14 +354,10 @@ PROCESSES = {
                 "pattern": "(?i)helados|otros no operacional|otros oper no ccial|servicios"
             },
             "agg_values": {
-                "actual":{"cols_res": ["total_venta_act_asignada",
-                              "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
-                "anterior": {"cols_res": ["total_venta_ant_asignada", 
-                              "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"},
-                "actual_kg":{"cols_res": ["total_venta_act_asignada_kg",
-                              "total_venta_act_sin_asignar_kg"], "column": "sum_venta_actual_kg"},
-                "anterior_kg": {"cols_res": ["total_venta_ant_asignada_kg", 
-                              "total_venta_ant_sin_asignar_kg"], "column": "sum_venta_anterior_kg"}
+                "actual":{"cols_res": ["total_venta_act_asignada", "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
+                "anterior": {"cols_res": ["total_venta_ant_asignada", "total_venta_ant_sin_asignar"], "column": "sum_venta_anterior"},
+                "actual_kg":{"cols_res": ["total_venta_act_asignada_kg", "total_venta_act_sin_asignar_kg"], "column": "sum_venta_actual_kg"},
+                "anterior_kg": {"cols_res": ["total_venta_ant_asignada_kg", "total_venta_ant_sin_asignar_kg"], "column": "sum_venta_anterior_kg"}
             },
             "add_columns": ["porc_participacion"],
             "permissible_diff_totals": 1000,
@@ -369,11 +366,12 @@ PROCESSES = {
                        ["oficina_venta", "cod_agente"]],
             "unique_columns":["oficina_venta", "cod_agente",
                             "sector", "categoria", "sub_categoria", "linea", "marca", 
-                            "mes"]
+                            "mes", "sum_venta_ppto", "sum_venta_ppto_kg"]
         },
     },
     "consolidation":{
         "compra": {
+            #delete
             "group_sales_by": [ "oficina_venta", "cod_agente", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
             "no_required_columns":{
                 "actual": ["sum_venta_anterior", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
@@ -382,6 +380,7 @@ PROCESSES = {
                 "anterior_kg": ["sum_venta_ppto_kg", "sum_venta_actual_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"]
             },
             "validate_nan": ["sum_venta_anterior", "sum_venta_anterior_kg"],
+            #end delete
             "type_sales": ["actual", "anterior", "presupuesto", "actual_kg", "anterior_kg", "presupuesto_kg"],
             "actual": {
                 "agg_columns":[ 

@@ -11,6 +11,7 @@ alive-progress = "2.1.0"
 pymsgbox= "1.0.9"
 tk = "*"
 pyxlsb = "*"
+pyarrow = "*"
 
 [scripts]
 test = "python -m unittest discover --pattern=test_*.py"

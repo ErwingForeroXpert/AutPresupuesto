@@ -1,7 +1,7 @@
 import os
 from src.utils import constants as const
-from .test_fixtures_funcs import *
-from .test_fixtures_const import *
+from test.test_fixtures_funcs import *
+from test.test_fixtures_const import *
 
 class FakeTable():
 
