@@ -28,6 +28,7 @@ async def process_afo_files(app: 'Application'):
         app (Application): actual instance of application
     """
     _files = app.get_file()
+    margin_months = [int(app.inputs["month_init"].get()), int(app.inputs["month_end"].get())]
     loop = asyncio.get_running_loop()
 
     app.update_label(label="lbl_status", label_text="status_project", text="Validando archivos...")
@@ -117,9 +118,9 @@ async def process_afo_files(app: 'Application'):
         
         with ThreadPoolExecutor(max_workers=4) as executor:
             arguments = [
-                [_dt_afo_directa, {"driver": _dt_driver}],
-                [_dt_afo_calle, {"driver": _dt_driver}],
-                [_dt_afo_compra, {"driver": _dt_driver, "aux_afo": _dt_afo_calle}]
+                [_dt_afo_directa, {"driver": _dt_driver, "margin_months": margin_months}],
+                [_dt_afo_calle, {"driver": _dt_driver, "margin_months": margin_months}],
+                [_dt_afo_compra, {"driver": _dt_driver, "margin_months": margin_months, "aux_afo": _dt_afo_calle}]
             ]
 
             futures = [loop.run_in_executor(
@@ -145,7 +146,7 @@ if __name__ == "__main__":
     App = Application(
         title=const.PROCESS_NAME,
         divisions=[2,2],
-        size ="300x200"
+        size ="450x200"
     )
 
     App.insert_action("button", "btn_insert_file", process_afo_files, event_loop=async_loop)

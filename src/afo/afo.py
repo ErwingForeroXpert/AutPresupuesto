@@ -80,7 +80,7 @@ class AFO(dfo):
         else:
             raise ValueError(f"Files not found, name regex: {name_regex}")
 
-    def process(self, driver: 'Driver', aux_afo: 'AFO'=None):
+    def process(self, driver: 'Driver', margin_months: list, aux_afo: 'AFO' = None):
         
         #load progress
         if feature_flags.ENVIROMENT == "DEV" and feature_flags.SKIP_AFO_PROCESS > -1:
@@ -94,7 +94,7 @@ class AFO(dfo):
             if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(level=1)
             if "formula" == self.properties["processes"][-1]:
-                self.save_final(self.execute_agrupation())
+                self.save_final(self.execute_agrupation(), margin_months)
 
         if "assigment" in self.properties["processes"] and feature_flags.SKIP_AFO_PROCESS < 2: 
             type_sales = self.get_properties_for_process(AFO_PROCESSES.ASSIGNMENT.name)["agg_values"].keys()
@@ -111,15 +111,15 @@ class AFO(dfo):
                     self.save_actual_progress(data=assigment, level=2, optional_end=f"_{_type}")
 
             if "assigment" == self.properties["processes"][-1]:
-                self.save_final(self.merge_assignment())
+                self.save_final(self.merge_assignment(), margin_months)
 
         if "consolidation" in self.properties["processes"]:
             type_sales = self.get_properties_for_process(AFO_PROCESSES.CONSOLIDATION.name)["type_sales"]
-            self.execute_consolidation(aux_afo=aux_afo, type_sales=type_sales, driver=driver)
+            self.execute_consolidation(aux_afo=aux_afo, type_sales=type_sales, driver=driver, margin_months=margin_months)
             if feature_flags.ENVIROMENT == "DEV":
                 self.save_actual_progress(data=self.base_consolidation, level=3)
 
-            self.save_final(self.base_consolidation)
+            self.save_final(self.base_consolidation, margin_months)
                
     def drop_if_all_cero(self, columns: 'list|str'):
         """Delete rows with cero in all columns
@@ -131,19 +131,20 @@ class AFO(dfo):
         self.delete_rows(mask)
         self.table.reset_index(drop=True, inplace=True)
 
-    def save_final(self, data: 'pd.DataFrame'=None):
+    def save_final(self, data: 'pd.DataFrame' = None, margin_months: list = []):
         route_file = os.path.join(const.ROOT_DIR, f"resultado/{AFO_TYPES[self._type].value}.csv")
         #save progress in file
         temp_data = self.table if data is None else data
 
-        #delete
-        if self._type == AFO_TYPES.DIRECTA.name:
-            mask_date = temp_data["mes"] >= 6
-            cols_without_month = [col for col in temp_data.columns if col != "mes"]
-            temp_data2 = temp_data[~mask_date].groupby(cols_without_month[:14], as_index=False)[cols_without_month[14:]].sum()
-            temp_data2["mes"] = 5
-            temp_data = pd.concat((temp_data2, temp_data[mask_date]), ignore_index=True)
-        #end delete 
+        if len(margin_months) > 0:
+            mask_date = (temp_data["mes"] >= margin_months[0]) & (temp_data["mes"] <= margin_months[1])
+            idx_month = temp_data.columns.tolist().index("mes")
+            unique_cols, value_cols = temp_data.columns[:idx_month].tolist(), temp_data.columns[idx_month+1:].tolist()
+
+            temp_data2 = temp_data[mask_date].groupby(unique_cols, as_index=False)[value_cols].sum()
+            temp_data2["mes"] = "-".join(map(str, margin_months))
+            temp_data = pd.concat((temp_data2, temp_data[~mask_date]), ignore_index=True)
+            
         temp_data.to_csv(route_file, sep=",", index=False, encoding="latin-1")
 
     def save_actual_progress(self, data: 'pd.DataFrame'=None, level=0, optional_end= ""):
@@ -664,13 +665,16 @@ class AFO(dfo):
         only_diff = utils.get_diff_list((self.base_consolidation.columns.tolist(), _properties["merge_final"]["found_columns"]), _type="right")
         base_to_merge = aux_afo.table.drop_duplicates(subset=_properties["merge_final"]["found_by"], ignore_index=True)
         
+        idx_month = self.base_consolidation.columns.tolist().index("tipologia")
+        temp_base_values = self.base_consolidation[["mes", *self.base_consolidation.columns.tolist()[idx_month+1:]]] #split vertical base by "tipologia"
+
         #use afo_aux with driver
-        self.base_consolidation = self.base_consolidation.merge(
+        self.base_consolidation = self.base_consolidation[[col for col in self.base_consolidation.columns.tolist()[:idx_month+1] if col != "mes"]].merge(
             right=base_to_merge[[_properties["merge_final"]["found_by"], *only_diff]],
             on=_properties["merge_final"]["found_by"],
             how="left"
         )
-
+        self.base_consolidation = pd.concat((self.base_consolidation, temp_base_values), axis=1)
 
         return self.base_consolidation
 

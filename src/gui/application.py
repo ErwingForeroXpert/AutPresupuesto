@@ -30,7 +30,7 @@ class Application():
             "type_route": tk.StringVar(),
             "type_selector": tk.StringVar(),
             "status_project": tk.StringVar(),
-            "progress_time": tk.StringVar()
+            "progress_time": tk.StringVar(),
         }
 
         self.execution_seconds = 0
@@ -65,32 +65,46 @@ class Application():
         self.labels["lbl_type_selector"] = tk.Label(self.root, textvariable=self.labels_text["type_selector"]).grid(row=0, column=0)
 
         self.inputs["path"] = tk.Entry(self.root)
-        self.inputs["path"].grid(row=0, column=1)
+        self.inputs["path"].grid(row=0, column=1, padx=5, pady=5)
 
         self.buttons["btn_insert_file"] = tk.Button(self.root, text="Ingresar")
-        self.buttons["btn_insert_file"].grid(row=0, column=2)
+        self.buttons["btn_insert_file"].grid(row=0, column=3, padx=5, pady=5)
 
         self.buttons["rd_folder"] = tk.Radiobutton(self.root, text="Carpeta", value="folder", \
             variable=self.labels_text["type_route"], 
             command=self.make_message("Debera seleccionar una carpeta donde se encuentren los archivos", others_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Carpeta:")])
             )
-        self.buttons["rd_folder"].grid(row=1, column=0)
+        self.buttons["rd_folder"].grid(row=1, column=0, padx=5, pady=5)
         self.buttons["rd_folder"].select()
 
         self.buttons["rd_file"] = tk.Radiobutton(self.root, text="Archivo", value="file", \
             variable=self.labels_text["type_route"], 
             command=self.make_message("Debera seleccionar el archivo", others_cb=[self.change_text(self.labels_text["type_selector"], "Seleccionar Archivo:")]), 
             state=tk.DISABLED)
-        self.buttons["rd_file"].grid(row=1, column=1)
+        self.buttons["rd_file"].grid(row=1, column=1, padx=5, pady=5)
         self.buttons["rd_file"].deselect()
+
+        tk.Label(self.root, text="Consolidar meses entre").grid(row=2, column=0, padx=5, pady=5)
+        self.inputs["month_init"] = tk.Entry(self.root, validate="key", validatecommand=(self.root.register(self.enter_only_digits), '%P', '%d'))
+        self.inputs["month_init"].grid(row=2, column=1, padx=5, pady=5)
+        tk.Label(self.root, text="y").grid(row=2, column=2, padx=5, pady=5)
+        self.inputs["month_end"] = tk.Entry(self.root, validate="key", validatecommand=(self.root.register(self.enter_only_digits), '%P', '%d'))
+        self.inputs["month_end"].grid(row=2, column=3, padx=5, pady=5)
+        self.inputs["month_init"].insert(0, "1")
+        self.inputs["month_end"].insert(0, "6")
 
         self.labels_text["status_project"].set("Sin archivos")
         self.labels["lbl_status"] = tk.Label(self.root, textvariable=self.labels_text["status_project"], )
-        self.labels["lbl_status"].grid(row=2, column=0)
+        self.labels["lbl_status"].grid(row=3, column=0, padx=5, pady=5)
 
         self.labels_text["progress_time"].set("00:00:00")
         self.labels["lbl_prog_time"] = tk.Label(self.root, textvariable=self.labels_text["progress_time"],)
-        self.labels["lbl_prog_time"].grid(row=3, column=0)
+        self.labels["lbl_prog_time"].grid(row=4, column=0, padx=5, pady=5)
+
+    def enter_only_digits(self, entry, action_type) -> bool:
+        if action_type == '1' and (not entry.isdigit() or len(entry) > 2):
+            return False
+        return True
 
     def update_label(self, label: str, label_text: str, text: str):
         self.labels_text[label_text].set(text)
