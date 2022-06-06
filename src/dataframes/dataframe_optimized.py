@@ -10,7 +10,7 @@ from sre_compile import isstring
 from time import time
 from utils import feature_flags
 from utils import constants as const
-from afo import afo_types
+from afo import afo_types, error
 from utils import index as utils
 from typing import Any
 import pandas as pd
@@ -134,7 +134,7 @@ class DataFrameOptimized():
                 encoding="latin-1", 
                 sep=";")
             if feature_flags.ENVIROMENT == "PROD":
-                raise Exception(exception_description)
+                raise error.AlertsGeneratedError(exception_description)
 
     def get_rows(self, criteria: 'np.array') -> 'DataFrameOptimized':
         """Get rows from the dataframe .
