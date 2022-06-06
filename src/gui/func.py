@@ -1,6 +1,6 @@
 from tkinter import messagebox
 from utils import log 
-from ..afo.error import AlertsGeneratedError
+from afo.error import AlertsGeneratedError
 
 def decorator_exception_message(title: str):
     """Create exception message for the decorated function.
@@ -19,7 +19,8 @@ def decorator_exception_message(title: str):
                 messagebox.showerror(message=f"Ha ocurrido un error en el proceso, intentelo de nuevo \n si el error persiste contacte a soporte.", title=title)
             finally:
                 log.insertInLog(message=e, type="error")
-
+                raise
+            
         return function_wrapper
         
     return parent_wrapper
