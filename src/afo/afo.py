@@ -228,7 +228,7 @@ class AFO(dfo):
         columns_to_validate = self.table if _properties["validate_nan_columns"] == "all" else self.table[_properties["validate_nan_columns"]]
         mask = pd.isna(columns_to_validate).any(axis=1)
         #delete
-        self.table = self.table[~mask].reset_index(drop=True)
+        # self.table = self.table[~mask].reset_index(drop=True)
         alert = columns_to_validate[mask]
 
         if alert.size > 0:
@@ -398,9 +398,9 @@ class AFO(dfo):
     def execute_assignment(self, agg_base: 'pd.DataFrame' = None, level: 'int' = 0, type_sale: 'str' = "actual") -> 'pd.DataFrame':
         
         #delete
-        if "trans_segmento" in agg_base.columns and "trans_formato" in agg_base.columns:
-            agg_base.drop(agg_base[(agg_base["trans_segmento"] == 'Hard Discount') & (agg_base["trans_formato"] == 'Mercaderia')].index, inplace=True)
-            agg_base.drop(agg_base[(agg_base["trans_segmento"] == 'Hipermercado') & (agg_base["trans_formato"] == 'La 14')].index, inplace=True)
+        # if "trans_segmento" in agg_base.columns and "trans_formato" in agg_base.columns:
+        #     agg_base.drop(agg_base[(agg_base["trans_segmento"] == 'Hard Discount') & (agg_base["trans_formato"] == 'Mercaderia')].index, inplace=True)
+        #     agg_base.drop(agg_base[(agg_base["trans_segmento"] == 'Hipermercado') & (agg_base["trans_formato"] == 'La 14')].index, inplace=True)
             
         _properties = self.get_properties_for_process(
             AFO_PROCESSES.ASSIGNMENT.name)
@@ -461,11 +461,11 @@ class AFO(dfo):
                 alert = total_sales_not_assign[mask_not_found_not_assigned]
                 alert["description"] = "aun se encuentran diferencias despues de la ultima asignación"
 
-                # self.validate_alert(
-                #     type=self._type,
-                #     exception_description=exception,
-                #     alert=alert
-                # )
+                self.validate_alert(
+                    type=self._type,
+                    exception_description=exception,
+                    alert=alert
+                )
 
             #get the registers of "columns level" with not assignation
             base_of_diff = agg_base.merge(right=assign_with_no_assign[mask_not_found_not_assigned], on=columns_level, how="left")

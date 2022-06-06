@@ -372,14 +372,14 @@ PROCESSES = {
     "consolidation":{
         "compra": {
             #delete
-            "group_sales_by": [ "oficina_venta", "cod_agente", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
-            "no_required_columns":{
-                "actual": ["sum_venta_anterior", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
-                "anterior": ["sum_venta_ppto", "sum_venta_actual", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
-                "actual_kg": ["sum_venta_anterior_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"],
-                "anterior_kg": ["sum_venta_ppto_kg", "sum_venta_actual_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"]
-            },
-            "validate_nan": ["sum_venta_anterior", "sum_venta_anterior_kg"],
+            # "group_sales_by": [ "oficina_venta", "cod_agente", "sector", "categoria", "sub_categoria", "linea", "marca", "mes"],
+            # "no_required_columns":{
+            #     "actual": ["sum_venta_anterior", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
+            #     "anterior": ["sum_venta_ppto", "sum_venta_actual", "sum_venta_anterior_kg", "sum_venta_ppto_kg", "sum_venta_actual_kg"],
+            #     "actual_kg": ["sum_venta_anterior_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"],
+            #     "anterior_kg": ["sum_venta_ppto_kg", "sum_venta_actual_kg", "sum_venta_anterior", "sum_venta_ppto", "sum_venta_actual"]
+            # },
+            # "validate_nan": ["sum_venta_anterior", "sum_venta_anterior_kg"],
             #end delete
             "type_sales": ["actual", "anterior", "presupuesto", "actual_kg", "anterior_kg", "presupuesto_kg"],
             "actual": {
