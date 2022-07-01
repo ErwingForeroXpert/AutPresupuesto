@@ -15,12 +15,11 @@ def decorator_exception_message(title: str):
                 await func(*args, **kargs)
             except AlertsGeneratedError as e:
                 messagebox.showerror(message=e, title=title)
+                log.insertInLog(message=e, type="warning")
             except Exception as e:
                 messagebox.showerror(message=f"Ha ocurrido un error en el proceso, intentelo de nuevo \n si el error persiste contacte a soporte.", title=title)
-            finally:
                 log.insertInLog(message=e, type="error")
-                raise
-            
+
         return function_wrapper
         
     return parent_wrapper

@@ -112,7 +112,7 @@ async def process_afo_files(app: 'Application'):
         _dt_afo_compra.drop_if_all_cero(["venta_nta_acum_anio_actual",
                 "ppto_nta_acum_anio_actual", "venta_nta_acum_anio_anterior"])
 
-        app.labels_text["status_project"].set("Ejecutando proceso principal...\n esto puede tardar vaya tomese un café")
+        app.labels_text["status_project"].set("Ejecutando proceso principal...\n esto puede tardar.")
         bar.text("Ejecutando proceso principal...")
         bar()
         
@@ -134,7 +134,7 @@ async def process_afo_files(app: 'Application'):
         bar.text("Proceso terminado")
         bar()
         tk.messagebox.showinfo(app.root.title(), f"Proceso terminado revise resultados en la ruta: \n {os.path.join(const.ROOT_DIR, 'resultado')}")
-    
+        
     
 if __name__ == "__main__":
     

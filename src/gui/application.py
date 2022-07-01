@@ -3,6 +3,7 @@ import tkinter as tk
 import numpy as np
 import threading
 import re
+import sys
 from os import getcwd,path, listdir
 from utils.constants import ROOT_DIR, ICON_IMAGE
 from utils.index import validate_or_create_folder
@@ -48,18 +49,18 @@ class Application():
         
         self.__design(divisions)
 
-    def __design(self, divisions: list) -> None:
+    def __design(self, divisions: list = None) -> None:
         """Create the layout for the given root window.
 
         Args:
             divisions (list): [description]
         """
-        _w = self.root.winfo_screenwidth()
-        _h = self.root.winfo_screenheight()
-        _divs = [min(3, divisions[0]), min(3, divisions[1])]
+        # _w = self.root.winfo_screenwidth()
+        # _h = self.root.winfo_screenheight()
+        # _divs = [min(3, divisions[0]), min(3, divisions[1])]
 
-        _rows = list(np.arange(start=_h//_divs[0], stop=_h, step=_h//_divs[0]))
-        _cols = list(np.arange(start=_w//_divs[1], stop=_w, step=_w//_divs[0]))
+        # _rows = list(np.arange(start=_h//_divs[0], stop=_h, step=_h//_divs[0]))
+        # _cols = list(np.arange(start=_w//_divs[1], stop=_w, step=_w//_divs[0]))
 
         self.labels_text["type_selector"].set("Seleccionar Carpeta:")
         self.labels["lbl_type_selector"] = tk.Label(self.root, textvariable=self.labels_text["type_selector"]).grid(row=0, column=0)
@@ -131,7 +132,6 @@ class Application():
         try:
             threading.Thread(target=lambda: async_loop.run_until_complete(action())).start()
         finally:
-            self.buttons["btn_insert_file"]['state'] = tk.NORMAL
             print("event end")
 
     def insert_action(self, _type: str, name: str, cb: 'Function', event_loop=None, **kargs) -> None:
@@ -147,20 +147,26 @@ class Application():
         """
         def _sub_func(**options):
             if event_loop is None:
-                return lambda: cb(self, **options)   
+                def func_temp(): 
+                    cb(self, **options)
+                    self.root.destroy()
+                    sys.exit()
+                return func_temp
             else:
                 async def func_temp(): 
                     await cb(self, **options)
-                return func_temp
+                    self.root.destroy()
+                    sys.exit()
+                return lambda: self.do_task(event_loop, func_temp)
 
         sub =  _sub_func(**kargs)
 
         if _type == "button":
             if name not in self.buttons.keys(): raise ValueError(f"{name} not found in buttons")
-            self.buttons[name]["command"] = sub if event_loop is None else lambda:self.do_task(event_loop, sub)
+            self.buttons[name]["command"] = sub
         elif _type == "input":
             if name not in self.inputs.keys(): raise ValueError(f"{name} not found in inputs")
-            self.inputs[name]["command"] = sub if event_loop is None else lambda:self.do_task(event_loop, sub)
+            self.inputs[name]["command"] = sub
 
     def make_message(self, message: str, _type: str = "info", others_cb: 'list[function]' = []) -> 'Function':
         """Create a messagebox with a messagebox .
@@ -196,7 +202,10 @@ class Application():
 
         self.execution_seconds = 0
         self.update_label(label="lbl_status", label_text="status_project", text="Procesando...")
-        self.buttons["btn_insert_file"]["state"]=tk.DISABLED
+        self.buttons["btn_insert_file"]["state"] = tk.DISABLED
+        self.inputs["month_init"]["state"] = tk.DISABLED
+        self.inputs["month_end"]["state"] = tk.DISABLED
+
         self.update_progress()
 
         return self.files

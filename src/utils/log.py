@@ -28,6 +28,7 @@ def insertInLog(message, name: str = None, path: str = None, type="debug"):
     _path = os.path.normpath(os.path.join(ROOT_DIR if path is None else path, f'{LOG_NAME}.log' if name is None else name))
         
     logging.basicConfig(filename=_path, encoding='utf-8', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    
     loger = {
         "debug": logging.debug,
         "warning": logging.warning,

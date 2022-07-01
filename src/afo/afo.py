@@ -57,14 +57,14 @@ class AFO(dfo):
 
         files = os.listdir(os.path.join(const.ROOT_DIR, f"test/files/progress/"))
         name_regex = f"progress_{_max_level}_{AFO_TYPES[self._type].value}.*"
-        extract_type_regex = fr"(?<=progress_{_max_level}_{AFO_TYPES[self._type].value}_).*(?=.ftr)"
+        extract_type_regex = fr"(?<=progress_{_max_level}_{AFO_TYPES[self._type].value}_).*(?=.pkl)"
 
         reg = re.compile(name_regex)
         files_found  = list(filter(reg.match, files))
 
         if files_found != []:
             if _max_level <= 1 and "formula" in self.properties["processes"]:
-                self.table = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/progress/{files_found[0]}"))
+                self.table = pd.read_pickle(os.path.join(const.ROOT_DIR, f"test/files/progress/{files_found[0]}"))
             elif _max_level == 2:
                 self.load_progress(level=1)
 
@@ -72,11 +72,11 @@ class AFO(dfo):
                     names_types_assign = [re.findall(extract_type_regex, filename)[0] for filename in files_found]
 
                     self.assigments = {
-                        f"{names_types_assign[idx]}": pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/progress/{filename}"))
+                        f"{names_types_assign[idx]}": pd.read_pickle(os.path.join(const.ROOT_DIR, f"test/files/progress/{filename}"))
                         for idx, filename in enumerate(files_found)
                     }   
             elif _max_level == 3 and "consolidation" in self.properties["processes"]:
-                self.base_consolidation = pd.read_feather(os.path.join(const.ROOT_DIR, f"test/files/progress/{files_found[0]}"))
+                self.base_consolidation = pd.read_pickle(os.path.join(const.ROOT_DIR, f"test/files/progress/{files_found[0]}"))
         else:
             raise ValueError(f"Files not found, name regex: {name_regex}")
 
@@ -155,7 +155,7 @@ class AFO(dfo):
         """
 
         route_file = os.path.join(const.ROOT_DIR, f"files/temp/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.csv")
-        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/progress/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.ftr")
+        route_file_test = os.path.join(const.ROOT_DIR, f"test/files/progress/progress_{level}_{AFO_TYPES[self._type].value}{optional_end}.pkl")
         route_file_alerts = os.path.join(const.ALERTS_DIR, f"{AFO_TYPES[self._type].value}_alerts.csv")
         
         #save progress in file
@@ -164,7 +164,8 @@ class AFO(dfo):
         temp_data.reset_index(drop=True).to_csv(route_file, sep=",", index=False, encoding="latin-1")
 
         #save progress for test 
-        temp_data.reset_index(drop=True).to_feather(route_file_test)
+        if feature_flags.ENVIROMENT == "DEV":
+            temp_data.reset_index(drop=True).to_pickle(route_file_test)
         
         #delete alerts
         if os.path.exists(route_file_alerts):
@@ -457,12 +458,13 @@ class AFO(dfo):
                 f"WARNING: los valores totales no son iguales, numero de filas: {mask_not_found_not_assigned.sum()}, nivel: {level+1}, tipo: {type_sale}, afo: {self._type}")
             
             if level >= len(_properties["levels"])-1: 
-                exception = f"El ultimo nivel de agrupacion aun tiene iniciativas sin asignar \n nivel: {level+1} \n tipo: {type_sale}"
+                exception = f"se generaron alertas para AFO - {self._type}, revisar en \n {const.ALERTS_DIR}"
                 alert = total_sales_not_assign[mask_not_found_not_assigned]
                 alert["description"] = "aun se encuentran diferencias despues de la ultima asignación"
 
                 self.validate_alert(
                     type=self._type,
+                    exception=True,
                     exception_description=exception,
                     alert=alert
                 )
@@ -722,7 +724,7 @@ class AFO(dfo):
         _properties = AFO.get_properties(afo_type)
         table = None
         for path in paths:
-            dto_instance = dto_instance = dfo.get_table_csv(
+            dto_instance = dfo.get_table_csv(
                 path=path,
                 delimiter=_properties["delimiter"],
                 skiprows=_properties["skiprows"][0],

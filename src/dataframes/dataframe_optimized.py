@@ -21,11 +21,10 @@ class DataFrameOptimized():
 
     def __init__(self, table=None, **kargs) -> None:
         self.table = None
-        self.__alerts = None
+        self.alerts = []
         # methods
         if table is not None:
             self.__process_table(table, **kargs)
-            self.create_alerts()
 
     def __len__(self) -> int:
         return len(self.table) if self.table is not None else 0
@@ -80,37 +79,6 @@ class DataFrameOptimized():
         except Exception as e:
             raise Exception(f"delete_rows {e}")
 
-    def create_alerts(self) -> None:
-
-        if self.table is not None:
-            _columns = [*self.table.columns.to_list(), "description"]
-            self.__alerts = pd.DataFrame(columns=_columns)
-        else:
-            raise Exception("Required table of DataFrameOptimized")
-
-    def insert_alert(self, alert: 'pd.DataFrame') -> None:
-        """Inserts an alert into the alert list .
-
-        Args:
-            alert ([DataFrame]): Dataframe of alerts
-            
-        Raises:
-            Exception: Generic Exception 
-        """
-
-        try:
-            _alerts_columns = self.table.columns.tolist()
-            # get only the columns that exist in the alerts
-            _required_of_alert = alert[[*_alerts_columns, "description"]]
-
-            self.__alerts = pd.concat(
-                [self.__alerts, _required_of_alert], ignore_index=True)
-
-        except Exception as e:
-            raise Exception(f"insert_alert {e}")
-
-    def get_alerts(self):
-        return self.__alerts
 
     def validate_alert(self, type: str, exception: bool=False, exception_description: str = "", alert: 'pd.DataFrame'=None):
         """Validate an alert .
@@ -123,16 +91,15 @@ class DataFrameOptimized():
 
         if alert is not None:
             if alert.size > 0:
-                self.insert_alert(
-                    alert=alert,
-                )
+                self.alerts.append(alert)
 
-        if exception and (table := self.get_alerts()).size > 0:
-            table.to_csv(
-                os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts.csv")), 
-                index=False, 
-                encoding="latin-1", 
-                sep=";")
+        if exception and len(self.alerts) > 0:
+            for idx, alert in enumerate(self.alerts):
+                alert.to_csv(
+                    os.path.normpath(os.path.join(const.ALERTS_DIR, f"{afo_types.AFO_TYPES[type].value}_alerts_{idx}.csv")), 
+                    index=False, 
+                    encoding="latin-1", 
+                    sep=";")
             if feature_flags.ENVIROMENT == "PROD":
                 raise error.AlertsGeneratedError(exception_description)
 
@@ -557,7 +524,7 @@ class DataFrameOptimized():
         dataframe[name_res] = dataframe[first_column]
 
         for column in other_columns:
-            dataframe[name_res] = dataframe[name_res] + dataframe[column]
+            dataframe[name_res] = dataframe[name_res].astype(str) + dataframe[column].astype(str)
 
         return dataframe
 
