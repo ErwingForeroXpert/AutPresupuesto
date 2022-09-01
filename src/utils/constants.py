@@ -325,7 +325,7 @@ PROCESSES = {
             "filter_assignment": {"column": "categoria", "pattern": "(?i)sin asignar"},
             "filter_sector": {
                 "column": "sector",
-                "pattern": "(?i)helados|otros no operacional|otros oper no ccial|servicios"
+                "pattern": "(?i)otros no operacional|otros oper no ccial"
             },
             "agg_values": {
                 "actual":{"cols_res": ["total_venta_act_asignada",
@@ -351,7 +351,7 @@ PROCESSES = {
             "filter_assignment": {"column": "categoria", "pattern": "(?i)sin asignar"},
             "filter_sector": {
                 "column": "sector",
-                "pattern": "(?i)helados|otros no operacional|otros oper no ccial|servicios"
+                "pattern": "(?i)otros no operacional|otros oper no ccial"
             },
             "agg_values": {
                 "actual":{"cols_res": ["total_venta_act_asignada", "total_venta_act_sin_asignar"], "column": "sum_venta_actual"},
